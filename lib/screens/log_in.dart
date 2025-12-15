@@ -1,7 +1,8 @@
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
-import 'package:apartment_rental_app/screens/api_service.dart';
+import 'package:apartment_rental_app/screens/booking_screen.dart';
+import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/screens/sign_up.dart';
-import 'package:apartment_rental_app/widgets/apartment_model.dart';
+import 'package:apartment_rental_app/models/apartment_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_text_filed.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final storage = const FlutterSecureStorage();
 
-
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
@@ -45,20 +45,31 @@ class _LoginPageState extends State<LoginPage> {
       if (response != null) {
         if (response.statusCode == 200) {
           final Map<String, dynamic> responseData = response.data;
-          // إذا نجح تسجيل الدخول (الباك اند عادة يرجع 200)
-          ScaffoldMessenger.of(
+         final Map<String, dynamic>? userData = responseData['data']; 
+
+    // 2. التحقق من وجود 'data' ثم الوصول إلى 'token'
+    String? accessToken;
+
+    if (userData != null && userData.containsKey('token')) {
+        // المفتاح الصحيح هو 'token' داخل 'data'
+        accessToken = userData['token']; 
+    } 
+    
+    // 3. التحقق قبل الكتابة والتنقل
+    if (accessToken != null && accessToken.isNotEmpty) {
+        await storage.write(key: 'jwt_token', value: accessToken);
+        ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Login Successful !')));
-          String accessToken = responseData['access_token'];
-           await storage.write(key: 'jwt_token', value: accessToken);
-          // الانتقال للصفحة التالية
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  ApartmentDetailsScreen(apartment: dummyApartment),
-            ),
-          );
+        ).showSnackBar(const SnackBar(content: Text('Login Successful !')));
+            // الانتقال للصفحة التالية
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    ApartmentDetailsScreen(apartment: dummyApartment)
+              ),
+            );
+          }
         } else {
           //هون معنى انو مارجع null بسفي شي من المعلومات خطا
           ScaffoldMessenger.of(context).showSnackBar(

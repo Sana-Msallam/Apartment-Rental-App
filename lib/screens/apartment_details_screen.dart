@@ -1,5 +1,5 @@
 import 'package:apartment_rental_app/screens/booking_screen.dart';
-import 'package:apartment_rental_app/widgets/apartment_model.dart';
+import 'package:apartment_rental_app/models/apartment_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 

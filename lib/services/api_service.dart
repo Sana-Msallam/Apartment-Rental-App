@@ -2,35 +2,43 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 class ApiService {
+  // 💡 1. تعريف baseUrl كمتغير خاص داخل الفئة
+  final String _baseUrl = 'http://192.168.1.111:8000';
+
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://github.com/Hala-Erksousi/Sakani.git',//الرابط تبع السيرفر
-      connectTimeout: const Duration(seconds: 5),    // إذا حاول التطبيق الاتصال بالسيرفر ولم يرد السيرفر خلال 5 ثوانٍ، سيعتبر أن الاتصال فشل
-     //  (مفيد جداً إذا كان الإنترنت ضعيفاً) الزمن يلي حيطلع فيه الطلب
-      receiveTimeout: const Duration(seconds: 5),   //الزمن يلي حيرجع فيه الرد (التوكن)
-      //: إذا اتصل التطبيق وبدأ السيرفر يرسل بيانات لكنه تأخر أكثر من 3 ثوانٍ في إكمال الإرسال، سيتم قطع العملية (للحفاظ على أداء التطبيق).
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
     ),
   );
+
   Future<Response?> login(String phone, String password) async {
     try {
+      // 💡 2. استخدام _dio و _baseUrl وتصحيح اسم المتغير
       Response response = await _dio.post(
-        'login',//end point
+        '$_baseUrl/api/login',
         data: {'password': password, 'phone': phone},
       );
-      if (response.statusCode == 200) {
-        return response.data; // هذا عادة يحتوي على التوكن (Token) ومعلومات المستخدم
-      }
-      return null; // نرجع null إذا كان Status Code غير 200 (مثل 401: Unauthorized)
 
+      if (response.statusCode == 200) {
+        return response;
+        // هذا عادة يحتوي على التوكن (Token) ومعلومات المستخدم
+      }
+      return null; // نرجع null إذا كان Status Code غير 200
     } on DioException catch (e) {
-      // 💡 معالجة أخطاء Dio (مثل Timeouts أو أخطاء 400/500)
+      // 💡 3. تحسين معالجة أخطاء Dio
       print("Dio Error: ${e.message}");
+      if (e.response != null) {
+        print("Server response data: ${e.response!.data}");
+        return e.response; // إرجاع الرد لمعالجته في واجهة المستخدم
+      }
       return null;
     } catch (e) {
       print("General Error: $e");
       return null;
     }
-}
+  }
+
   Future<Response?> register({
     required String firstName,
     required String lastName,
@@ -42,7 +50,7 @@ class ApiService {
     required Function(int sent, int total) onProgressUpdate,
   }) async {
     try {
-      //  إعداد بيانات الصور كـ MultipartFile
+      // إعداد بيانات الصور كـ MultipartFile
       String personalFileName = personalImage.path.split('/').last;
       String idFileName = idImage.path.split('/').last;
 
@@ -54,20 +62,21 @@ class ApiService {
         'password': password,
         'date_of_birth': dateOfBirth,
         // يتم إرسال الملفات باستخدام MultipartFile
-        'personal_image': await MultipartFile.fromFile(
+        'personal_photo': await MultipartFile.fromFile(
           personalImage.path,
           filename: personalFileName,
         ),
-        'id_image': await MultipartFile.fromFile(
+        'ID_photo': await MultipartFile.fromFile(
           idImage.path,
           filename: idFileName,
         ),
       });
 
-      // إرسال الطلب POST
+      // إرسال الطلب POST (💡 استخدام _dio و _baseUrl وتصحيح اسم المتغير)
       Response response = await _dio.post(
-        'register', // end point
+        '$_baseUrl/api/signUp',
         data: formData,
+        onSendProgress: onProgressUpdate,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {

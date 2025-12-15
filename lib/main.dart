@@ -1,7 +1,7 @@
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:apartment_rental_app/screens/start.dart';
-import 'package:apartment_rental_app/widgets/apartment_model.dart';
+import 'package:apartment_rental_app/models/apartment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';

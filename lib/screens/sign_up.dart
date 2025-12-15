@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:apartment_rental_app/main.dart';
-import 'package:apartment_rental_app/screens/api_service.dart';
+import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 const Color vBorderColor = Color(0xFFC0C0C0);
@@ -53,21 +53,26 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     if (personalImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('please upload a profile picture.'), backgroundColor: Colors.red,),
+        const SnackBar(
+          content: Text('please upload a profile picture.'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
     if (idImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('please upload a ID picture.'), backgroundColor: Colors.red,),
+        const SnackBar(
+          content: Text('please upload a ID picture.'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
     final String dateOfBirth = _dateController.text;
 
-    setState(() => _isLoading = true
-    ); // بدء التحميل
+    setState(() => _isLoading = true); // بدء التحميل
 
     try {
       final response = await _apiService.register(
@@ -81,50 +86,61 @@ class _RegisterPageState extends State<RegisterPage> {
         onProgressUpdate: _updateProgress,
       );
 
-      if (response != null) {
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          final Map<String, dynamic> responseData = response.data;
-          // نجاح التسجيل:
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration Successful!'), backgroundColor: Colors.green),
-          );
-          String accessToken = responseData['access_token'];
-          await storage.write(key: 'jwt_token', value: accessToken);
-
-          // الانتقال للصفحة التالية بعد النجاح
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ApartmentDetailsScreen(apartment: dummyApartment),
-            ),
-          );
-        } else if (response.statusCode! >= 400 && response.statusCode! < 500) {
-          // خطأ من السيرفر (مثل: الهاتف موجود بالفعل، أو كلمة المرور ضعيفة)
-          String errorMessage = response.data['message'] ?? 'Registration failed. Please check your data.';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-          );
-        }
-      } else {
-        // خطأ اتصال (null)
+      if (response == null) {
+        // 1. معالجة حالة فشل الاتصال (Response is null)
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Connection Error: Failed to reach server.'), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text('Connection Error: Failed to reach server.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else if (response.statusCode == 200 || response.statusCode == 201) {
+        // 2. معالجة حالة النجاح (Status 200/201)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration Successful! please LogIn'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      } else if (response.statusCode! >= 400 && response.statusCode! < 500) {
+        // 3. معالجة أخطاء العميل/الخادم (Status 4xx)
+        // هذا هو المكان الصحيح لمعالجة أخطاء مثل الهاتف مستخدم بالفعل
+        String errorMessage =
+            response.data['message'] ??
+            'Registration failed. Please check your data.';
+        if (response.data['errors'] != null &&
+            response.data['errors']['phone'] != null) {
+          // نأخذ أول رسالة خطأ من مصفوفة أخطاء حقل الهاتف
+          errorMessage = response.data['errors']['phone'][0];
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+        );
+      }
+      // ملاحظة: الـ Status Code 302 سيقع ضمن هذا الجزء كخطأ (4xx-5xx) ما لم يتم معالجته
+      // بشكل خاص، ولكن يجب حله من جهة Laravel (كما ذكرنا سابقاً).
+      // يمكنك إضافة معالجة لـ 5xx هنا إذا أردت (خطأ الخادم)
+      else if (response.statusCode! >= 500) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Server Error (500): Try again later.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
-      // خطأ غير متوقع
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected Error: $e'), backgroundColor: Colors.red),
-      );
+      // ... معالجة الأخطاء غير المتوقعة ...
     } finally {
-      setState(() => _isLoading = false); // إنهاء التحميل
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-
-
-
-
-
 
   Future<void> _selectDate(BuildContext context) async {
     // مشان اختيار التاريخ من الروزنامة
@@ -303,6 +319,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     if (!phoneRegExp.hasMatch(value)) {
                       return 'please enter numbers only in the phone number.';
                     }
+                    if (value.length < 10) {
+                      return 'Phone number must be at least 10 digits.'; // رسالة الخطأ
+                    }
                     return null;
                   },
                 ),
@@ -408,36 +427,40 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 SizedBox(height: 20),
 
-              SizedBox(height: 20),
-                if (_isLoading && _uploadProgress > 0.0 && _uploadProgress < 1.0)
-          Column(
-          children: [
-          LinearProgressIndicator(
-          value: _uploadProgress,
-          backgroundColor: vBorderColor,
-          color: kPrimaryColor,
-        ),
-        const SizedBox(height: 5),
-        Text(
-          'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
-          style: TextStyle(color: kPrimaryColor),
-        ),
-        const SizedBox(height: 15),
-        ],
-      )
-        else
-        SizedBox(height: vheight),
+                SizedBox(height: 20),
+                if (_isLoading &&
+                    _uploadProgress > 0.0 &&
+                    _uploadProgress < 1.0)
+                  Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: _uploadProgress,
+                        backgroundColor: vBorderColor,
+                        color: kPrimaryColor,
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Uploading... ${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(color: kPrimaryColor),
+                      ),
+                      const SizedBox(height: 15),
+                    ],
+                  )
+                else
+                  SizedBox(height: vheight),
 
-
-
-              CustomButton(
-                textButton: _isLoading ? 'Loading...' : 'REGISTER', // 👈 عرض حالة التحميل
-                vTextColor: Color(0xFFFFFFFF),
-                kPrimaryColor: _isLoading ? kPrimaryColor.withOpacity(0.7) : kPrimaryColor,
-                width: double.infinity,
-                onPressed: _isLoading ? () {} : _handleRegister,
-              ),
-        SizedBox(height: 12),
+                CustomButton(
+                  textButton: _isLoading
+                      ? 'Loading...'
+                      : 'REGISTER', // 👈 عرض حالة التحميل
+                  vTextColor: Color(0xFFFFFFFF),
+                  kPrimaryColor: _isLoading
+                      ? kPrimaryColor.withOpacity(0.7)
+                      : kPrimaryColor,
+                  width: double.infinity,
+                  onPressed: _isLoading ? () {} : _handleRegister,
+                ),
+                SizedBox(height: 12),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // import 'package:apartment_rental_app/screens/home_screen.dart';
 // ولأغراض التجربة نستخدم شاشة تفاصيل الشقة
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
-import 'package:apartment_rental_app/widgets/apartment_model.dart';
+import 'package:apartment_rental_app/models/apartment_model.dart';
 
 import '../main.dart';
 
@@ -112,6 +112,7 @@ class StartPage extends StatelessWidget {
                       kPrimaryColor: Color(0xFFFFFFFF),
                       vTextColor: Color(0xFF234F68),
                       width: double.infinity,
+                      
 
                       onPressed: () => _handleStartButton(context),
                     ),
