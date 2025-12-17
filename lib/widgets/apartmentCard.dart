@@ -1,3 +1,4 @@
+import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 class Apartmentcard extends StatelessWidget{
@@ -15,7 +16,6 @@ class Apartmentcard extends StatelessWidget{
     required this.city,
     required this.area,
   });
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -35,8 +35,7 @@ class Apartmentcard extends StatelessWidget{
               height: 150,
               width: double.infinity,
               fit: BoxFit.cover,
-            ) ,
-          
+            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -44,11 +43,7 @@ class Apartmentcard extends StatelessWidget{
               children: [
                 Text(
                   price,
-                  style: GoogleFonts.lato(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF234F68),
-                  ),
+                  style: AppConstants.secondText,
                 ),
                 const SizedBox(height:4),
                 Row(
@@ -63,12 +58,9 @@ class Apartmentcard extends StatelessWidget{
                         Expanded(
                           child: Text(
                           '$governorate _$city',
-                          style: GoogleFonts.lato(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
+                          style:AppConstants.thirdText,
                           maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         ),
                       ],
@@ -89,10 +81,7 @@ class Apartmentcard extends StatelessWidget{
                       const SizedBox(width: 4),
                       Text(
                         '$area''M',
-                        style: GoogleFonts.lato(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                        ),
+                        style: AppConstants.thirdText,
                       ),
                     ],
                   ),
