@@ -1,3 +1,5 @@
+import 'package:apartment_rental_app/main.dart';
+import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import '../widgets/apartmentCard.dart';
 import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override
@@ -28,82 +31,93 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 6,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.68,
-                ),
-                itemCount: 8,
-                itemBuilder: (context, index) {
-                  final properties = [
-                    {
-                      'imagePath': 'assets/images/door1.jpg',
-                      'price': '400.000',
-                      'governorate': 'Damascus',
-                      'city': 'Mazzeh',
-                      'area': '250',
-                    },
-                    {
-                      'imagePath': 'assets/images/door2.jpg',
-                      'price': '500.000',
-                      'governorate': 'Damascus',
-                      'city': 'Midan',
-                      'area': '100',
-                    },
-                    {
-                      'imagePath': 'assets/images/door3.jpg',
-                      'price': '600.000',
-                      'governorate': 'Damascus',
-                      'city': 'BabToma',
-                      'area': '200',
-                    },
-                    {
-                      'imagePath': 'assets/images/door4.jpg',
-                      'price': '250.000',
-                      'governorate': 'Damascus',
-                      'city': 'Afif',
-                      'area': '150',
-                    },
-                    {
-                      'imagePath': 'assets/images/door1.jpg',
-                      'price': '400.000',
-                      'governorate': 'Damascus',
-                      'city': 'Mazzeh',
-                      'area': '250',
-                    },
-                    {
-                      'imagePath': 'assets/images/door2.jpg',
-                      'price': '500.000',
-                      'governorate': 'Damascus',
-                      'city': 'Midan',
-                      'area': '100',
-                    },
-                    {
-                      'imagePath': 'assets/images/door3.jpg',
-                      'price': '600.000',
-                      'governorate': 'Damascus',
-                      'city': 'BabToma',
-                      'area': '200',
-                    },
-                    {
-                      'imagePath': 'assets/images/door4.jpg',
-                      'price': '250.000',
-                      'governorate': 'Damascus',
-                      'city': 'Afif',
-                      'area': '150',
-                    },
-                  ];
-                  final property = properties[index];
-                  return Apartmentcard(
-                    imagePath: property['imagePath']!,
-                    price: property['price']!,
-                    governorate: property['governorate']!,
-                    city: property['city']!,
-                    area: property['area']!,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ApartmentDetailsScreen(apartment: dummyApartment),
+                    ),
                   );
                 },
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.68,
+                  ),
+                  itemCount: 8,
+                  itemBuilder: (context, index) {
+                    final properties = [
+                      {
+                        'imagePath': 'assets/images/door1.jpg',
+                        'price': '400.000',
+                        'governorate': 'Damascus',
+                        'city': 'Mazzeh',
+                        'area': '250',
+                      },
+                      {
+                        'imagePath': 'assets/images/door2.jpg',
+                        'price': '500.000',
+                        'governorate': 'Damascus',
+                        'city': 'Midan',
+                        'area': '100',
+                      },
+                      {
+                        'imagePath': 'assets/images/door3.jpg',
+                        'price': '600.000',
+                        'governorate': 'Damascus',
+                        'city': 'BabToma',
+                        'area': '200',
+                      },
+                      {
+                        'imagePath': 'assets/images/door4.jpg',
+                        'price': '250.000',
+                        'governorate': 'Damascus',
+                        'city': 'Afif',
+                        'area': '150',
+                      },
+                      {
+                        'imagePath': 'assets/images/door1.jpg',
+                        'price': '400.000',
+                        'governorate': 'Damascus',
+                        'city': 'Mazzeh',
+                        'area': '250',
+                      },
+                      {
+                        'imagePath': 'assets/images/door2.jpg',
+                        'price': '500.000',
+                        'governorate': 'Damascus',
+                        'city': 'Midan',
+                        'area': '100',
+                      },
+                      {
+                        'imagePath': 'assets/images/door3.jpg',
+                        'price': '600.000',
+                        'governorate': 'Damascus',
+                        'city': 'BabToma',
+                        'area': '200',
+                      },
+                      {
+                        'imagePath': 'assets/images/door4.jpg',
+                        'price': '250.000',
+                        'governorate': 'Damascus',
+                        'city': 'Afif',
+                        'area': '150',
+                      },
+                    ];
+                    final property = properties[index];
+                    return Apartmentcard(
+                      imagePath: property['imagePath']!,
+                      price: property['price']!,
+                      governorate: property['governorate']!,
+                      city: property['city']!,
+                      area: property['area']!,
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -112,6 +126,7 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }
+
   PreferredSizeWidget _buildCustomAppBar() {
     return PreferredSize(
       preferredSize: const Size.fromHeight(100.0),
@@ -133,23 +148,25 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const Spacer(),
-           IconButton(
-            icon: Icon(Icons.notifications_none,
-        color: Colors.grey[800],
-        size: 28,
-      ),
-      onPressed: (){
-        // Navigator.push(
-        //   context, 
-        // MaterialPageRoute(builder: (context)=> NotificationScreen())
-        // );
-      },
-           )
+            IconButton(
+              icon: Icon(
+                Icons.notifications_none,
+                color: Colors.grey[800],
+                size: 28,
+              ),
+              onPressed: () {
+                // Navigator.push(
+                //   context,
+                // MaterialPageRoute(builder: (context)=> NotificationScreen())
+                // );
+              },
+            ),
           ],
         ),
       ),
     );
   }
+
   Widget _buildCustomBottomNavBar() {
     return Container(
       height: 65,
@@ -182,6 +199,7 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildNavBarItem(BuildContext context, IconData icon, bool isActive) {
     return IconButton(
       icon: Icon(
@@ -204,7 +222,7 @@ class HomeScreen extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) => const FavoritesScreen()),
           );
-        } else if (icon == Icons.person) { 
+        } else if (icon == Icons.person) {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProfileScreen()),
