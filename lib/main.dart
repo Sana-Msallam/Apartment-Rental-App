@@ -6,6 +6,7 @@ import 'package:apartment_rental_app/models/apartment_model.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 final ApartmentModel dummyApartment = ApartmentModel(
   city: 'Damascus',
   governorate: 'Syria',
@@ -34,7 +35,11 @@ void main()async  {
     print('Initialization failed: $e');
   }
 
-  runApp(Sakani());      
+  runApp(
+       ProviderScope(
+        child: Sakani(),
+      ),
+  );
 }
 
 final String vfont = 'vfo-Regular';
@@ -53,7 +58,7 @@ class Sakani extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sakani Apartment Rental',
-      home:StartPage(),
+      home:HomeScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

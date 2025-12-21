@@ -3,7 +3,8 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final String _baseUrl = 'http://192.168.1.111:8080';
+  // 💡 1. تعريف baseUrl كمتغير خاص داخل الفئة
+  final String _baseUrl = 'http://10.0.2.2:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -72,7 +73,7 @@ class ApiService {
       print(' إرسال طلب تسجيل جديد لـ: $_baseUrl/api/signUp');
 
       Response response = await _dio.post(
-        '$_baseUrl/api/signUp',
+        '$_baseUrl/signUp',
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );

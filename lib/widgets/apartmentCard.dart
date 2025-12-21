@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 class Apartmentcard extends StatelessWidget{
   final String imagePath;
-  final String price;
+  final int price;
   final String governorate;
   final String city;
-  final String area;
+  final int space;
 
   const Apartmentcard({
     super.key,
@@ -14,7 +14,7 @@ class Apartmentcard extends StatelessWidget{
     required this.price,
     required this.governorate,
     required this.city,
-    required this.area,
+    required this.space,
   });
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class Apartmentcard extends StatelessWidget{
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  price,
+                  '$price',
                   style: AppConstants.secondText,
                 ),
                 const SizedBox(height:4),
@@ -80,7 +80,7 @@ class Apartmentcard extends StatelessWidget{
                       const Icon(Icons.square_foot, color: Colors.grey, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        '$area''M',
+                        '$space''M',
                         style: AppConstants.thirdText,
                       ),
                     ],
