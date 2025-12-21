@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 
 class ApiService {
   // 💡 1. تعريف baseUrl كمتغير خاص داخل الفئة
-  final String _baseUrl = 'http://192.168.1.111:8000';
+  final String _baseUrl = 'http://10.0.2.2:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -16,7 +16,7 @@ class ApiService {
     try {
       // 💡 2. استخدام _dio و _baseUrl وتصحيح اسم المتغير
       Response response = await _dio.post(
-        '$_baseUrl/api/login',
+        '$_baseUrl/login',
         data: {'password': password, 'phone': phone},
       );
 
@@ -74,7 +74,7 @@ class ApiService {
 
       // إرسال الطلب POST (💡 استخدام _dio و _baseUrl وتصحيح اسم المتغير)
       Response response = await _dio.post(
-        '$_baseUrl/api/signUp',
+        '$_baseUrl/signUp',
         data: formData,
         onSendProgress: onProgressUpdate,
       );
