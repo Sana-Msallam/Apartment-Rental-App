@@ -66,7 +66,6 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
         idImage: idImage!,
       );
 
-      // 2. الفحص يعتمد على وجود الكائن
       if (response != null) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -179,7 +178,6 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
       ),
       body: Stack(
         children: [
-          // 2. طبقة الصورة الثابتة (مفصولة تماماً)
           const Positioned.fill(
             child: Image(
               image: AssetImage('assets/images/start.png'),
@@ -187,11 +185,9 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
             ),
           ),
 
-          // 3. طبقة المحتوى مع معالجة يدوية لمساحة الكيبورد
           Positioned.fill(
             child: SafeArea(
               child: Padding(
-                // نستخدم هذا الـ Padding لنجعل المستطيل يرتفع فوق الكيبورد يدوياً
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
@@ -214,7 +210,7 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
                               Icons.verified_user_outlined,
                               size: 60,
                               color:
-                                  kPrimaryColor, // تم تغيير اللون للأبيض ليناسب النسق
+                                  kPrimaryColor,
                             ),
                             const SizedBox(height: 15),
                             const Text(
@@ -235,7 +231,6 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
                             ),
                             const SizedBox(height: 30),
 
-                            // حقل رفع الصورة الشخصية
                             PhotoUpload(
                               hintText: 'Personal Photo',
                               icon: Icons.person_pin,
@@ -247,7 +242,6 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
                             ),
                             const SizedBox(height: 20),
 
-                            // حقل رفع صورة الهوية
                             PhotoUpload(
                               hintText: 'ID Photo',
                               icon: Icons.credit_card,
@@ -261,13 +255,12 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
 
                             const SizedBox(height: 40),
 
-                            // زر الإنهاء
                             _isLoading
                                 ? const CircularProgressIndicator(
                                     color:kPrimaryColor,
                                   )
                                 : CustomButton(
-                                    textButton: 'FINISH REGISTRATION',
+                                    textButton: 'Finish Registration',
                                     onTap: _handleRegister,
                                     width: double.infinity,
                                     vTextColor: Colors.white,

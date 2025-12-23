@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+ import 'package:cached_network_image/cached_network_image.dart';
 class Apartmentcard extends StatelessWidget{
   final String imagePath;
   final int price;
@@ -30,12 +33,38 @@ class Apartmentcard extends StatelessWidget{
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Image.asset(
-              imagePath,
+          CachedNetworkImage(
+            imageUrl: imagePath, 
+            height: 150,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            httpHeaders: const {
+              'Connection': 'keep-alive',
+            },
+            placeholder: (context, url) => Container(
               height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
+              color: Colors.grey[200],
+              child: const Center(child: CircularProgressIndicator()),
             ),
+            errorWidget: (context, url, error) => Container(
+              height: 150,
+              color: Colors.grey[200],
+              child: const Icon(Icons.broken_image, size: 50),
+            ),
+          ),
+  //          Image.network(
+  //            imagePath,
+  // height: 150,
+  // width: double.infinity,
+  // fit: BoxFit.cover,
+  // ),
+
+// ElevatedButton(onPressed: (){
+//   log("zak $imagePath");
+// }, child: Text("data")) ,
+  // placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+  // errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(

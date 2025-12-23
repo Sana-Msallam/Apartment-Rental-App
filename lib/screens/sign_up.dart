@@ -89,7 +89,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      // 1. هذا السطر هو الأهم لمنع اهتزاز أو تحرك الخلفية عند ظهور الكيبورد
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFF020617),
@@ -100,7 +99,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
       body: Stack(
         children: [
-          // 2. طبقة الصورة الثابتة (مفصولة تماماً)
           const Positioned.fill(
             child: Image(
               image: AssetImage('assets/images/start.png'),
@@ -108,11 +106,9 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
 
-          // 3. طبقة المحتوى مع معالجة يدوية لمساحة الكيبورد
           Positioned.fill(
             child: SafeArea(
               child: Padding(
-                // نستخدم هذا الـ Padding لنجعل المستطيل يرتفع فوق الكيبورد يدوياً
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),

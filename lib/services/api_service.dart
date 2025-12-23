@@ -3,7 +3,6 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  // 💡 1. تعريف baseUrl كمتغير خاص داخل الفئة
   final String _baseUrl = 'http://10.0.2.2:8000/api';
 
   final Dio _dio = Dio(
@@ -17,27 +16,30 @@ class ApiService {
 
   Future<UserModel?> login(String phone, String password) async {
     try {
-      print(' محاولة تسجيل دخول: $_baseUrl/api/login');
+      print(' try to login$_baseUrl/login');
 
       final response = await _dio.post(
-        '$_baseUrl/api/login',
+        '$_baseUrl/login',
         data: {'phone': phone, 'password': password},
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
+        print('response data =  $responseData');
 
         final userData =
             responseData['user'] ?? responseData['data'] ?? responseData;
 
         final String? token = responseData['token'] ?? userData['token'];
-        print(' كود الاستجابة: ${response.statusCode}');
+        print(' code ${response.statusCode}');
         return UserModel.fromJson(userData, token: token);
       }
-    } on DioException catch (e) {
+
+    }
+    on DioException catch (e) {
       _handleDioError(e);
       return null;
     } catch (e) {
-      print(' خطأ غير متوقع: $e');
+      print(' Error $e');
       return null;
     }
   }
@@ -70,7 +72,7 @@ class ApiService {
         'email': email,
       });
 
-      print(' إرسال طلب تسجيل جديد لـ: $_baseUrl/api/signUp');
+
 
       Response response = await _dio.post(
         '$_baseUrl/signUp',
@@ -78,20 +80,20 @@ class ApiService {
         options: Options(contentType: 'multipart/form-data'),
       );
 
-      print(' كود الاستجابة: ${response.statusCode}');
+     print(' ${response.statusCode}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         final userData =
             response.data['user'] ?? response.data['data'] ?? response.data;
         final String? token = response.data['token'] ?? userData?['token'];
         return UserModel.fromJson(userData, token: token);
       } else if (response.statusCode == 422) {
-        print("خطأ التحقق من البيانات 422: ${response.data}");
+        print("422: ${response.data}");
       }
     } on DioException catch (e) {
       _handleDioError(e);
       return null;
     } catch (e) {
-      print(" خطأ عام في التسجيل: $e");
+      print(" Error $e");
       return null;
     }
     return null;
@@ -100,10 +102,10 @@ class ApiService {
   void _handleDioError(DioException e) {
     print("Server Response Error: ${e.response?.data}");
     if (e.response != null) {
-      // هذا السطر سيطبع لكِ في الـ Console السبب الدقيق للفشل
-      print("خطأ من السيرفر (422): ${e.response?.data}");
+
+      print("Error:${e.response?.data}");
     } else {
-      print("خطأ في الاتصال: ${e.message}");
+      print(" ${e.message}");
     }
     return null;
   }

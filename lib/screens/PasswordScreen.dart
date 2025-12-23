@@ -6,12 +6,10 @@ import 'package:apartment_rental_app/widgets/custom_text_filed.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
 
-// الألوان والتعريفات الثابتة المستخدمة في الـ Widgets الخاصة بك
 const Color kPrimaryColor = Color(0xFF234F68);
 const Color vBorderColor = Color(0xFFC0C0C0);
 const Color kBackgroundColor = Color(0xFFF5F5F5);
 
-// 1. صفحة إنشاء كلمة السر
 class PasswordScreen extends StatefulWidget {
   final String firstName, lastName, phone, email, dateOfBirth;
 
@@ -32,7 +30,6 @@ class _PasswordScreenState extends State<PasswordScreen> {
   final TextEditingController _confirmPassController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   void _handleNextStep() {
-    // نقوم بالتحقق مرة واحدة فقط
     if (_formKey.currentState!.validate()) {
       print("All validations passed! Proceeding to next step...");
 
@@ -56,7 +53,6 @@ class _PasswordScreenState extends State<PasswordScreen> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      // 1. هذا السطر هو الأهم لمنع اهتزاز أو تحرك الخلفية عند ظهور الكيبورد
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFF020617),
@@ -67,7 +63,6 @@ class _PasswordScreenState extends State<PasswordScreen> {
       ),
       body: Stack(
         children: [
-          // 2. طبقة الصورة الثابتة (مفصولة تماماً)
           const Positioned.fill(
             child: Image(
               image: AssetImage('assets/images/start.png'),
@@ -75,11 +70,9 @@ class _PasswordScreenState extends State<PasswordScreen> {
             ),
           ),
 
-          // 3. طبقة المحتوى مع معالجة يدوية لمساحة الكيبورد
           Positioned.fill(
             child: SafeArea(
               child: Padding(
-                // نستخدم هذا الـ Padding لنجعل المستطيل يرتفع فوق الكيبورد يدوياً
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),

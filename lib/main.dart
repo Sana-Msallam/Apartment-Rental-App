@@ -4,6 +4,7 @@ import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:apartment_rental_app/screens/start.dart';
 import 'package:apartment_rental_app/models/apartment_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,8 +35,9 @@ void main()async  {
     // يمكنك طباعة الخطأ إذا حدث فشل في التهيئة
     print('Initialization failed: $e');
   }
-
+  await const FlutterSecureStorage().deleteAll(); // سيمسح كل شيء مخزن في Secure Storage
   runApp(
+
        ProviderScope(
         child: Sakani(),
       ),
@@ -58,7 +60,8 @@ class Sakani extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Sakani Apartment Rental',
-      home:HomeScreen(),
+
+      home: StartPage(),
       debugShowCheckedModeBanner: false,
     );
   }

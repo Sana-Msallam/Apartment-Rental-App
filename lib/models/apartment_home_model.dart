@@ -17,10 +17,11 @@ class Apartment{
 });
   factory Apartment.fromJson(Map<String,dynamic> json){
     String rawPath = json['main_image']['path']?? '';
+    String correctedPath = rawPath.replaceAll('localhost', '10.0.2.2');
     // String localAsset = "assets/images/apartment_default.jpg"; 
     
     
-    String  localAsset = "assets/images/${rawPath.split('/').last}";
+    // String  localAsset = "assets/images/${rawPath.split('/').last}";
 
     return Apartment(
         id: json['id'],
@@ -28,7 +29,7 @@ class Apartment{
         governorate:json['governorate'],
         city:json['city'],
         space:json['space'] ,
-        imagePath: localAsset,
+        imagePath: correctedPath,
     );
   }
 }

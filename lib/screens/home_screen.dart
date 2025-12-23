@@ -32,42 +32,58 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 5),
+            // بداية الجزء الذي كان يحتوي على أخطاء في الأقواس
             Expanded(
               child: Consumer(
-                builder: (context, ref, child){
-                  final apartmentsAsyncValue= ref.watch(apartmentProvider);
+                builder: (context, ref, child) {
+                  final apartmentsAsyncValue = ref.watch(apartmentProvider);
+                  
                   return apartmentsAsyncValue.when(
-                    data: (apartments){
-                      if(apartments.isEmpty){
+                    data: (apartments) {
+                      if (apartments.isEmpty) {
                         return const Center(child: Text('No apartments found.'));
                       }
-                      return GridView.builder(gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      
+                      return GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 6,
                           mainAxisSpacing: 10,
                           childAspectRatio: 0.68,
-                      ),
-                          itemCount: apartments.length,
-                          itemBuilder: (context, index){
-                        final apartment=apartments[index];
-                        return Apartmentcard(
-                          imagePath: apartment.imagePath, // <-- سيتم تعديله لاحقًا ليقبل رابط شبكة
-                          price: apartment.price,
-                          governorate: apartment.governorate,
-                          city: apartment.city,
-                          space: apartment.space,
-                        );
-                          },
+                        ),
+                        itemCount: apartments.length,
+                        itemBuilder: (context, index) {
+                          final apartment = apartments[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ApartmentDetailsScreen(
+                                    apartment: dummyApartment,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Apartmentcard(
+                              imagePath: apartment.imagePath,
+                              price: apartment.price,
+                              governorate: apartment.governorate,
+                              city: apartment.city,
+                              space: apartment.space,
+                            ),
+                          );
+                        },
                       );
                     },
-                    loading: ()=> const Center(child: CircularProgressIndicator()),
-                    error: (error, stack)=> Center(
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => Center(
                       child: Text('Something went wrong: ${error.toString()}'),
                     ),
                   );
                 },
-              ),
-            ),
+              ), 
+            ), 
           ],
         ),
       ),

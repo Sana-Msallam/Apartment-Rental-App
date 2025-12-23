@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/apartment_home_model.dart';
 
 class ApartmentHomeService{
   final Dio _dio;
+  static const _storage = FlutterSecureStorage();
   ApartmentHomeService(this._dio);
   factory ApartmentHomeService.create(){
     final dio=Dio();
@@ -12,18 +14,21 @@ class ApartmentHomeService{
     dio.options.connectTimeout=const Duration(seconds: 10);
     dio.options.receiveTimeout= const Duration(seconds: 10);
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options,handler){
-        const String? _token ="2|0NNR4pikq3TqvX311PdgHtly3PsqCI4TFaDiKyoA026551c9";
-        options.headers['Authorization']='Bearer $_token';
+      onRequest: (options,handler) async{
+         String? _token =await _storage.read(key: 'jwt_token');
+
+         if (_token != null) {
+           options.headers['Authorization'] = 'Bearer $_token';
+         }
         options.headers['Accept']= 'application/json';
-        print('Sending request with TOken...');
+
         return handler.next(options);
       },
       onError: (DioException e, handler){
         return handler.next(e);
       },
     ));
-    
+
     return ApartmentHomeService(dio);
   }
   Future<List<Apartment>>fetchApartments()async{

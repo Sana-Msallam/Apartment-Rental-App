@@ -41,12 +41,10 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isLoading = true);
     try {
-      // 1. استلام كائن المستخدم (UserModel) مباشرة
       final user = await _apiService.login(phone, password);
 
-      // 2. التحقق إذا كان الكائن موجوداً (نجاح)
       if (user != null) {
-        // 3. بما أننا وضعنا التوكن داخل الموديل، نصل إليه عبر user.token
+
         if (user.token != null && user.token!.isNotEmpty) {
           await storage.write(key: 'jwt_token', value: user.token);
 
@@ -67,7 +65,6 @@ class _LoginPageState extends State<LoginPage> {
           _showSnackBar('Login failed: Token not found in user data');
         }
       } else {
-        // إذا رجع null معناها البيانات خاطئة أو السيرفر لم يستجب
         _showSnackBar('Login Failed: Invalid credentials or Connection Error');
       }
     } catch (e) {
@@ -77,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // دالة مساعدة لتقليل تكرار الكود
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(
       context,
@@ -95,7 +91,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 1. هذا السطر هو الأهم لمنع اهتزاز أو تحرك الخلفية عند ظهور الكيبورد
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFF020617),
@@ -106,7 +101,6 @@ class _LoginPageState extends State<LoginPage> {
       ),
       body: Stack(
         children: [
-          // 2. طبقة الصورة الثابتة (مفصولة تماماً)
           const Positioned.fill(
             child: Image(
               image: AssetImage('assets/images/start.png'),
@@ -114,11 +108,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
 
-          // 3. طبقة المحتوى مع معالجة يدوية لمساحة الكيبورد
-          Positioned.fill(
+            Positioned.fill(
             child: SafeArea(
               child: Padding(
-                // نستخدم هذا الـ Padding لنجعل المستطيل يرتفع فوق الكيبورد يدوياً
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
@@ -131,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: GlassContainer(
                       child: Column(
                         mainAxisSize:
-                            MainAxisSize.min, // ليأخذ العمود حجم محتواه فقط
+                            MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Center(
@@ -155,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 35),
 
-                          buildLabel("Last Name"),
+                          buildLabel("Phone number"),
 
                           CustomTextFiled(
                             controller: _phoneController,
