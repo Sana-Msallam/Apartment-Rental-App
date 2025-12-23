@@ -41,12 +41,9 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isLoading = true);
     try {
-      // 1. استلام كائن المستخدم (UserModel) مباشرة
       final user = await _apiService.login(phone, password);
 
-      // 2. التحقق إذا كان الكائن موجوداً (نجاح)
-      if (user != null) {
-        // 3. بما أننا وضعنا التوكن داخل الموديل، نصل إليه عبر user.token
+      if (user != null && user.token != null) {
         if (user.token != null && user.token!.isNotEmpty) {
           await storage.write(key: 'jwt_token', value: user.token);
 
@@ -155,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 35),
 
-                          buildLabel("Last Name"),
+                          buildLabel("Phone Number"),
 
                           CustomTextFiled(
                             controller: _phoneController,
@@ -170,6 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 8),
 
+                          //   buildLabel("Password"),
                           CustomTextFiled(
                             controller: _passwordController,
                             hintText: "••••••••",

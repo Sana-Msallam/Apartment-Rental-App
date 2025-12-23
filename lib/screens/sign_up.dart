@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:apartment_rental_app/screens/PasswordScreen.dart'
-    hide CustomTextFiled, CustomButton;
+import 'package:apartment_rental_app/screens/PasswordScreen.dart';
+
 import 'package:apartment_rental_app/widgets/buildLabel.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_text_filed.dart';

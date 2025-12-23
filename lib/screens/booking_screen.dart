@@ -1,8 +1,11 @@
+import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
 import 'package:apartment_rental_app/widgets/date_selector.dart';
-import 'dart:ui'; // ضروري مشان الـ ImageFilter
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
@@ -11,7 +14,10 @@ const Color kSecondaryColor = Color(0xFF4B799E);
 final String vfont = 'vfo-Regular';
 
 class BookingApp extends StatefulWidget {
-  const BookingApp({super.key});
+  final UserModel user;
+  final int apartmentId;
+
+  const BookingApp({super.key, required this.user,required this.apartmentId,});
 
   @override
   State<BookingApp> createState() => _BookingAppState();
@@ -24,7 +30,6 @@ class _BookingAppState extends State<BookingApp> {
   final DateTime _firstDate = DateTime.now();
   final DateTime _lastDate = DateTime.now().add(const Duration(days: 365 * 10));
 
-  // --- اللوجيك الخاص بكِ (بدون أي تغيير) ---
   Future<void> _selectStartDate() async {
     try {
       final DateTime? picked = await showDatePicker(
@@ -87,14 +92,125 @@ class _BookingAppState extends State<BookingApp> {
     }
   }
 
-  void _submitBooking() {
+  void _submitBooking() async {
     if (_startDate == null || _endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select both dates.')),
       );
       return;
     }
-    // ... باقي لوجيك الـ Confirm والـ ShowDialog تبعك
+    String startStr = DateFormat('yyyy-MM-dd').format(_startDate!);
+    String endStr = DateFormat('yyyy-MM-dd').format(_endDate!);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    double? totalPrice = await ApiService().calculatePrice(
+     apartmentId: widget.apartmentId, // هنا نستخدم الـ ID الحقيقي
+      startDate: startStr,
+      endDate: endStr
+    );
+    Navigator.pop(context);
+    if (totalPrice != null) {
+      _showConfirmationDialog(totalPrice, startStr, endStr);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to calculate price. Try again.')),
+      );
+    }
+  }
+
+  void _showConfirmationDialog(double price, String start, String end) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text(
+          'Confirm Reservation',
+          style: TextStyle(color: kPrimaryColor),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.calendar_today, color: kSecondaryColor),
+              title: const Text("Period"),
+              subtitle: Text("$start to $end"),
+            ),
+            ListTile(
+              leading: const Icon(Icons.attach_money, color: Colors.green),
+              title: const Text("Total Price"),
+              subtitle: Text(
+                "\$${price.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: 10,
+        ),
+        actions: [
+          Row(
+            // استخدمنا Row مشان يطلعوا الزرين جنب بعض بشكل مرتب
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomButton(
+                  textButton: 'Confirm',
+                  vTextColor: Colors.white,
+                  kPrimaryColor: kPrimaryColor,
+                  width: null, // خليه ياخد مساحة الـ Expanded
+                  onTap: () async {
+                    // إظهار لودينغ بسيط أثناء التأكيد النهائي
+                    showDialog(
+                      context: context,
+                      builder: (context) =>
+                          const Center(child: CircularProgressIndicator()),
+                    );
+
+                    bool success = await ApiService().confirmBooking(
+                    apartmentId: widget.apartmentId, // الـ ID الحقيقي للشقة
+                      startDate: start,
+                      endDate: end,
+                      totalPrice: price,
+                      userId:
+                          1, // widget.user.id, // مؤقتاً لحين تمرير اليوزر الحقيقي كما شرحت فوق
+                    );
+
+                    Navigator.pop(context); // إغلاق اللودينغ
+                    Navigator.pop(context); // إغلاق الدايلوج
+
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Booking Successful!"),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   @override

@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   CustomButton({
-    required this.textButton,
-    required this.vTextColor,
-    required this.kPrimaryColor,
-    required this.width,
+     this.textButton,
+     this.vTextColor,
+     this.kPrimaryColor,
+     this.width,
     this.vfont = 'Lato-Regular',
     this.onTap,
   });
-  final String textButton;
-  final Color vTextColor; // Color(0xFFFFFFFF);
-  final Color kPrimaryColor;
+  final String? textButton;
+  final Color? vTextColor; // Color(0xFFFFFFFF);
+  final Color ?kPrimaryColor;
   final double? width;
   final String? vfont;
   final VoidCallback? onTap;
@@ -33,7 +33,7 @@ class CustomButton extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            textButton,
+            textButton!,
             style: TextStyle(
               fontSize: 20,
               color: vTextColor,

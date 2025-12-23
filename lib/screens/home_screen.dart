@@ -1,4 +1,6 @@
 import 'package:apartment_rental_app/main.dart';
+import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/screens/add_apartment_page.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
@@ -36,9 +38,10 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          ApartmentDetailsScreen(apartment: dummyApartment),
+                      builder: (context) => AddApartmentPage(),
+                      // ApartmentDetailsScreen(apartment: dummyApartment,user: UserModel.currentUser!, // تأكد من تمرير اليوزر هنا
                     ),
+                    //    ),
                   );
                 },
                 child: GridView.builder(
@@ -54,56 +57,56 @@ class HomeScreen extends StatelessWidget {
                       {
                         'imagePath': 'assets/images/door1.jpg',
                         'price': '400.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'Mazzeh',
                         'area': '250',
                       },
                       {
                         'imagePath': 'assets/images/door2.jpg',
                         'price': '500.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'Midan',
                         'area': '100',
                       },
                       {
                         'imagePath': 'assets/images/door3.jpg',
                         'price': '600.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'BabToma',
                         'area': '200',
                       },
                       {
                         'imagePath': 'assets/images/door4.jpg',
                         'price': '250.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'Afif',
                         'area': '150',
                       },
                       {
                         'imagePath': 'assets/images/door1.jpg',
                         'price': '400.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'Mazzeh',
                         'area': '250',
                       },
                       {
                         'imagePath': 'assets/images/door2.jpg',
                         'price': '500.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'Midan',
                         'area': '100',
                       },
                       {
                         'imagePath': 'assets/images/door3.jpg',
                         'price': '600.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'BabToma',
                         'area': '200',
                       },
                       {
                         'imagePath': 'assets/images/door4.jpg',
                         'price': '250.000',
-                        'governorate': 'Damascus',
+                        'governorate ': 'Damascus',
                         'city': 'Afif',
                         'area': '150',
                       },
@@ -112,7 +115,7 @@ class HomeScreen extends StatelessWidget {
                     return Apartmentcard(
                       imagePath: property['imagePath']!,
                       price: property['price']!,
-                      governorate: property['governorate']!,
+                      governorate: property['governorate ']!,
                       city: property['city']!,
                       area: property['area']!,
                     );
