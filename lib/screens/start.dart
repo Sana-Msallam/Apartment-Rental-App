@@ -1,3 +1,4 @@
+import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/models/apartment_model.dart';
 
 import '../main.dart';
-
 
 const Color kGradientColorStart = Color(0x00234F68);
 const Color kGradientColorMid = Color(0x66234F68);
@@ -23,31 +23,21 @@ class StartPage extends StatelessWidget {
   Color kPrimaryColor = Color(0xFF234F68);
   final String vfont = 'Lato-Regular';
 
-  // 1. الدالة الجديدة التي تنفذ عملية فحص التوكن والانتقال
   Future<void> _handleStartButton(BuildContext context) async {
-    // 💡 يمكن هنا عرض مؤشر تحميل أثناء انتظار قراءة التوكن، لكننا سنفترض سرعة القراءة
-
-    String? token = await storage.read(key: 'jwt_token'); // قراءة التوكن المخزن
+    String? token = await storage.read(key: 'jwt_token');
 
     if (token != null) {
-      // التوكن موجود: توجيه المستخدم مباشرة إلى واجهة الشقق
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => ApartmentDetailsScreen(apartment: dummyApartment),
-        ),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else {
-      // لا يوجد توكن: توجيه المستخدم إلى صفحة تسجيل الدخول
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => LoginPage(),
-        ),
+        MaterialPageRoute(builder: (context) => LoginPage()),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +46,6 @@ class StartPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // ... (كود عرض الصورة والخلفية المتدرجة لم يتغير) ...
           SizedBox(
             width: size.width,
             height: size.height,
@@ -112,9 +101,8 @@ class StartPage extends StatelessWidget {
                       kPrimaryColor: Color(0xFFFFFFFF),
                       vTextColor: Color(0xFF234F68),
                       width: double.infinity,
-                      
 
-                      onPressed: () => _handleStartButton(context),
+                      onTap: () => _handleStartButton(context),
                     ),
                   ),
                 ],

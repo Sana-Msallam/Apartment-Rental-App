@@ -1,12 +1,15 @@
+import 'dart:developer';
+
 import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+ import 'package:cached_network_image/cached_network_image.dart';
 class Apartmentcard extends StatelessWidget{
   final String imagePath;
-  final String price;
+  final int price;
   final String governorate;
   final String city;
-  final String area;
+  final int space;
 
   const Apartmentcard({
     super.key,
@@ -14,7 +17,7 @@ class Apartmentcard extends StatelessWidget{
     required this.price,
     required this.governorate,
     required this.city,
-    required this.area,
+    required this.space,
   });
   @override
   Widget build(BuildContext context) {
@@ -30,19 +33,45 @@ class Apartmentcard extends StatelessWidget{
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Image.asset(
-              imagePath,
+          CachedNetworkImage(
+            imageUrl: imagePath, 
+            height: 150,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            httpHeaders: const {
+              'Connection': 'keep-alive',
+            },
+            placeholder: (context, url) => Container(
               height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
+              color: Colors.grey[200],
+              child: const Center(child: CircularProgressIndicator()),
             ),
+            errorWidget: (context, url, error) => Container(
+              height: 150,
+              color: Colors.grey[200],
+              child: const Icon(Icons.broken_image, size: 50),
+            ),
+          ),
+  //          Image.network(
+  //            imagePath,
+  // height: 150,
+  // width: double.infinity,
+  // fit: BoxFit.cover,
+  // ),
+
+// ElevatedButton(onPressed: (){
+//   log("zak $imagePath");
+// }, child: Text("data")) ,
+  // placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+  // errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  price,
+                  '$price',
                   style: AppConstants.secondText,
                 ),
                 const SizedBox(height:4),
@@ -80,7 +109,7 @@ class Apartmentcard extends StatelessWidget{
                       const Icon(Icons.square_foot, color: Colors.grey, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        '$area''M',
+                        '$space''M',
                         style: AppConstants.thirdText,
                       ),
                     ],

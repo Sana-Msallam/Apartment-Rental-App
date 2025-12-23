@@ -1,110 +1,107 @@
-import 'package:apartment_rental_app/main.dart';
 import 'package:flutter/material.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 const Color vBorderColor = Color(0xFFC0C0C0);
 
 class CustomTextFiled extends StatefulWidget {
-  CustomTextFiled({
+  const CustomTextFiled({
     super.key,
     this.hintText,
-    this.isPassword,
+    this.isPassword = false,
+    this.prefixIcon,
     this.suffixIconWidget,
-    this.vfont,
+    this.controller,
     this.validator,
-    this.controller, //  المتحكم الخارجي
     this.onChanged,
-    this.autovalidateMode, //  ضروري لإعادة بناء الـ State في حالة كلمة المرور
+    this.autovalidateMode,
+    this.keyboardType,
   });
 
   final String? hintText;
   final TextEditingController? controller;
-  final bool? isPassword;
+  final bool isPassword;
+  final IconData? prefixIcon;
   final Widget? suffixIconWidget;
-  final String? vfont;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
-  final AutovalidateMode? autovalidateMode; //  تعريف الخاصية
+  final AutovalidateMode? autovalidateMode;
+  final TextInputType? keyboardType;
 
   @override
   State<CustomTextFiled> createState() => _CustomTextFiledState();
 }
 
 class _CustomTextFiledState extends State<CustomTextFiled> {
-  bool _obscureText = false;
+  late bool _obscureText;
 
   @override
   void initState() {
     super.initState();
-    _obscureText = widget.isPassword ?? false;
+    _obscureText = widget.isPassword;
+    
+    // إضافة مستمع للمتحكم لتحديث لون الإطار تلقائياً عند مسح النص أو كتابته
+    widget.controller?.addListener(_handleControllerChange);
   }
 
-  Widget? _buildSuffixIcon() {
-    if (widget.suffixIconWidget != null) {
-      return widget.suffixIconWidget;
-    } else if (widget.isPassword == true) {
-      return IconButton(
-        icon: Icon(
-          _obscureText ? Icons.visibility_off : Icons.visibility,
-          color: kPrimaryColor,
-        ),
-        onPressed: () {
-          setState(() {
-            _obscureText = !_obscureText;
-          });
-        },
-      );
-    }
-    return null;
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_handleControllerChange);
+    super.dispose();
+  }
+
+  void _handleControllerChange() {
+    if (mounted) setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    // الحل الأكيد: قراءة حالة وجود النص مباشرة من المتحكم الخارجي//
+    // حساب اللون بناءً على حالة النص
     final bool hasText = widget.controller?.text.isNotEmpty ?? false;
-    final Color activeColor;
+    final Color activeColor = hasText ? kPrimaryColor : vBorderColor;
 
-    if (hasText) {
-      //  الحالة الثالثة: فيه نص = أزرق غامق ثابت
-      activeColor = kPrimaryColor;
-    } else {
-      //  الحالة الأولى: فاضي وغير مركز عليه = رمادي
-      activeColor = vBorderColor;
-    }
     return TextFormField(
-      controller: widget.controller, //  استخدام المتحكم الخارجي مباشرة
+      controller: widget.controller,
       obscureText: _obscureText,
-      autovalidateMode: widget.autovalidateMode ?? AutovalidateMode.disabled,
+      keyboardType: widget.keyboardType,
+      // إذا لم يتم تمرير نمط التحقق، نستخدم الافتراضي
+      autovalidateMode: widget.autovalidateMode ?? AutovalidateMode.onUserInteraction,
       validator: widget.validator,
-      // تحديث الـ State عند كل تغيير للنص لإعادة بناء الـ Widget وتطبيق اللون الجديد
-      onChanged: (value) {
-        // نضمن أن يتم استدعاء onChanged الممرر من الأب إذا كان موجوداً
-        if (widget.onChanged != null) {
-          widget.onChanged!(value);
-        }
-        // تحديث الـ State لتغيير لون الحدود بناءً على وجود النص
-        setState(() {});
-      },    
+      onChanged: widget.onChanged,
+      style: const TextStyle(fontSize: 16),
       decoration: InputDecoration(
-        suffixIcon: _buildSuffixIcon(),
+        filled: true,
+        fillColor: Colors.white,
         hintText: widget.hintText,
-        hintStyle: TextStyle(color: vBorderColor, fontFamily: vfont),
+        hintStyle: const TextStyle(color: vBorderColor),
+        prefixIcon: widget.prefixIcon != null 
+            ? Icon(widget.prefixIcon, color: kPrimaryColor) 
+            : null,
+        suffixIcon: widget.isPassword
+            ? IconButton(
+                // منع تغيير تركيز الحقل عند النقر على الأيقونة
+                padding: EdgeInsets.zero,
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility, 
+                  color: kPrimaryColor
+                ),
+                onPressed: () => setState(() => _obscureText = !_obscureText),
+              )
+            : widget.suffixIconWidget,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: vBorderColor),
-          borderRadius: BorderRadius.circular(5.0),
+          borderRadius: BorderRadius.circular(15.0),
         ),
-
         enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0),
           borderSide: BorderSide(color: activeColor),
-          borderRadius: BorderRadius.circular(5.0),
         ),
-
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: kPrimaryColor,
-            width: 1.0,
-          ),
-          borderRadius: BorderRadius.circular(5.0),
+          borderRadius: BorderRadius.circular(15.0),
+          borderSide: const BorderSide(color: kPrimaryColor, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15.0),
+          borderSide: const BorderSide(color: Colors.red),
         ),
       ),
     );

@@ -1,12 +1,12 @@
-import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
-import 'package:apartment_rental_app/screens/booking_screen.dart';
+import 'dart:ui';
+import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/screens/sign_up.dart';
-import 'package:apartment_rental_app/models/apartment_model.dart';
+import 'package:apartment_rental_app/widgets/buildLabel.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_text_filed.dart';
+import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
-import 'package:apartment_rental_app/main.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 final String vfont = 'Lato-Regular';
@@ -41,57 +41,43 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isLoading = true);
     try {
-      final response = await _apiService.login(phone, password);
-      if (response != null) {
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> responseData = response.data;
-         final Map<String, dynamic>? userData = responseData['data']; 
+      final user = await _apiService.login(phone, password);
 
-    // 2. التحقق من وجود 'data' ثم الوصول إلى 'token'
-    String? accessToken;
+      if (user != null) {
 
-    if (userData != null && userData.containsKey('token')) {
-        // المفتاح الصحيح هو 'token' داخل 'data'
-        accessToken = userData['token']; 
-    } 
-    
-    // 3. التحقق قبل الكتابة والتنقل
-    if (accessToken != null && accessToken.isNotEmpty) {
-        await storage.write(key: 'jwt_token', value: accessToken);
-        ScaffoldMessenger.of(
-            context,
-        ).showSnackBar(const SnackBar(content: Text('Login Successful !')));
-            // الانتقال للصفحة التالية
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    ApartmentDetailsScreen(apartment: dummyApartment)
-              ),
-            );
-          }
-        } else {
-          //هون معنى انو مارجع null بسفي شي من المعلومات خطا
+        if (user.token != null && user.token!.isNotEmpty) {
+          await storage.write(key: 'jwt_token', value: user.token);
+
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login Failed: Invalid credentials')),
+            const SnackBar(
+              content: Text('Login Successful!'),
+              backgroundColor: Colors.green,
+            ),
           );
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) => false,
+          );
+        } else {
+          _showSnackBar('Login failed: Token not found in user data');
         }
       } else {
-        // حالة الـ null (انقطاع إنترنت أو مشكلة تقنية بالسيرفر)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Connection Error: Please check your internet'),
-          ),
-        );
+        _showSnackBar('Login Failed: Invalid credentials or Connection Error');
       }
     } catch (e) {
-      // هذه تعمل في حال حدث خطأ "غير متوقع" في الكود نفسه
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      _showSnackBar('Error: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -104,75 +90,139 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Color buttonColor = _isLoading
-        ? kPrimaryColor.withOpacity(0.7) // لون باهت (70% شفافية) أثناء التحميل
-        : kPrimaryColor;
     return Scaffold(
-      backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
+      extendBodyBehindAppBar: true,
+      backgroundColor: const Color(0xFF020617),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: Image(
+              image: AssetImage('assets/images/start.png'),
+              fit: BoxFit.cover,
+            ),
+          ),
 
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          children: [
-            Spacer(flex: 2),
-            Image.asset('assets/images/icon.png'),
-            Spacer(flex: 1),
-            CustomTextFiled(
-              hintText: 'Phone number',
-              controller: _phoneController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              suffixIconWidget: Icon(Icons.phone, color: kPrimaryColor),
-            ),
-            SizedBox(height: 18),
-            CustomTextFiled(
-              hintText: 'Passowrd',
-              isPassword: true,
-              controller: _passwordController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-            ),
-            SizedBox(height: 18),
-            CustomButton(
-              textButton: _isLoading ? 'Loading...' : 'LOGIN',
-              vTextColor: Color(0xFFFFFFFF),
-              kPrimaryColor: buttonColor,
-              width: double.infinity,
-              onPressed: _isLoading ? () {} : _handleLogin,
-            ),
-            SizedBox(height: 12),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Don\'t Have An Account? ',
-                  style: TextStyle(color: Color(0xFF898989), fontFamily: vfont),
+            Positioned.fill(
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return RegisterPage();
-                        },
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'Register',
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  child: Center(
+                    child: GlassContainer(
+                      child: Column(
+                        mainAxisSize:
+                            MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Text(
+                              "Welcome Back",
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: kPrimaryColor,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Center(
+                            child: Text(
+                              "Sign in to your account",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 44, 44, 44),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 35),
 
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: kPrimaryColor,
-                      fontFamily: vfont,
+                          buildLabel("Phone number"),
+
+                          CustomTextFiled(
+                            controller: _phoneController,
+                            hintText: "09xx xxx xxx",
+                            prefixIcon: Icons.phone_android_rounded,
+                          ),
+
+                          const SizedBox(height: 20),
+                          Text(
+                            "Password",
+                            style: TextStyle(color: kPrimaryColor),
+                          ),
+                          const SizedBox(height: 8),
+
+                          CustomTextFiled(
+                            controller: _passwordController,
+                            hintText: "••••••••",
+                            isPassword: true,
+                            prefixIcon: Icons.lock_outline_rounded,
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          _isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.blueAccent,
+                                  ),
+                                )
+                              : Center(
+                                  child: CustomButton(
+                                    textButton: 'LOGIN',
+                                    vTextColor: const Color(0xFFFFFFFF),
+                                    kPrimaryColor: kPrimaryColor,
+                                    width: 280,
+                                    onTap: _handleLogin,
+                                  ),
+                                ),
+                          const SizedBox(height: 20),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Don\'t Have An Account? ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterPage(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Register',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: kPrimaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
-            Spacer(flex: 4),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

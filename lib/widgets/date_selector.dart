@@ -19,7 +19,7 @@ class DateSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,    
+      elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: vBorderColor.withOpacity(0.5), width: 1),
@@ -58,7 +58,7 @@ class DateSelector extends StatelessWidget {
                   ),
                 ],
               ),
-              Icon(Icons.calendar_month, color: kPrimaryColor, size: 30),
+              Icon(Icons.calendar_today, color: kPrimaryColor, size: 30),
             ],
           ),
         ),

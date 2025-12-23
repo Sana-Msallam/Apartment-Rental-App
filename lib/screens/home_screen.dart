@@ -1,15 +1,20 @@
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/main.dart';
+import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/apartmentCard.dart';
+// import '../widgets/property_card.dart';
 import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildCustomAppBar(),
@@ -27,85 +32,58 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 5),
+            // بداية الجزء الذي كان يحتوي على أخطاء في الأقواس
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 6,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.68,
-                ),
-                itemCount: 8,
-                itemBuilder: (context, index) {
-                  final properties = [
-                    {
-                      'imagePath': 'assets/images/door1.jpg',
-                      'price': '400.000',
-                      'governorate': 'Damascus',
-                      'city': 'Mazzeh',
-                      'area': '250',
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final apartmentsAsyncValue = ref.watch(apartmentProvider);
+                  
+                  return apartmentsAsyncValue.when(
+                    data: (apartments) {
+                      if (apartments.isEmpty) {
+                        return const Center(child: Text('No apartments found.'));
+                      }
+                      
+                      return GridView.builder(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 6,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 0.68,
+                        ),
+                        itemCount: apartments.length,
+                        itemBuilder: (context, index) {
+                          final apartment = apartments[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ApartmentDetailsScreen(
+                                    apartment: dummyApartment,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Apartmentcard(
+                              imagePath: apartment.imagePath,
+                              price: apartment.price,
+                              governorate: apartment.governorate,
+                              city: apartment.city,
+                              space: apartment.space,
+                            ),
+                          );
+                        },
+                      );
                     },
-                    {
-                      'imagePath': 'assets/images/door2.jpg',
-                      'price': '500.000',
-                      'governorate': 'Damascus',
-                      'city': 'Midan',
-                      'area': '100',
-                    },
-                    {
-                      'imagePath': 'assets/images/door3.jpg',
-                      'price': '600.000',
-                      'governorate': 'Damascus',
-                      'city': 'BabToma',
-                      'area': '200',
-                    },
-                    {
-                      'imagePath': 'assets/images/door4.jpg',
-                      'price': '250.000',
-                      'governorate': 'Damascus',
-                      'city': 'Afif',
-                      'area': '150',
-                    },
-                    {
-                      'imagePath': 'assets/images/door1.jpg',
-                      'price': '400.000',
-                      'governorate': 'Damascus',
-                      'city': 'Mazzeh',
-                      'area': '250',
-                    },
-                    {
-                      'imagePath': 'assets/images/door2.jpg',
-                      'price': '500.000',
-                      'governorate': 'Damascus',
-                      'city': 'Midan',
-                      'area': '100',
-                    },
-                    {
-                      'imagePath': 'assets/images/door3.jpg',
-                      'price': '600.000',
-                      'governorate': 'Damascus',
-                      'city': 'BabToma',
-                      'area': '200',
-                    },
-                    {
-                      'imagePath': 'assets/images/door4.jpg',
-                      'price': '250.000',
-                      'governorate': 'Damascus',
-                      'city': 'Afif',
-                      'area': '150',
-                    },
-                  ];
-                  final property = properties[index];
-                  return Apartmentcard(
-                    imagePath: property['imagePath']!,
-                    price: property['price']!,
-                    governorate: property['governorate']!,
-                    city: property['city']!,
-                    area: property['area']!,
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => Center(
+                      child: Text('Something went wrong: ${error.toString()}'),
+                    ),
                   );
                 },
-              ),
-            ),
+              ), 
+            ), 
           ],
         ),
       ),

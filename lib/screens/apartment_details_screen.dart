@@ -332,7 +332,7 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
                     vTextColor: Color(0xFFFFFFFF),
                     kPrimaryColor: kPrimaryColor,
                     width: double.infinity,
-                    onPressed: () {
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
