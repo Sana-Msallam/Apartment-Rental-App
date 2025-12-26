@@ -5,19 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
  import 'package:cached_network_image/cached_network_image.dart';
 class Apartmentcard extends StatelessWidget{
+  final int id;
   final String imagePath;
   final int price;
   final String governorate;
   final String city;
   final int space;
+  final VoidCallback onTap;
 
   const Apartmentcard({
     super.key,
+    required this.id,
     required this.imagePath,
     required this.price,
     required this.governorate,
     required this.city,
     required this.space,
+    required this.onTap,
   });
   @override
   Widget build(BuildContext context) {
@@ -28,6 +32,9 @@ class Apartmentcard extends StatelessWidget{
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadiusGeometry.circular(20.0),
       ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
       child: Column(
@@ -71,7 +78,7 @@ class Apartmentcard extends StatelessWidget{
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$price',
+                  '$price \$',
                   style: AppConstants.secondText,
                 ),
                 const SizedBox(height:4),
@@ -86,7 +93,7 @@ class Apartmentcard extends StatelessWidget{
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                          '$governorate _$city',
+                          '$governorate, $city',
                           style:AppConstants.thirdText,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -109,7 +116,7 @@ class Apartmentcard extends StatelessWidget{
                       const Icon(Icons.square_foot, color: Colors.grey, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        '$space''M',
+                        '$space m²',
                         style: AppConstants.thirdText,
                       ),
                     ],
@@ -120,6 +127,7 @@ class Apartmentcard extends StatelessWidget{
         ],
       ),
     ),
+      ),
     );
   }
 }

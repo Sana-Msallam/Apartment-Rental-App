@@ -32,7 +32,6 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 5),
-            // بداية الجزء الذي كان يحتوي على أخطاء في الأقواس
             Expanded(
               child: Consumer(
                 builder: (context, ref, child) {
@@ -55,17 +54,18 @@ class HomeScreen extends ConsumerWidget {
                         itemBuilder: (context, index) {
                           final apartment = apartments[index];
                           return GestureDetector(
-                            onTap: () {
+                            child: Apartmentcard(
+                              id:apartment.id,
+                              onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ApartmentDetailsScreen(
-                                    apartment: dummyApartment,
+                                    apartmentId: apartment.id,
                                   ),
                                 ),
                               );
                             },
-                            child: Apartmentcard(
                               imagePath: apartment.imagePath,
                               price: apartment.price,
                               governorate: apartment.governorate,

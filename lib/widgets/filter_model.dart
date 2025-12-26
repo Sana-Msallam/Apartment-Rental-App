@@ -1,33 +1,35 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-class FilterModel extends StatefulWidget{
+class FilterModel extends ConsumerStatefulWidget{
   const FilterModel({super.key});
 
   @override
-  State<FilterModel> createState() => _FilterModelState(); 
+  ConsumerState<FilterModel> createState() => _FilterModelState(); 
     
   }
-  class _FilterModelState extends State<FilterModel>{
+  class _FilterModelState extends ConsumerState<FilterModel>{
     String _selectedGovernorate='All';
-    String? _selectedCity=' ';
-    RangeValues _priceRange= const RangeValues(50, 1000);
+    String _selectedCity='All';
+    RangeValues _priceRange= const RangeValues(500, 500000);
     
-    RangeValues _areaRange= const RangeValues(50, 500);
+    RangeValues _spaceRange= const RangeValues(50, 500);
 
     final List<String> _governorates = ['All','Damascus', 'Aleppo', 'Homs', 'Hama', 'Draa', 'Latakia','Tartous','Suwayda','Deir ez-Zor' ,'Idlib','Raqqa'];
     final Map<String, List<String>> _citiesByGovernorate={
-      'Damascus': ['Midan', 'Mazzeh', 'Afif'],
-      'Aleppo':['As-Safira','Al-Bab','Manbij'],
-      'Homs': ['Talkalakh', 'Al-Qusayr','Al-Rastan'],
-      'Hama':['Salamiyah','Masyaf','Al-Hamraa'],
-      'Draa':['Bosra','Al-Hirak','Nawa'],
-      'Latakia':['Kessab','Jableh','Mashqita'],
-      'Tartous':['Baniyas','Arwad','Safita'],
-      'Suwayda':['Shahba','Salkhad','Shaqqa'],
-      'Deir ez-Zor':['Mayadin','Abu Kamal','Al-Asharah'],
-      'Idlib':['Ariha','Jisr ash-Shughur','Maarat al-Numan'],
-      'Raqqa':['Al-Thawrah','Al-Karamah','Al-Mansoura'],
+      'Damascus': ['All','Midan', 'Mazzeh', 'Afif'],
+      'Aleppo':['All','As-Safira','Al-Bab','Manbij'],
+      'Homs': ['All','Talkalakh', 'Al-Qusayr','Al-Rastan'],
+      'Hama':['All','Salamiyah','Masyaf','Al-Hamraa'],
+      'Draa':['All','Bosra','Al-Hirak','Nawa'],
+      'Latakia':['All','Kessab','Jableh','Mashqita'],
+      'Tartous':['All','Baniyas','Arwad','Safita'],
+      'Suwayda':['All','Shahba','Salkhad','Shaqqa'],
+      'Deir ez-Zor':['All','Mayadin','Abu Kamal','Al-Asharah'],
+      'Idlib':['All','Ariha','Jisr ash-Shughur','Maarat al-Numan'],
+      'Raqqa':['All','Al-Thawrah','Al-Karamah','Al-Mansoura'],
     };
     @override
     Widget build(BuildContext context){
@@ -73,16 +75,19 @@ class FilterModel extends StatefulWidget{
               _buildPriceRangeSlider(),
 
               const SizedBox(height:20),
-               _buildSectionTitle('Area (sqm)'),
+               _buildSectionTitle('Space (m²)'),
               const SizedBox(height: 10),
-              _buildAreaRangeSlider(),
+              _buildSpaceRangeSlider(),
               const SizedBox(height:30),
 
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        ref.read(apartmentProvider.notifier).loadApartments(); 
+                      Navigator.pop(context);
+                      },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         side: BorderSide(color:AppConstants.primaryColor),
@@ -100,7 +105,15 @@ class FilterModel extends StatefulWidget{
                     Expanded(
                       child: ElevatedButton(
                         onPressed: (){
-                          Navigator.pop(context);
+                         ref.read(apartmentProvider.notifier).applyFilter(
+                          governorate: _selectedGovernorate == 'All'? null: _selectedGovernorate, 
+                          city: _selectedCity == 'All'? null : _selectedCity,       
+                          minPrice: _priceRange.start, 
+                          maxPrice: _priceRange.end,
+                          minSpace: _spaceRange.start,
+                          maxSpace: _spaceRange.end,
+                         );
+                         Navigator.pop(context);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppConstants.primaryColor,
@@ -155,12 +168,8 @@ class FilterModel extends StatefulWidget{
       onChanged: (newValue){
   setState(() {
     _selectedGovernorate = newValue!;
-
-    if (newValue == "All") {
-      _selectedCity = null;
-    } else {
-      _selectedCity = _citiesByGovernorate[newValue]!.first;
-    }
+    _selectedCity = 'All';
+    
   });
 },
     );
@@ -201,8 +210,8 @@ class FilterModel extends StatefulWidget{
   Widget _buildPriceRangeSlider() {
     return RangeSlider(
       values: _priceRange,
-      min: 50,
-      max: 1000,
+      min: 500,
+      max: 500000,
       divisions: 10,
       activeColor: AppConstants.primaryColor,
       inactiveColor: AppConstants.secondColor,
@@ -213,25 +222,25 @@ class FilterModel extends StatefulWidget{
       onChanged: (RangeValues values) {
         setState(() {
           _priceRange = values;
-        });
+      });
       },
     );
   }
-Widget _buildAreaRangeSlider(){
+Widget _buildSpaceRangeSlider(){
   return RangeSlider(
-    values: _areaRange, 
+    values: _spaceRange, 
     min: 50,
     max: 500,
     divisions: 10,
     activeColor:AppConstants.primaryColor,
     inactiveColor: AppConstants.secondColor,
      labels: RangeLabels(
-        '${_areaRange.start.round()} sqm',
-        '${_areaRange.end.round()} sqm',
+        '${_spaceRange.start.round()} ',
+        '${_spaceRange.end.round()} ',
       ),
    onChanged: (RangeValues values) {
         setState(() {
-          _areaRange = values;
+          _spaceRange = values;
         });
       },
     );

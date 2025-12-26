@@ -6,7 +6,7 @@ class CustomButton extends StatelessWidget {
     required this.textButton,
     required this.vTextColor,
     required this.kPrimaryColor,
-    required this.width,
+    this.width,
     this.vfont = 'Lato-Regular',
     this.onTap,
   });

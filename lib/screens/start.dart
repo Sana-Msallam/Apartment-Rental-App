@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // import 'package:apartment_rental_app/screens/home_screen.dart';
 // ولأغراض التجربة نستخدم شاشة تفاصيل الشقة
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
-import 'package:apartment_rental_app/models/apartment_model.dart';
+import 'package:apartment_rental_app/models/apartment_details_model.dart';
 
 import '../main.dart';
 

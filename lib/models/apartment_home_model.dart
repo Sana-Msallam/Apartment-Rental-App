@@ -26,10 +26,16 @@ class Apartment{
     return Apartment(
         id: json['id'],
         price:json['price'],
-        governorate:json['governorate'],
-        city:json['city'],
+        governorate:(json['governorate'] as String).capitalize(),
+        city:(json['city'] as String).capitalize(),
         space:json['space'] ,
         imagePath: correctedPath,
     );
+  }
+}
+extension StringExtension on String {
+  String capitalize() {
+    if (this.isEmpty) return this;
+    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
   }
 }
