@@ -1,3 +1,5 @@
+import 'package:apartment_rental_app/screens/booking_screen.dart';
+import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:flutter/material.dart';
 import 'package:apartment_rental_app/models/apartment_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
@@ -5,7 +7,6 @@ import 'package:apartment_rental_app/widgets/custom_app_bar.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 
-// بيانات وهمية - تأكد من مطابقة المسارات لما هو موجود في مجلد assets عندك
 final dummyApartment = ApartmentModel(
   id: 101,
   price: 1200,
@@ -54,7 +55,7 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: CustomAppBar(title: "Apartment Details"),
       body: Stack(
         children: [
@@ -88,12 +89,15 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
 
                         const SizedBox(height: 30),
 
-                        const Text(
+                        Text(
                           "Description",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: kPrimaryColor,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : kPrimaryColor,
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -101,7 +105,7 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
                           widget.apartment.description,
                           style: TextStyle(
                             fontSize: 15,
-                            color: Colors.grey[700],
+                            color: Theme.of(context).cardColor,
                             height: 1.5,
                           ),
                         ),
@@ -110,12 +114,15 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
                         const Divider(),
                         const SizedBox(height: 20),
 
-                        const Text(
+                        Text(
                           "Property Owner",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: kPrimaryColor,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : kPrimaryColor,
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -130,16 +137,27 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
             ),
           ),
 
-          // الزر الثابت
           Positioned(
             bottom: 20,
             left: 20,
             right: 20,
             child: CustomButton(
               textButton: "Rental Now",
-              kPrimaryColor: kPrimaryColor,
+              kPrimaryColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : kPrimaryColor,
               vTextColor: Colors.white,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginPage(),
+                    // BookingApp(
+                    // apartmentId: widget.apartment.id,pricePerNight: 123, // نمرر الـ ID فقط
+                    //         ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -166,10 +184,10 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.grey[200],
-                      child: const Icon(
+                      child: Icon(
                         Icons.broken_image,
                         size: 50,
-                        color: Colors.grey,
+                        color: Theme.of(context).cardColor,
                       ),
                     ),
                   );
@@ -215,10 +233,12 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
             children: [
               Text(
                 widget.apartment.city,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
-                  color: kPrimaryColor,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : kPrimaryColor,
                 ),
               ),
               Text(
@@ -229,10 +249,12 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
           ),
           Text(
             "\$${widget.apartment.price.toInt()}",
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w900,
-              color: kPrimaryColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : kPrimaryColor,
             ),
           ),
         ],
@@ -257,9 +279,14 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Title Deed Status",
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : kPrimaryColor,
+                  ),
                 ),
                 Text(
                   widget.apartment.titleDeed,
@@ -293,7 +320,7 @@ class _ApartmentDetailsScreenState extends State<ApartmentDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey[200]!),
       ),

@@ -1,23 +1,28 @@
-import 'package:apartment_rental_app/models/user_model.dart';
-import 'package:apartment_rental_app/services/api_service.dart';
+import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
 import 'package:apartment_rental_app/widgets/date_selector.dart';
-import 'dart:ui';
-import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
-const Color vBorderColor = Color(0xFFC0C0C0);
-const Color kSecondaryColor = Color(0xFF4B799E);
-final String vfont = 'vfo-Regular';
 
 class BookingApp extends StatefulWidget {
-  final UserModel user;
   final int apartmentId;
+  final double pricePerNight;
+  final int? bookingId;     
+  final DateTime? initialStart;  
+  final DateTime? initialEnd;    
 
-  const BookingApp({super.key, required this.user,required this.apartmentId,});
+  const BookingApp({
+    super.key,
+    required this.apartmentId,
+    required this.pricePerNight,
+    this.bookingId,
+    this.initialStart,
+    this.initialEnd,
+  });
 
   @override
   State<BookingApp> createState() => _BookingAppState();
@@ -30,183 +35,177 @@ class _BookingAppState extends State<BookingApp> {
   final DateTime _firstDate = DateTime.now();
   final DateTime _lastDate = DateTime.now().add(const Duration(days: 365 * 10));
 
+  @override
+  void initState() {
+    super.initState();
+    _startDate = widget.initialStart;
+    _endDate = widget.initialEnd;
+  }
+
   Future<void> _selectStartDate() async {
-    try {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: _startDate ?? _firstDate,
-        firstDate: _firstDate,
-        lastDate: _lastDate,
-        builder: (context, child) {
-          return Theme(
-            data: ThemeData.light().copyWith(
-              colorScheme: const ColorScheme.light(primary: kPrimaryColor),
-            ),
-            child: child!,
-          );
-        },
-      );
-      if (picked != null) {
-        setState(() {
-          _startDate = picked;
-          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
-            _endDate = null;
-          }
-        });
-      }
-    } catch (e) {
-      print('Error: $e');
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate ?? _firstDate,
+      firstDate: _firstDate,
+      lastDate: _lastDate,
+      builder: (context, child) => _buildDatePickerTheme(context, child!),
+    );
+    if (picked != null) {
+      setState(() {
+        _startDate = picked;
+        if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+          _endDate = null;
+        }
+      });
     }
   }
 
   Future<void> _selectEndDate() async {
     if (_startDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select the start date first.')),
-      );
+      _showErrorSnackBar('Please select the start date first.');
       return;
     }
-    final DateTime minRequiredEndDate = DateTime(
-      _startDate!.year,
-      _startDate!.month + 1,
-      _startDate!.day,
+    // شرط الشهر الواحد
+    final DateTime minRequiredEndDate = DateTime(_startDate!.year, _startDate!.month + 1, _startDate!.day);
+    
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _endDate != null && _endDate!.isAfter(minRequiredEndDate) ? _endDate! : minRequiredEndDate,
+      firstDate: minRequiredEndDate,
+      lastDate: _lastDate,
+      builder: (context, child) => _buildDatePickerTheme(context, child!),
     );
-    try {
-      final DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: _endDate != null && _endDate!.isAfter(minRequiredEndDate)
-            ? _endDate!
-            : minRequiredEndDate,
-        firstDate: minRequiredEndDate,
-        lastDate: _lastDate,
-        builder: (context, child) => Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(primary: kPrimaryColor),
-          ),
-          child: child!,
-        ),
-      );
-      if (picked != null) setState(() => _endDate = picked);
-    } catch (e) {
-      print('Error: $e');
-    }
+    if (picked != null) setState(() => _endDate = picked);
+  }
+
+  Widget _buildDatePickerTheme(BuildContext context, Widget child) {
+    final theme = Theme.of(context);
+    return Theme(
+      data: theme.copyWith(
+        colorScheme: theme.brightness == Brightness.dark
+            ? theme.colorScheme.copyWith(primary: Colors.white, surface: const Color(0xFF22282A))
+            : theme.colorScheme.copyWith(primary: theme.primaryColor),
+      ),
+      child: child,
+    );
   }
 
   void _submitBooking() async {
     if (_startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select both dates.')),
-      );
+      _showErrorSnackBar('Please select both dates.');
       return;
     }
+
+    const storage = FlutterSecureStorage();
+    String? token = await storage.read(key: 'jwt_token');
+
+    if (token == null) {
+      _showErrorSnackBar('Please login first.');
+      Navigator.pushNamed(context, '/login');
+      return;
+    }
+
     String startStr = DateFormat('yyyy-MM-dd').format(_startDate!);
     String endStr = DateFormat('yyyy-MM-dd').format(_endDate!);
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
-    double? totalPrice = await ApiService().calculatePrice(
-     apartmentId: widget.apartmentId, // هنا نستخدم الـ ID الحقيقي
-      startDate: startStr,
-      endDate: endStr
-    );
-    Navigator.pop(context);
-    if (totalPrice != null) {
-      _showConfirmationDialog(totalPrice, startStr, endStr);
+
+    if (widget.bookingId != null) {
+      _handleUpdate(token, startStr, endStr);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to calculate price. Try again.')),
-      );
+      _handleNewBooking(token, startStr, endStr);
     }
   }
 
-  void _showConfirmationDialog(double price, String start, String end) {
+  void _handleUpdate(String token, String start, String end) async {
+    _showLoadingDialog();
+    bool success = await BookingService().updateBookingDate(widget.bookingId!, start, end, token);
+    
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Update Successful!'), backgroundColor: Colors.green));
+      Navigator.pop(context, true); 
+    } else {
+      _showErrorSnackBar('Update failed. Check dates availability.');
+    }
+  }
+
+  void _handleNewBooking(String token, String start, String end) async {
+    _showLoadingDialog();
+    try {
+      double? totalPrice = await BookingService().calculatePrice(
+        apartmentId: widget.apartmentId,
+        startDate: start,
+        endDate: end,
+        token: token,
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (totalPrice != null) {
+        _showConfirmationDialog(totalPrice, start, end, token);
+      } else {
+        _showErrorSnackBar('Dates might be unavailable.');
+      }
+    } catch (e) {
+      if (mounted) Navigator.pop(context);
+      _showErrorSnackBar('Server error.');
+    }
+  }
+
+  void _showLoadingDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: const Text(
-          'Confirm Reservation',
-          style: TextStyle(color: kPrimaryColor),
-        ),
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
+  }
+
+  void _showConfirmationDialog(double price, String start, String end, String token) {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        title: Text('Confirm Reservation', style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.calendar_today, color: kSecondaryColor),
-              title: const Text("Period"),
-              subtitle: Text("$start to $end"),
-            ),
+                leading: Icon(Icons.calendar_today, color: theme.primaryColor), 
+                title: const Text("Period"), 
+                subtitle: Text("$start to $end", style: theme.textTheme.bodyMedium)),
             ListTile(
-              leading: const Icon(Icons.attach_money, color: Colors.green),
-              title: const Text("Total Price"),
-              subtitle: Text(
-                "\$${price.toStringAsFixed(2)}",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
+                leading: const Icon(Icons.attach_money, color: Colors.green), 
+                title: const Text("Total"), 
+                subtitle: Text("\$${price.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
           ],
         ),
-        actionsPadding: const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 10,
-        ),
         actions: [
-          Row(
-            // استخدمنا Row مشان يطلعوا الزرين جنب بعض بشكل مرتب
-            children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    "Cancel",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: CustomButton(
-                  textButton: 'Confirm',
-                  vTextColor: Colors.white,
-                  kPrimaryColor: kPrimaryColor,
-                  width: null, // خليه ياخد مساحة الـ Expanded
-                  onTap: () async {
-                    // إظهار لودينغ بسيط أثناء التأكيد النهائي
-                    showDialog(
-                      context: context,
-                      builder: (context) =>
-                          const Center(child: CircularProgressIndicator()),
-                    );
-
-                    bool success = await ApiService().confirmBooking(
-                    apartmentId: widget.apartmentId, // الـ ID الحقيقي للشقة
-                      startDate: start,
-                      endDate: end,
-                      totalPrice: price,
-                      userId:
-                          1, // widget.user.id, // مؤقتاً لحين تمرير اليوزر الحقيقي كما شرحت فوق
-                    );
-
-                    Navigator.pop(context); // إغلاق اللودينغ
-                    Navigator.pop(context); // إغلاق الدايلوج
-
-                    if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Booking Successful!"),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text("Cancel", style: TextStyle(color: theme.hintColor))),
+          CustomButton(
+            textButton: 'Confirm',
+            onTap: () async {
+              Navigator.pop(dialogContext);
+              _showLoadingDialog();
+              bool success = await BookingService().confirmBooking(
+                apartmentId: widget.apartmentId,
+                startDate: start,
+                endDate: end,
+                token: token,
+              );
+              if (mounted) Navigator.pop(context); 
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reservation Successful!'), backgroundColor: Colors.green));
+                Navigator.pop(context);
+              }
+            },
+            kPrimaryColor: theme.primaryColor, vTextColor: Colors.white, width: 100,
           ),
         ],
       ),
@@ -215,73 +214,54 @@ class _BookingAppState extends State<BookingApp> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final dynamicTitleColor = isDark ? Colors.white : theme.primaryColor;
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF020617),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent, 
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
-          // 1. الخلفية
-          Positioned.fill(
-            child: Image.asset('assets/images/start.png', fit: BoxFit.cover),
-          ),
-
-          // 2. المحتوى باستخدام GlassContainer
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GlassContainer(
-                // هنا الفرق! يمكنك إضافة قيم هنا للتحكم بالشكل (انظري الشرح بالأسفل)
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // const Icon(
-                    //   Icons.calendar_today_rounded,
-                    //   size: 60,
-                    //   color: kPrimaryColor,
-                    // ),
-                    const SizedBox(height: 15),
-                    const Text(
-                      "Select Stay Period",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: kPrimaryColor,
+          Positioned.fill(child: Image.asset('assets/images/start.png', fit: BoxFit.cover)),
+          Positioned.fill(child: Container(color: Colors.black.withOpacity(0.5))),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GlassContainer(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 15),
+                      Text(
+                        widget.bookingId == null ? "Select Stay Period" : "Edit Stay Period",
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: dynamicTitleColor),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      "Minimum reservation period is one month.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Color.fromARGB(255, 44, 44, 44)),
-                    ),
-                    const SizedBox(height: 30),
-
-                    DateSelector(
-                      title: 'Check-in',
-                      date: _startDate,
-                      onTap: _selectStartDate,
-                    ),
-                    const SizedBox(height: 20),
-                    DateSelector(
-                      title: 'Check-out',
-                      date: _endDate,
-                      onTap: _selectEndDate,
-                    ),
-                    const SizedBox(height: 40),
-                    CustomButton(
-                      onTap: _submitBooking,
-                      textButton: 'Confirm Booking',
-                      vTextColor: Colors.white,
-                      kPrimaryColor: kPrimaryColor,
-                      width: double.infinity,
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Minimum reservation period is one month.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 30),
+                      DateSelector(title: 'Check-in', date: _startDate, onTap: _selectStartDate),
+                      const SizedBox(height: 20),
+                      DateSelector(title: 'Check-out', date: _endDate, onTap: _selectEndDate),
+                      const SizedBox(height: 40),
+                      CustomButton(
+                        onTap: _submitBooking,
+                        textButton: widget.bookingId == null ? 'Confirm Booking' : 'Update Dates',
+                        kPrimaryColor: isDark ? Colors.white : theme.primaryColor,
+                        vTextColor: isDark ? Colors.black : Colors.white,
+                        width: double.infinity,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

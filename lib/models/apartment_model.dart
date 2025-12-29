@@ -1,5 +1,5 @@
 class ApartmentModel {
-  final int? id;
+  final int id;
   final double price;
   final int rooms;
   final int bathrooms;

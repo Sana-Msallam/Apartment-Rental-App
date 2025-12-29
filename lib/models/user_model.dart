@@ -1,5 +1,5 @@
 class UserModel {
-  static UserModel? currentUser; // متغير "عالمي" ثابت في الذاكرة
+  static UserModel? currentUser; 
   final int? id;
   final String firstName;
   final String lastName;
@@ -8,7 +8,7 @@ class UserModel {
   final String? dateOfBirth;
   final String? personalPhoto; 
   final String? idPhoto;
-  final String? token; 
+  final String? token;
 
   UserModel({
     this.id,
@@ -22,20 +22,31 @@ class UserModel {
     this.token,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json, {required token}) {
+  factory UserModel.fromJson(Map<String, dynamic> json, {String? token}) {
+    String? rawPhoto = json['personal_photo'];
+    String? processedPhoto;
+
+    if (rawPhoto != null && rawPhoto.isNotEmpty) {
+      if (rawPhoto.startsWith('http')) {
+        processedPhoto = rawPhoto; 
+      } else {
+        processedPhoto = "http://192.168.1.104:8000/storage/$rawPhoto";
+      }
+    }
+
     return UserModel(
       id: json['id'],
       firstName: json['first_name'] ?? '',
       lastName: json['last_name'] ?? '',
       email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
+      phone: json['phone']?.toString() ?? '', 
       dateOfBirth: json['date_of_birth'],
-      personalPhoto: json['personal_photo'],
+      personalPhoto: processedPhoto,
       idPhoto: json['ID_photo'],
-token: token ?? json['token'],    );
+      token: token ?? json['token'],
+    );
   }
 
-  // إذا احتجتِ تحويل الكائن إلى Map لإرساله للسيرفر (اختياري)
   Map<String, dynamic> toJson() {
     return {
       'id': id,

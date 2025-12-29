@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final String _baseUrl = 'http://192.168.1.111:8080';
+  final String _baseUrl = 'http://192.168.1.107:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -16,27 +16,28 @@ class ApiService {
 
   Future<UserModel?> login(String phone, String password) async {
     try {
-      print(' محاولة تسجيل دخول: $_baseUrl/api/login');
+      print(' try to login$_baseUrl/login');
 
       final response = await _dio.post(
-        '$_baseUrl/api/login',
+        '$_baseUrl/login',
         data: {'phone': phone, 'password': password},
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
+        print('response data =  $responseData');
 
         final userData =
             responseData['user'] ?? responseData['data'] ?? responseData;
 
         final String? token = responseData['token'] ?? userData['token'];
-        print(' كود الاستجابة: ${response.statusCode}');
+        print(' code ${response.statusCode}');
         return UserModel.fromJson(userData, token: token);
       }
     } on DioException catch (e) {
       _handleDioError(e);
       return null;
     } catch (e) {
-      print(' خطأ غير متوقع: $e');
+      print(' Error $e');
       return null;
     }
   }
@@ -69,28 +70,26 @@ class ApiService {
         'email': email,
       });
 
-      print(' إرسال طلب تسجيل جديد لـ: $_baseUrl/api/signUp');
-
       Response response = await _dio.post(
-        '$_baseUrl/api/signUp',
+        '$_baseUrl/signUp',
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
 
-      print(' كود الاستجابة: ${response.statusCode}');
+      print(' ${response.statusCode}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         final userData =
             response.data['user'] ?? response.data['data'] ?? response.data;
         final String? token = response.data['token'] ?? userData?['token'];
         return UserModel.fromJson(userData, token: token);
       } else if (response.statusCode == 422) {
-        print("خطأ التحقق من البيانات 422: ${response.data}");
+        print("422: ${response.data}");
       }
     } on DioException catch (e) {
       _handleDioError(e);
       return null;
     } catch (e) {
-      print(" خطأ عام في التسجيل: $e");
+      print(" Error $e");
       return null;
     }
     return null;
@@ -99,68 +98,10 @@ class ApiService {
   void _handleDioError(DioException e) {
     print("Server Response Error: ${e.response?.data}");
     if (e.response != null) {
-      // هذا السطر سيطبع لكِ في الـ Console السبب الدقيق للفشل
-      print("خطأ من السيرفر (422): ${e.response?.data}");
+      print("Error:${e.response?.data}");
     } else {
-      print("خطأ في الاتصال: ${e.message}");
+      print(" ${e.message}");
     }
     return null;
-  }
-
-  Future<double?> calculatePrice({
-    required int apartmentId,
-    required String startDate,
-    required String endDate,
-    
-  }) async {
-    try {
-      final response = await _dio.get(
-        '$_baseUrl/api/some_endpoint',
-        data: {
-          'apartment_id': apartmentId,
-          'start_date': startDate,
-          'end_date': endDate,
-        },
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = response.data;
-        double price = responseData['total_price']?.toDouble() ?? 0.0;
-        return price;
-      }
-    } catch (e) {
-      print('error calculate price:$e');
-    }
-    return null;
-  }
-
-   Future<bool> confirmBooking({
-    required int apartmentId,
-    required String startDate,
-    required String endDate,
-    required double totalPrice,
-    required int userId,
-  }) async {
-    try {
-      final response = await _dio.post(
-        '$_baseUrl/api/BookApartment',
-        data: {
-          'apartment_id': apartmentId,
-          'start_date': startDate,
-          'end_date': endDate,
-          'total_price': totalPrice,
-          'user_id': userId,
-          'status': 'pending',
-        },
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-      return response.statusCode == 200 || response.statusCode == 201;
-       } else {
-        print('Failed to confirm booking. Status code: ${response.statusCode}');
-      return false;
-      }
-    } catch (e) {
-      print('Error confirming booking: $e');
-      return false;
-    }
   }
 }
