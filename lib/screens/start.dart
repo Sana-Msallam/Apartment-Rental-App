@@ -3,6 +3,17 @@ import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// يجب استيراد شاشتك الرئيسية (واجهة الشقق)
+// import 'package:apartment_rental_app/screens/home_screen.dart';
+// ولأغراض التجربة نستخدم شاشة تفاصيل الشقة
+import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
+import 'package:apartment_rental_app/models/apartment_details_model.dart';
+
+import '../main.dart';
+
+const Color kGradientColorStart = Color(0x00234F68);
+const Color kGradientColorMid = Color(0x66234F68);
+const Color kGradientColorEnd = Color(0xCC234F68);
 
 class StartPage extends StatelessWidget {
   StartPage({super.key});

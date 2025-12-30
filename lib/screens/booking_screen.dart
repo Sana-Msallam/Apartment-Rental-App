@@ -10,7 +10,7 @@ const Color kPrimaryColor = Color(0xFF234F68);
 
 class BookingApp extends StatefulWidget {
   final int apartmentId;
-  final double pricePerNight;
+  final int pricePerNight;
   final int? bookingId;     
   final DateTime? initialStart;  
   final DateTime? initialEnd;    

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   CustomButton({
-    this.textButton,
-    this.vTextColor,
-    this.kPrimaryColor,
+    required this.textButton,
+    required this.vTextColor,
+    required this.kPrimaryColor,
     this.width,
     this.vfont = 'Lato-Regular',
     this.onTap,
@@ -21,9 +21,13 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final Color defaultButtonColor = isDark ? Colors.white : const Color(0xFF234F68);
+    final Color defaultButtonColor = isDark
+        ? Colors.white
+        : const Color(0xFF234F68);
 
-    final Color defaultTextColor = isDark ? const Color(0xFF234F68) : Colors.white;
+    final Color defaultTextColor = isDark
+        ? const Color(0xFF234F68)
+        : Colors.white;
 
     return GestureDetector(
       onTap: onTap,

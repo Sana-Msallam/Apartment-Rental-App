@@ -117,7 +117,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                 MaterialPageRoute(
                   builder: (context) => BookingApp(
                     apartmentId: bookings[index]['apartment_id'],
-                    pricePerNight: double.parse(
+                    pricePerNight: int.parse(
                       bookings[index]['total_price'].toString(),
                     ),
                     bookingId: bookings[index]['id'],

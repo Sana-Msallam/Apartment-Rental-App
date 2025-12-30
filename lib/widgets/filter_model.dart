@@ -1,61 +1,58 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-class FilterModel extends StatefulWidget {
+class FilterModel extends ConsumerStatefulWidget{
   const FilterModel({super.key});
 
   @override
-  State<FilterModel> createState() => _FilterModelState();
-}
+  ConsumerState<FilterModel> createState() => _FilterModelState(); 
+    
+  }
+  class _FilterModelState extends ConsumerState<FilterModel>{
+    String _selectedGovernorate='All';
+    String _selectedCity='All';
+    RangeValues _priceRange= const RangeValues(500, 500000);
+    
+    RangeValues _spaceRange= const RangeValues(50, 500);
 
-class _FilterModelState extends State<FilterModel> {
-  String _selectedGovernorate = 'All';
-  String? _selectedCity; 
-  RangeValues _priceRange = const RangeValues(50, 1000);
-  RangeValues _areaRange = const RangeValues(50, 500);
-
-  final List<String> _governorates = [
-    'All', 'Damascus', 'Aleppo', 'Homs', 'Hama', 'Draa', 'Latakia', 'Tartous', 'Suwayda', 'Deir ez-Zor', 'Idlib', 'Raqqa'
-  ];
-  
-  final Map<String, List<String>> _citiesByGovernorate = {
-    'Damascus': ['Midan', 'Mazzeh', 'Afif'],
-    'Aleppo': ['As-Safira', 'Al-Bab', 'Manbij'],
-    'Homs': ['Talkalakh', 'Al-Qusayr', 'Al-Rastan'],
-    'Hama': ['Salamiyah', 'Masyaf', 'Al-Hamraa'],
-    'Draa': ['Bosra', 'Al-Hirak', 'Nawa'],
-    'Latakia': ['Kessab', 'Jableh', 'Mashqita'],
-    'Tartous': ['Baniyas', 'Arwad', 'Safita'],
-    'Suwayda': ['Shahba', 'Salkhad', 'Shaqqa'],
-    'Deir ez-Zor': ['Mayadin', 'Abu Kamal', 'Al-Asharah'],
-    'Idlib': ['Ariha', 'Jisr ash-Shughur', 'Maarat al-Numan'],
-    'Raqqa': ['Al-Thawrah', 'Al-Karamah', 'Al-Mansoura'],
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    // 1. تحديد الثيم الحالي
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : AppConstants.secondColor,
-                  borderRadius: BorderRadius.circular(10),
+    final List<String> _governorates = ['All','Damascus', 'Aleppo', 'Homs', 'Hama', 'Draa', 'Latakia','Tartous','Suwayda','Deir ez-Zor' ,'Idlib','Raqqa'];
+    final Map<String, List<String>> _citiesByGovernorate={
+      'Damascus': ['All','Midan', 'Mazzeh', 'Afif'],
+      'Aleppo':['All','As-Safira','Al-Bab','Manbij'],
+      'Homs': ['All','Talkalakh', 'Al-Qusayr','Al-Rastan'],
+      'Hama':['All','Salamiyah','Masyaf','Al-Hamraa'],
+      'Draa':['All','Bosra','Al-Hirak','Nawa'],
+      'Latakia':['All','Kessab','Jableh','Mashqita'],
+      'Tartous':['All','Baniyas','Arwad','Safita'],
+      'Suwayda':['All','Shahba','Salkhad','Shaqqa'],
+      'Deir ez-Zor':['All','Mayadin','Abu Kamal','Al-Asharah'],
+      'Idlib':['All','Ariha','Jisr ash-Shughur','Maarat al-Numan'],
+      'Raqqa':['All','Al-Thawrah','Al-Karamah','Al-Mansoura'],
+    };
+    
+    @override
+    Widget build(BuildContext context){
+      return Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top:Radius.circular(25.0))
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize:MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppConstants.secondColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -81,48 +78,59 @@ class _FilterModelState extends State<FilterModel> {
             const SizedBox(height: 10),
             _buildPriceRangeSlider(isDark),
 
-            const SizedBox(height: 20),
-            _buildSectionTitle('Area (sqm)', isDark),
-            const SizedBox(height: 10),
-            _buildAreaRangeSlider(isDark),
-            const SizedBox(height: 30),
+              const SizedBox(height:20),
+               _buildSectionTitle('Space (m²)'),
+              const SizedBox(height: 10),
+              _buildSpaceRangeSlider(),
+              const SizedBox(height:30),
 
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      side: BorderSide(color: isDark ? Colors.white38 : AppConstants.primaryColor),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        ref.read(apartmentProvider.notifier).loadApartments(); 
+                      Navigator.pop(context);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        side: BorderSide(color:AppConstants.primaryColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Text(
+                        'Reset',
+                        style: AppConstants.secondText,
+                      ),
                       ),
                     ),
-                    child: Text(
-                      'Reset',
-                      style: AppConstants.secondText.copyWith(
-                        color: isDark ? Colors.white70 : AppConstants.primaryColor,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? Colors.white : AppConstants.primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    child: Text(
-                      'Apply',
-                      style: GoogleFonts.lato(
-                        color: isDark ? AppConstants.primaryColor : Colors.white,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: (){
+                         ref.read(apartmentProvider.notifier).applyFilter(
+                          governorate: _selectedGovernorate == 'All'? null: _selectedGovernorate, 
+                          city: _selectedCity == 'All'? null : _selectedCity,       
+                          minPrice: _priceRange.start, 
+                          maxPrice: _priceRange.end,
+                          minSpace: _spaceRange.start,
+                          maxSpace: _spaceRange.end,
+                         );
+                         Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppConstants.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                           child: Text(
+                            'Apply',
+                            style: GoogleFonts.lato(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -166,16 +174,13 @@ class _FilterModelState extends State<FilterModel> {
           child: Text(governorate),
         );
       }).toList(),
-      onChanged: (newValue) {
-        setState(() {
-          _selectedGovernorate = newValue!;
-          if (newValue == "All") {
-            _selectedCity = null;
-          } else {
-            _selectedCity = _citiesByGovernorate[newValue]!.first;
-          }
-        });
-      },
+      onChanged: (newValue){
+  setState(() {
+    _selectedGovernorate = newValue!;
+    _selectedCity = 'All';
+    
+  });
+},
     );
   }
 
@@ -213,8 +218,8 @@ class _FilterModelState extends State<FilterModel> {
   Widget _buildPriceRangeSlider(bool isDark) {
     return RangeSlider(
       values: _priceRange,
-      min: 50,
-      max: 1000,
+      min: 500,
+      max: 500000,
       divisions: 10,
       activeColor: isDark ? Colors.white : AppConstants.primaryColor,
       inactiveColor: isDark ? Colors.white12 : AppConstants.secondColor,
@@ -225,26 +230,25 @@ class _FilterModelState extends State<FilterModel> {
       onChanged: (RangeValues values) {
         setState(() {
           _priceRange = values;
-        });
+      });
       },
     );
   }
-
-  Widget _buildAreaRangeSlider(bool isDark) {
-    return RangeSlider(
-      values: _areaRange,
-      min: 50,
-      max: 500,
-      divisions: 10,
-      activeColor: isDark ? Colors.white : AppConstants.primaryColor,
-      inactiveColor: isDark ? Colors.white12 : AppConstants.secondColor,
-      labels: RangeLabels(
-        '${_areaRange.start.round()} sqm',
-        '${_areaRange.end.round()} sqm',
+Widget _buildSpaceRangeSlider(){
+  return RangeSlider(
+    values: _spaceRange, 
+    min: 50,
+    max: 500,
+    divisions: 10,
+    activeColor:AppConstants.primaryColor,
+    inactiveColor: AppConstants.secondColor,
+     labels: RangeLabels(
+        '${_spaceRange.start.round()} ',
+        '${_spaceRange.end.round()} ',
       ),
       onChanged: (RangeValues values) {
         setState(() {
-          _areaRange = values;
+          _spaceRange = values;
         });
       },
     );

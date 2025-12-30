@@ -54,17 +54,18 @@ class HomeScreen extends ConsumerWidget {
                         itemBuilder: (context, index) {
                           final apartment = apartments[index];
                           return GestureDetector(
-                            onTap: () {
+                            child: Apartmentcard(
+                              id:apartment.id,
+                              onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ApartmentDetailsScreen(
-                                    apartment: apartment.id,
+                                    apartmentId: apartment.id,
                                   ),
                                 ),
                               );
                             },
-                            child: Apartmentcard(
                               imagePath: apartment.imagePath,
                               price: apartment.price,
                               governorate: apartment.governorate,

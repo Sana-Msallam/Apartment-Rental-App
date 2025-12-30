@@ -1,4 +1,9 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/screens/home_screen.dart';
+import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
+import 'package:apartment_rental_app/screens/booking_screen.dart';
+import 'package:apartment_rental_app/screens/start.dart';
+import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/controller/ThemeNotifier_controller.dart';
