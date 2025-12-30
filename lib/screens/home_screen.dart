@@ -59,7 +59,7 @@ class HomeScreen extends ConsumerWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ApartmentDetailsScreen(
-                                    apartment: dummyApartment,
+                                    apartment: apartment.id,
                                   ),
                                 ),
                               );

@@ -65,7 +65,6 @@ class _BookingAppState extends State<BookingApp> {
       _showErrorSnackBar('Please select the start date first.');
       return;
     }
-    // شرط الشهر الواحد
     final DateTime minRequiredEndDate = DateTime(_startDate!.year, _startDate!.month + 1, _startDate!.day);
     
     final DateTime? picked = await showDatePicker(

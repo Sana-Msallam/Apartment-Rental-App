@@ -10,7 +10,8 @@ class ApartmentHomeService{
   ApartmentHomeService(this._dio);
   factory ApartmentHomeService.create(){
     final dio=Dio();
-    dio.options.baseUrl='http://192.168.1.107/api/';
+    dio.options.baseUrl= 'http://192.168.0.126:8000/api';
+
     dio.options.connectTimeout=const Duration(seconds: 10);
     dio.options.receiveTimeout= const Duration(seconds: 10);
     dio.interceptors.add(InterceptorsWrapper(

@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
+import 'package:apartment_rental_app/controller/profile_controller.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
@@ -11,7 +13,7 @@ import 'package:apartment_rental_app/widgets/photo_upload.dart';
 const Color kPrimaryColor = Color(0xFF234F68);
 const Color vBorderColor = Color(0xFFC0C0C0);
 
-class UploadPhotosScreen extends StatefulWidget {
+class UploadPhotosScreen extends ConsumerStatefulWidget {
   final String firstName, lastName, phone, email, dateOfBirth, password;
 
   const UploadPhotosScreen({
@@ -25,10 +27,11 @@ class UploadPhotosScreen extends StatefulWidget {
   });
 
   @override
-  State<UploadPhotosScreen> createState() => _UploadPhotosScreenState();
+  // تأكدي أن هذه هي ConsumerState وليس State فقط
+  ConsumerState<UploadPhotosScreen> createState() => _UploadPhotosScreenState();
 }
 
-class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
+class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
   final ApiService _apiService = ApiService();
   File? personalImage;
   File? idImage;
@@ -61,6 +64,7 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
 
       if (response != null) {
         if (!mounted) return;
+        ref.invalidate(profileProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Registration Successful!'),

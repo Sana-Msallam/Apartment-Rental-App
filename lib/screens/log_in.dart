@@ -27,7 +27,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
-  void _handleLogin() async {
+ void _handleLogin() async {
     String phone = _phoneController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -40,16 +40,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     try {
       final user = await _apiService.login(phone, password);
 
-      if (user != null && user.token != null && user.token!.isNotEmpty) {
+      if (user != null && user.token != null) {
+        // 1. حفظ التوكن أولاً
         await storage.write(key: 'jwt_token', value: user.token);
 
-        try {
-          await ref.read(profileProvider.notifier).getProfile(user.token!);
-        } catch (e) {
-          debugPrint("Profile fetch failed: $e");
-        }
+        // 2. تحديث الـ ProfileProvider يدوياً بالتوكن الجديد
+        // هذه الخطوة تضمن أن البروفايل سيُجلب فوراً دون انتظار إعادة تشغيل التطبيق
+        await ref.read(profileProvider.notifier).getProfile(user.token!);
 
         if (!mounted) return;
+        
+        // 3. الانتقال للشاشة الرئيسية
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -64,7 +65,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
   void _showSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(

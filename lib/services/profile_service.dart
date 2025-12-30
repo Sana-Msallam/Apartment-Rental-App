@@ -3,14 +3,14 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ProfileService {
-  final String _baseUrl = 'http://192.168.1.107:8000/api';
+  final String _baseUrl = 'http://192.168.0.126:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
       connectTimeout: const Duration(seconds: 60),
       receiveTimeout: const Duration(seconds: 60),
       headers: {'Accept': 'application/json'},
-      validateStatus: (status) => status! < 500,
+    //  validateStatus: (status) => status! < 500,
     ),
   );
 

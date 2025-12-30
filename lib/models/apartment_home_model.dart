@@ -17,7 +17,7 @@ class Apartment{
 });
   factory Apartment.fromJson(Map<String,dynamic> json){
     String rawPath = json['main_image']['path']?? '';
-    String correctedPath = rawPath.replaceAll('localhost', '10.0.2.2');
+    String correctedPath = rawPath.replaceAll('localhost', '192.168.0.126');
     // String localAsset = "assets/images/apartment_default.jpg"; 
     
     
