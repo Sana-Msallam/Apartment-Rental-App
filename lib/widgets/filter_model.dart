@@ -3,56 +3,63 @@ import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-class FilterModel extends ConsumerStatefulWidget{
+
+class FilterModel extends ConsumerStatefulWidget {
   const FilterModel({super.key});
 
   @override
-  ConsumerState<FilterModel> createState() => _FilterModelState(); 
-    
-  }
-  class _FilterModelState extends ConsumerState<FilterModel>{
-    String _selectedGovernorate='All';
-    String _selectedCity='All';
-    RangeValues _priceRange= const RangeValues(500, 500000);
-    
-    RangeValues _spaceRange= const RangeValues(50, 500);
+  ConsumerState<FilterModel> createState() => _FilterModelState();
+}
 
-    final List<String> _governorates = ['All','Damascus', 'Aleppo', 'Homs', 'Hama', 'Draa', 'Latakia','Tartous','Suwayda','Deir ez-Zor' ,'Idlib','Raqqa'];
-    final Map<String, List<String>> _citiesByGovernorate={
-      'Damascus': ['All','Midan', 'Mazzeh', 'Afif'],
-      'Aleppo':['All','As-Safira','Al-Bab','Manbij'],
-      'Homs': ['All','Talkalakh', 'Al-Qusayr','Al-Rastan'],
-      'Hama':['All','Salamiyah','Masyaf','Al-Hamraa'],
-      'Draa':['All','Bosra','Al-Hirak','Nawa'],
-      'Latakia':['All','Kessab','Jableh','Mashqita'],
-      'Tartous':['All','Baniyas','Arwad','Safita'],
-      'Suwayda':['All','Shahba','Salkhad','Shaqqa'],
-      'Deir ez-Zor':['All','Mayadin','Abu Kamal','Al-Asharah'],
-      'Idlib':['All','Ariha','Jisr ash-Shughur','Maarat al-Numan'],
-      'Raqqa':['All','Al-Thawrah','Al-Karamah','Al-Mansoura'],
-    };
-    
-    @override
-    Widget build(BuildContext context){
-      return Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top:Radius.circular(25.0))
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisSize:MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: AppConstants.secondColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+class _FilterModelState extends ConsumerState<FilterModel> {
+  String _selectedGovernorate = 'All';
+  String _selectedCity = 'All';
+  RangeValues _priceRange = const RangeValues(500, 500000);
+  RangeValues _spaceRange = const RangeValues(50, 500);
+
+  final List<String> _governorates = [
+    'All', 'Damascus', 'Aleppo', 'Homs', 'Hama', 'Draa', 'Latakia', 'Tartous', 'Suwayda', 'Deir ez-Zor', 'Idlib', 'Raqqa'
+  ];
+  
+  final Map<String, List<String>> _citiesByGovernorate = {
+    'Damascus': ['All', 'Midan', 'Mazzeh', 'Afif'],
+    'Aleppo': ['All', 'As-Safira', 'Al-Bab', 'Manbij'],
+    'Homs': ['All', 'Talkalakh', 'Al-Qusayr', 'Al-Rastan'],
+    'Hama': ['All', 'Salamiyah', 'Masyaf', 'Al-Hamraa'],
+    'Draa': ['All', 'Bosra', 'Al-Hirak', 'Nawa'],
+    'Latakia': ['All', 'Kessab', 'Jableh', 'Mashqita'],
+    'Tartous': ['All', 'Baniyas', 'Arwad', 'Safita'],
+    'Suwayda': ['All', 'Shahba', 'Salkhad', 'Shaqqa'],
+    'Deir ez-Zor': ['All', 'Mayadin', 'Abu Kamal', 'Al-Asharah'],
+    'Idlib': ['All', 'Ariha', 'Jisr ash-Shughur', 'Maarat al-Numan'],
+    'Raqqa': ['All', 'Al-Thawrah', 'Al-Karamah', 'Al-Mansoura'],
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    // تحديد إذا كان الوضع ليلي أو نهاري
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        // تعديل لون الخلفية ليتغير مع الثيم
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // شريط السحب العلوي (الـ Handle)
+            Center(
+              child: Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : AppConstants.secondColor,
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
@@ -64,6 +71,7 @@ class FilterModel extends ConsumerStatefulWidget{
               ),
             ),
             const SizedBox(height: 20),
+            
             _buildSectionTitle('Governorate', isDark),
             const SizedBox(height: 10),
             _buildGovernorateDropdown(isDark),
@@ -78,59 +86,65 @@ class FilterModel extends ConsumerStatefulWidget{
             const SizedBox(height: 10),
             _buildPriceRangeSlider(isDark),
 
-              const SizedBox(height:20),
-               _buildSectionTitle('Space (m²)'),
-              const SizedBox(height: 10),
-              _buildSpaceRangeSlider(),
-              const SizedBox(height:30),
+            const SizedBox(height: 20),
+            _buildSectionTitle('Space (m²)', isDark),
+            const SizedBox(height: 10),
+            _buildSpaceRangeSlider(isDark), // تمرير isDark هنا أيضاً
+            const SizedBox(height: 30),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        ref.read(apartmentProvider.notifier).loadApartments(); 
+            Row(
+              children: [
+                // زر الـ Reset
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      ref.read(apartmentProvider.notifier).loadApartments();
                       Navigator.pop(context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        side: BorderSide(color:AppConstants.primaryColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      side: BorderSide(
+                        color: isDark ? Colors.white38 : AppConstants.primaryColor
                       ),
-                      child: Text(
-                        'Reset',
-                        style: AppConstants.secondText,
-                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
                     ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: (){
-                         ref.read(apartmentProvider.notifier).applyFilter(
-                          governorate: _selectedGovernorate == 'All'? null: _selectedGovernorate, 
-                          city: _selectedCity == 'All'? null : _selectedCity,       
-                          minPrice: _priceRange.start, 
-                          maxPrice: _priceRange.end,
-                          minSpace: _spaceRange.start,
-                          maxSpace: _spaceRange.end,
-                         );
-                         Navigator.pop(context);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppConstants.primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                           child: Text(
-                            'Apply',
-                            style: GoogleFonts.lato(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                    child: Text(
+                      'Reset',
+                      style: AppConstants.secondText.copyWith(
+                        color: isDark ? Colors.white70 : AppConstants.primaryColor,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                // زر الـ Apply
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      ref.read(apartmentProvider.notifier).applyFilter(
+                        governorate: _selectedGovernorate == 'All' ? null : _selectedGovernorate,
+                        city: _selectedCity == 'All' ? null : _selectedCity,
+                        minPrice: _priceRange.start,
+                        maxPrice: _priceRange.end,
+                        minSpace: _spaceRange.start,
+                        maxSpace: _spaceRange.end,
+                      );
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppConstants.primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: Text(
+                      'Apply',
+                      style: GoogleFonts.lato(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -174,13 +188,12 @@ class FilterModel extends ConsumerStatefulWidget{
           child: Text(governorate),
         );
       }).toList(),
-      onChanged: (newValue){
-  setState(() {
-    _selectedGovernorate = newValue!;
-    _selectedCity = 'All';
-    
-  });
-},
+      onChanged: (newValue) {
+        setState(() {
+          _selectedGovernorate = newValue!;
+          _selectedCity = 'All';
+        });
+      },
     );
   }
 
@@ -224,27 +237,28 @@ class FilterModel extends ConsumerStatefulWidget{
       activeColor: isDark ? Colors.white : AppConstants.primaryColor,
       inactiveColor: isDark ? Colors.white12 : AppConstants.secondColor,
       labels: RangeLabels(
-        '${(_priceRange.start).toStringAsFixed(1)}M',
-        '${(_priceRange.end).toStringAsFixed(1)}M',
+        '${(_priceRange.start).toStringAsFixed(0)}',
+        '${(_priceRange.end).toStringAsFixed(0)}',
       ),
       onChanged: (RangeValues values) {
         setState(() {
           _priceRange = values;
-      });
+        });
       },
     );
   }
-Widget _buildSpaceRangeSlider(){
-  return RangeSlider(
-    values: _spaceRange, 
-    min: 50,
-    max: 500,
-    divisions: 10,
-    activeColor:AppConstants.primaryColor,
-    inactiveColor: AppConstants.secondColor,
-     labels: RangeLabels(
-        '${_spaceRange.start.round()} ',
-        '${_spaceRange.end.round()} ',
+
+  Widget _buildSpaceRangeSlider(bool isDark) {
+    return RangeSlider(
+      values: _spaceRange,
+      min: 50,
+      max: 500,
+      divisions: 10,
+      activeColor: isDark ? Colors.white : AppConstants.primaryColor,
+      inactiveColor: isDark ? Colors.white12 : AppConstants.secondColor,
+      labels: RangeLabels(
+        '${_spaceRange.start.round()}',
+        '${_spaceRange.end.round()}',
       ),
       onChanged: (RangeValues values) {
         setState(() {

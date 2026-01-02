@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final String _baseUrl = 'http://192.168.0.126:8000/api';
+  final String _baseUrl = 'http://192.168.1.105:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -94,6 +94,35 @@ class ApiService {
     }
     return null;
   }
+
+// أضف هذا التابع داخل كلاس ApiService في ملف api_service.dart
+
+Future<bool> logout(String token) async {
+  try {
+    final response = await _dio.post(
+      '$_baseUrl/logout',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("Logout successful from Backend");
+      return true;
+    }
+    return false;
+  } on DioException catch (e) {
+    print("Logout Error: ${e.response?.data}");
+    return false;
+  } catch (e) {
+    print("Logout Unexpected Error: $e");
+    return false;
+  }
+}
+
 
   void _handleDioError(DioException e) {
     print("Server Response Error: ${e.response?.data}");

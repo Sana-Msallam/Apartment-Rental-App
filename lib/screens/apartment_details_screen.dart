@@ -38,10 +38,10 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   @override
   Widget build(BuildContext context) {
     final apartmentAsync = ref.watch(apartmentDetailProvider(widget.apartmentId));
-
+final theme = Theme.of(context);
+final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: const CustomAppBar(title: "Apartment Details"),
+backgroundColor: theme.scaffoldBackgroundColor, // سيأخذ الأبيض في الفاتح و 0xFF0F1213 في الداكن      appBar: const CustomAppBar(title: "Apartment Details"),
       body: apartmentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: kPrimaryColor)),
         error: (err, stack) => Center(child: Text("Error: $err")),
@@ -68,9 +68,9 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                           children: [
                             _buildFeaturesGrid(apartment),
                             const SizedBox(height: 30),
-                            const Text(
+                            Text(
                               "Description",
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kPrimaryColor),
+                              style: theme.textTheme.bodyMedium, // سيتحول تلقائياً من رمادي إلى أبيض
                             ),
                             const SizedBox(height: 10),
                             Text(
@@ -195,59 +195,32 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  Widget _buildStatusCard(ApartmentDetail apartment) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: kPrimaryColor.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: kPrimaryColor.withOpacity(0.1)),
+ Widget _buildStatusCard(ApartmentDetail apartment) {
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
+  return Container(
+    padding: const EdgeInsets.all(15),
+    decoration: BoxDecoration(
+      // في الداكن نستخدم لون الكارد، في الفاتح نستخدم لون خفيف من الأساسي
+      color: isDark ? theme.cardColor : kPrimaryColor.withOpacity(0.05),
+      borderRadius: BorderRadius.circular(15),
+      border: Border.all(color: theme.dividerColor),
+    ),
+    child: Row(
+      children: [
+        const Icon(Icons.verified_rounded, color: Colors.teal),
+        // باقي المحتوى...
+        Text(
+          "Verified Property",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: isDark ? Colors.white : kPrimaryColor,
+          ),
         ),
-        child: Row(
-          children: [
-            // أيقونة التحقق
-            const Icon(Icons.verified_rounded, color: Colors.teal, size: 28),
-            const SizedBox(width: 12),
-            
-            // عمود معلومات التحقق
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Verification Status", 
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text("Verified Property", 
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: kPrimaryColor)),
-                ],
-              ),
-            ),
-
-            // خط فاصل صغير عمودي لإعطاء جمالية
-            Container(
-              height: 30,
-              width:1,
-              color: Colors.grey.withOpacity(0.3),
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-            ),
-
-            // عمود سند الملكية
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Title Deed", 
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(apartment.titleDeed, // هنا يظهر "Green" أو نوع السند
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.teal)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+      ],
+    ),
+  );
+}
   Widget _buildFeaturesGrid(ApartmentDetail apartment) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -262,10 +235,12 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   }
 
   Widget _buildOwnerCard(ApartmentDetail apartment) {
+      final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+      color: isDark ? theme.cardColor : kPrimaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey[200]!),
       ),

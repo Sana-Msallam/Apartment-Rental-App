@@ -2,41 +2,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-final bookingProvider = StateNotifierProvider<BookingController, BookingState>((ref) {
-  return BookingController();
-});
-
+// 1. تعريف الـ State بشكل كامل
 class BookingState {
   final List<dynamic> currentBookings;
   final List<dynamic> cancelledBookings;
+  final List<dynamic> historyBookings;
   final bool isLoading;
 
   BookingState({
     this.currentBookings = const [],
     this.cancelledBookings = const [],
+    this.historyBookings = const [],
     this.isLoading = false,
   });
 
   BookingState copyWith({
     List<dynamic>? currentBookings,
     List<dynamic>? cancelledBookings,
+    List<dynamic>? historyBookings,
     bool? isLoading,
   }) {
     return BookingState(
       currentBookings: currentBookings ?? this.currentBookings,
       cancelledBookings: cancelledBookings ?? this.cancelledBookings,
+      historyBookings: historyBookings ?? this.historyBookings, // تم الإصلاح هنا 👈
       isLoading: isLoading ?? this.isLoading,
     );
   }
 }
 
+// 2. الكنترولر مع كافة التوابع
 class BookingController extends StateNotifier<BookingState> {
   BookingController() : super(BookingState());
 
   final BookingService _service = BookingService();
   final _storage = const FlutterSecureStorage();
 
- Future<void> fetchMyBookings() async {
+  // جلب الحجوزات
+  Future<void> fetchMyBookings() async {
     try {
       state = state.copyWith(isLoading: true);
       String? token = await _storage.read(key: 'jwt_token');
@@ -45,17 +48,24 @@ class BookingController extends StateNotifier<BookingState> {
         final dynamic response = await _service.getMyBookings(token);
 
         if (response != null && response is Map) {
-          final Map<String, dynamic> responseData = Map<String, dynamic>.from(response);
-          
-          final List<dynamic> bookingsList = responseData['data'] ?? [];
+          final List<dynamic> bookingsList = response['data'] ?? [];
 
           state = state.copyWith(
-            currentBookings: bookingsList.where((b) => b['status'] != 'cancelled').toList(),
-            cancelledBookings: bookingsList.where((b) => b['status'] == 'cancelled').toList(),
+            currentBookings: bookingsList
+                .where((b) =>
+                    b['status'].toString().toLowerCase() != 'cancelled' &&
+                    b['status'].toString().toLowerCase() != 'completed')
+                .toList(),
+            cancelledBookings: bookingsList
+                .where((b) => b['status'].toString().toLowerCase() == 'cancelled')
+                .toList(),
+            historyBookings: bookingsList
+                .where((b) => b['status'].toString().toLowerCase() == 'completed')
+                .toList(),
             isLoading: false,
           );
         } else {
-          state = state.copyWith(isLoading: false, currentBookings: [], cancelledBookings: []);
+          state = state.copyWith(isLoading: false);
         }
       } else {
         state = state.copyWith(isLoading: false);
@@ -65,31 +75,45 @@ class BookingController extends StateNotifier<BookingState> {
       state = state.copyWith(isLoading: false);
     }
   }
-  Future<bool> updateBookingDate(int bookingId, String start,String end,String token) async {
+
+  // تابع الإلغاء (Cancel Booking) - تم إعادته وإصلاحه 👈
+  Future<void> cancelBooking(int bookingId) async {
     try {
-    String? token = await _storage.read(key: 'jwt_token');
-    if (token == null) return false;
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null) return;
 
-    bool success = await _service.updateBookingDate(bookingId, start, end, token);
-    
-    if (success) {
-      await fetchMyBookings(); 
+      // استدعاء السيرفس (تأكدي أن الاسم في السيرفس cancelBookings)
+      final bool success = await _service.cancelBookings(bookingId, token);
+
+      if (success) {
+        print("✅ Booking $bookingId cancelled successfully");
+        await fetchMyBookings();
+      } else {
+        print(" Failed to cancel booking on server");
+      }
+    } catch (e) {
+      print(" Error in cancelBooking: $e");
     }
-    return success;
-  } catch (e) {
-    print("Update Controller Error: $e");
-    return false;
+  }
+
+  Future<bool> updateBooking(int bookingId, String start, String end) async {
+    try {
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null) return false;
+
+      final success = await _service.updateBookingDate(bookingId, start, end, token);
+      if (success) {
+        await fetchMyBookings();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Update Error: $e");
+      return false;
+    }
   }
 }
 
-  Future<bool> cancelBooking(int bookingId) async {
-    String? token = await _storage.read(key: 'jwt_token');
-    if (token == null) return false;
-    
-    bool success = await _service.cancelBookings(bookingId, token);
-    if (success) {
-      await fetchMyBookings();
-    }
-    return success;
-  }
-}
+final bookingProvider = StateNotifierProvider<BookingController, BookingState>((ref) {
+  return BookingController();
+});

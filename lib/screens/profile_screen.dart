@@ -1,7 +1,9 @@
 import 'package:apartment_rental_app/controller/ThemeNotifier_controller.dart';
 import 'package:apartment_rental_app/controller/profile_controller.dart';
 import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/screens/my_bookings_screen.dart';
+import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -12,25 +14,46 @@ const Color kPrimaryColor = Color(0xFF234F68);
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Center(
-          child: CircularProgressIndicator(color: Theme.of(context).primaryColor)),
-    );
-    try {
-      const storage = FlutterSecureStorage();
-      await storage.delete(key: 'jwt_token');
-      ref.invalidate(profileProvider);
-      if (!context.mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    } catch (e) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Logout error")));
+Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
+  try {
+    const storage = FlutterSecureStorage();
+    
+
+    String? token = await storage.read(key: 'jwt_token');
+
+
+    await storage.delete(key: 'jwt_token');
+    
+    ref.invalidate(profileProvider);
+
+
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()), 
+        (route) => false, 
+      );
+    }
+
+    if (token != null) {
+      ApiService().logout(token).then((success) {
+        debugPrint("Backend logout status: $success");
+      }).catchError((e) {
+        debugPrint("Backend logout background error: $e");
+      });
+    }
+
+  } catch (e) {
+    debugPrint("Logout Error: $e");
+    if (context.mounted) {
+       Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) =>  LoginPage()),
+        (route) => false,
+      );
     }
   }
+}
 
   void _showEditDialog(BuildContext context, UserModel user, bool isDark) {
     showDialog(
@@ -75,24 +98,9 @@ class ProfileScreen extends ConsumerWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-          if (isDark)
-            Positioned(
-              top: -100,
-              right: -50,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.primaryColor.withOpacity(0.15),
-                      blurRadius: 100,
-                    ),
-                  ],
-                ),
-              ),
-            ),
+       
+              
+            
 
           Column(
             children: [

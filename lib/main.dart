@@ -19,6 +19,8 @@ class Sakani extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+final theme = Theme.of(context);
+final isDark = theme.brightness == Brightness.dark;
     final currentThemeMode = ref.watch(themeProvider);
 
     const textStyleDisplay = TextStyle(
@@ -63,7 +65,7 @@ class Sakani extends ConsumerWidget {
         ),
 
         dividerTheme: DividerThemeData(
-          color: Colors.grey.withOpacity(0.3),
+          color: Colors.grey.withOpacity(0.1),
           thickness: 1,
         ),
 
@@ -102,14 +104,14 @@ class Sakani extends ConsumerWidget {
         ),
 
         dividerTheme: DividerThemeData(
-          color: const Color.fromARGB(255, 170, 170, 170).withOpacity(0.2),
+          color: const Color.fromARGB(255, 201, 200, 200).withOpacity(0.2),
           thickness: 1,
         ),
 
         textTheme: TextTheme(
           displayLarge: textStyleDisplay.copyWith(color: Colors.white),
           bodyLarge: textStyleBodyLarge.copyWith(color: Colors.white),
-          bodyMedium: textStyleBodyMedium.copyWith(color: Colors.white70),
+          bodyMedium: textStyleBodyMedium.copyWith(color: Colors.white),
         ),
 
         elevatedButtonTheme: ElevatedButtonThemeData(
@@ -124,7 +126,10 @@ class Sakani extends ConsumerWidget {
       ),
 
       themeMode: currentThemeMode,
-      home: StartPage(),
-    );
-  }
+      home: StartPage(
+      ),
+      );
+          }
 }
+    
+

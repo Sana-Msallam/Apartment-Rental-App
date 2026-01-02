@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class BookingService {
-  final String _baseUrl = 'http://192.168.0.126:8000/api';
+  final String _baseUrl = 'http://192.168.1.105:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -21,15 +21,13 @@ class BookingService {
     required String token,
   }) async {
     try {
-
-
       final response = await _dio.get(
         '$_baseUrl/booking/calculate',
         queryParameters: {
           'apartment_id': apartmentId,
           'start_date': startDate,
           'end_date': endDate,
-          'status': 'pending', 
+          'status': 'pending',
         },
         options: Options(
           headers: {
@@ -82,55 +80,91 @@ class BookingService {
       return false;
     }
   }
-Future<dynamic> getMyBookings(String token) async {
+
+  Future<dynamic> getMyBookings(String token) async {
+    try {
+      final response = await _dio.get(
+        '$_baseUrl/booking',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer ${token.trim()}',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data;
+      }
+    } catch (e) {
+      print("Error fetching bookings: $e");
+    }
+    return null;
+  }
+
+Future<bool> cancelBookings(int bookingId, String token) async {
   try {
-    final response = await _dio.get(
-      '$_baseUrl/booking',
+    final response = await _dio.put(
+      '$_baseUrl/booking/$bookingId/cancel',
       options: Options(
         headers: {
           'Authorization': 'Bearer ${token.trim()}',
-          'Accept': 'application/json',
+          'Accept': 'application/json', 
         },
       ),
     );
-
-    if (response.statusCode == 200) {
-      return response.data; 
-    }
-  } catch (e) {
-    print("Error fetching bookings: $e");
+    
+    print("Cancel Status Code: ${response.statusCode}");
+    return response.statusCode == 200 || response.statusCode == 201;
+  } on DioException catch (e) {
+    print(" خطأ عند الإلغاء: ${e.response?.statusCode} - ${e.response?.data}");
+    return false;
   }
-  return null;
 }
-  Future<bool> cancelBookings(int bookingId, String token) async {
+
+  Future<bool> updateBookingDate(
+    int bookingId,
+    String start,
+    String end,
+    String token,
+  ) async {
     try {
       final response = await _dio.put(
-'$_baseUrl/booking/$bookingId/cancel',
+        '$_baseUrl/booking/$bookingId/update',
+        data: {'start_date': start, 'end_date': end},
+
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      return response.statusCode == 200 || response.statusCode == 201;
+      print("Server Response Status: ${response.statusCode}");
+      return response.statusCode == 200;
     } catch (e) {
-      print("$e");
+      return false;
     }
-    return false;
   }
-
-Future <bool> updateBookingDate(int bookingId, String start,String end,String token)async{
-  try{
-    final response=await _dio.put(
-
-    '$_baseUrl/booking/$bookingId/update',
-      data: {'start_date': start, 'end_date': end},
-      
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );print("Server Response Status: ${response.statusCode}");
-    return response.statusCode == 200;
-  } catch (e) { 
+Future<bool> submitBookingReview({
+  required int bookingId,
+  required int apartmentId,
+  required int stars,
+  required String token,
+}) async {
+  try {
+    final response = await _dio.post(
+      '$_baseUrl/review', 
+      data: {
+        'booking_id': bookingId,
+        'apartment_id': apartmentId,
+        'stars': stars, 
+      },
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+    return response.statusCode == 201 || response.statusCode == 200;
+  } on DioException catch (e) {
+    print(" خطأ السيرفر: ${e.response?.data}"); 
     return false;
-  }
   }
 }
-
-
-
-
+}
