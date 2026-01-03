@@ -70,7 +70,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF020617),
+       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -84,6 +84,11 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
               fit: BoxFit.cover,
             ),
           ),
+Container(
+  color: Theme.of(context).brightness == Brightness.dark 
+      ? Colors.black.withOpacity(0.6) 
+      : Colors.transparent,
+),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -104,14 +109,14 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
                     ),
                     const SizedBox(height: 25),
 
-                    buildLabel("Apartment Photos"),
+                    buildLabel(context,"Apartment Photos"),
                     const SizedBox(height: 8),
                     _buildPhotoUploadWidget(),
                     if (_selectedImages.isNotEmpty) _buildImagePreview(),
 
                     const SizedBox(height: 20),
 
-                    buildLabel("Price (\$)"),
+                    buildLabel(context,"Price (\$)"),
                     CustomTextFiled(
                       controller: _priceController,
                       hintText: "e.g. 1200",
@@ -127,7 +132,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildLabel("Rooms"),
+                              buildLabel(context,"Rooms"),
                               CustomTextFiled(
                                 controller: _roomsController,
                                 hintText: "3",
@@ -141,7 +146,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildLabel("Bathrooms"),
+                              buildLabel(context,"Bathrooms"),
                               CustomTextFiled(
                                 controller: _bathroomsController,
                                 hintText: "2",
@@ -155,7 +160,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
 
                     const SizedBox(height: 15),
 
-                    buildLabel("region"),
+                    buildLabel(context,"region"),
                     CustomDropdown(
                       hint: "Select",
                       value: _selectedgovernorates,
@@ -167,7 +172,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
 
                     const SizedBox(height: 15),
 
-                    buildLabel("City"),
+                  buildLabel(context,"City"),
                     CustomTextFiled(
                       controller: _cityController,
                       hintText: "e.g. Al-Midan",
@@ -176,7 +181,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
 
                     const SizedBox(height: 15),
                     
-                    buildLabel("builtYear"),
+                    buildLabel(context,"builtYear"),
                     CustomTextFiled(
                       controller: _builtController,
                       hintText: "2000",
@@ -185,7 +190,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
 
                     const SizedBox(height: 15),
 
-                    buildLabel("Title Deed Type"),
+                  buildLabel(context,"Title Deed Type"),
                     CustomDropdown(
                       hint: "Select Title Deed",
                       value: _selectedTitleDeed,
@@ -197,7 +202,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
 
                     const SizedBox(height: 15),
 
-                    buildLabel("Description"),
+                    buildLabel(context,"Description"),
                     CustomTextFiled(
                       controller: _descriptionController,
                       hintText: "Describe your apartment...",
@@ -232,7 +237,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+color: Theme.of(context).cardColor, // يأخذ لون الثيم الموحد
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: hasImages ? kPrimaryColor : Colors.grey.shade400,
@@ -293,7 +298,7 @@ class _AddApartmentPageState extends State<AddApartmentPage> {
                     setState(() {
                       _selectedImages.removeAt(
                         index,
-                      ); // حذف الصورة من القائمة حسب رقمها (index)
+                      );
                     });
                   },
                   child: const CircleAvatar(

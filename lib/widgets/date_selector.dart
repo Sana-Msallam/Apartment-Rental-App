@@ -11,19 +11,24 @@ final String vfont = 'vfo-Regular';
 class DateSelector extends StatelessWidget {
   DateSelector({required this.date, this.title, required this.onTap});
 
-  final String? title; // عنوان الحقل (تاريخ البدء/الانتهاء)
-
-  final DateTime? date; // قيمة التاريخ الحالي (إذا كانت موجودة)
-  final VoidCallback onTap; // الدالة التي يتم تشغيلها عند النقر (لفتح التقويم)
+  final String? title; 
+  final DateTime? date; 
+  final VoidCallback onTap; 
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
+      color: isDark ? const Color(0xFF1E1E1E) : Colors.white, 
+      
       elevation: 4,
       shape: RoundedRectangleBorder(
-        
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: vBorderColor.withOpacity(0.5), width: 1),
+        side: BorderSide(
+          color: isDark ? Colors.white24 : vBorderColor.withOpacity(0.5), 
+          width: 1,
+        ),
       ),
       margin: EdgeInsets.zero,
       child: InkWell(
@@ -41,7 +46,7 @@ class DateSelector extends StatelessWidget {
                     title!,
                     style: TextStyle(
                       fontSize: 16,
-                      color: kSecondaryColor,
+                      color: isDark ? Colors.white70 : kSecondaryColor,
                       fontFamily: vfont,
                       fontWeight: FontWeight.w600,
                     ),
@@ -53,13 +58,18 @@ class DateSelector extends StatelessWidget {
                         : DateFormat('EEEE, MMM d, yyyy').format(date!),
                     style: TextStyle(
                       fontSize: 18,
-                      // fontWeight: FontWeight.bold,
-                      color: date == null ? Colors.grey : Colors.black,
+                      color: date == null 
+                          ? Colors.grey 
+                          : (isDark ? Colors.white : Colors.black),
                     ),
                   ),
                 ],
               ),
-              Icon(Icons.calendar_today, color: kPrimaryColor, size: 30),
+              Icon(
+                Icons.calendar_today, 
+                color: isDark ? Colors.white : kPrimaryColor, 
+                size: 30
+              ),
             ],
           ),
         ),

@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // import 'package:apartment_rental_app/screens/home_screen.dart';
 // ولأغراض التجربة نستخدم شاشة تفاصيل الشقة
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
-import 'package:apartment_rental_app/models/apartment_model.dart';
+import 'package:apartment_rental_app/models/apartment_details_model.dart';
 
 import '../main.dart';
 
@@ -18,95 +18,99 @@ const Color kGradientColorEnd = Color(0xCC234F68);
 class StartPage extends StatelessWidget {
   StartPage({super.key});
 
-  final storage = const FlutterSecureStorage(); // تهيئة خدمة التخزين هنا
-
-  Color kPrimaryColor = Color(0xFF234F68);
-  final String vfont = 'Lato-Regular';
+  final storage = const FlutterSecureStorage();
 
   Future<void> _handleStartButton(BuildContext context) async {
     String? token = await storage.read(key: 'jwt_token');
-
-    if (token != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+    if (context.mounted) {
+      if (token != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    const Color myBlue = Color(0xFF234F68);
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1A1A1A) : myBlue,
       body: Stack(
         children: [
-          SizedBox(
-            width: size.width,
-            height: size.height,
-            child: Image.asset('assets/images/start.png', fit: BoxFit.cover),
+
+          Positioned.fill(
+            child: Opacity(
+              opacity: isDark ? 0.5 : 0.9,
+              child: Image.asset('assets/images/start.png', fit: BoxFit.cover),
+            ),
           ),
-          Container(
-            width: size.width,
-            height: size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  kGradientColorStart,
-                  kGradientColorMid,
-                  kGradientColorEnd,
-                ],
-                stops: [0.0, 0.6, 1.0],
+
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    isDark ? Colors.transparent : myBlue.withOpacity(0.4),
+                    Colors.transparent,
+                    isDark ? Colors.black.withOpacity(0.5) : myBlue,
+                  ],
+                  stops: const [0.1, 0.4, 1.0],
+                ),
               ),
             ),
           ),
-          Positioned(
-            bottom: 80,
-            left: 20,
-            right: 20,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 40.0,
-                vertical: 60.0,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(
-                    child: Text(
-                      'Sakani',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 50,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 4,
-                        fontFamily: 'Lato-BoldItalic',
-                      ),
-                    ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const Spacer(flex: 5),
+                const Text(
+                  'Sakani',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                    fontFamily: 'Lato-BoldItalic',
                   ),
-
-                  SizedBox(height: 90),
-
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 250),
-                    child: CustomButton(
-                      textButton: 'Let\'s started',
-                      kPrimaryColor: Color(0xFFFFFFFF),
-                      vTextColor: Color(0xFF234F68),
-                      width: double.infinity,
-
-                      onTap: () => _handleStartButton(context),
-                    ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Find your perfect home easily",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
-              ),
+                ),
+                const Spacer(flex: 1),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 40,
+                    vertical: 40,
+                  ),
+                  child: CustomButton(
+                    textButton: 'Get Started',
+                    kPrimaryColor: isDark ? Colors.white : myBlue,
+                    vTextColor: isDark ? const Color(0xFF424242) : Colors.white,
+                    width: double.infinity,
+                    onTap: () => _handleStartButton(context),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
         ],
