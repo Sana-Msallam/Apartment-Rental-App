@@ -1,6 +1,4 @@
-// import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:convert';
-
 import 'package:apartment_rental_app/models/user_model.dart' show UserModel;
 import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
@@ -42,9 +40,11 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   @override
   Widget build(BuildContext context) {
     final apartmentAsync = ref.watch(apartmentDetailProvider(widget.apartmentId));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const CustomAppBar(title: "Apartment Details"),
       body: apartmentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: kPrimaryColor)),
@@ -63,7 +63,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                       const SizedBox(height: 25),
                       _buildPriceHeader(apartment),
                       const SizedBox(height: 20),
-                      _buildStatusCard(apartment),
+                      _buildStatusCard(apartment, isDark, theme), // دمجنا الثيم هنا
                       const SizedBox(height: 25),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -72,14 +72,21 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                           children: [
                             _buildFeaturesGrid(apartment),
                             const SizedBox(height: 30),
-                            const Text(
+                            Text(
                               "Description",
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kPrimaryColor),
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               apartment.description,
-                              style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.5),
+                              style: TextStyle(
+                                fontSize: 15, 
+                                color: isDark ? Colors.grey[400] : Colors.grey[700], 
+                                height: 1.5
+                              ),
                             ),
                             const SizedBox(height: 30),
                             const Divider(),
@@ -89,7 +96,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kPrimaryColor),
                             ),
                             const SizedBox(height: 15),
-                            _buildOwnerCard(apartment),
+                            _buildOwnerCard(apartment, isDark, theme),
                             const SizedBox(height: 150),
                           ],
                         ),
@@ -110,17 +117,16 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                     const storage = FlutterSecureStorage();
                     String? userData = await storage.read(key: 'jwt_token');
                     if (userData != null) {
-                     final user = UserModel.fromJson(jsonDecode(userData), token: userData);
-                    Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BookingApp(
-                                   user:user ,
-                                    apartmentId: apartment.id,
-                         ),
-                      
-                       ),
-                    );
+                      // منطق الانتقال لشاشة الحجز
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingApp(
+                            apartmentId: apartment.id,
+                            pricePerNight: apartment.price,
+                          ),
+                        ),
+                      );
                     }
                   },
                 ),
@@ -131,6 +137,9 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
       ),
     );
   }
+
+  // --- Widgets المقسمة لترتيب الكود ---
+
   Widget _buildImageSlider(ApartmentDetail apartment) {
     return Column(
       children: [
@@ -183,72 +192,57 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("${apartment.price} \$", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: kPrimaryColor)),
+          Text("${apartment.price} \$", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: kPrimaryColor)),
           Row(
-                      children: [
-                        const Icon(Icons.location_on,color: Colors.grey, size: 18),
-                        const SizedBox(width: 4),
-                       
-                           Text(
-                          '${apartment.governorate}, ${apartment.city}',
-                          style:AppConstants.titleText,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        
-                      ],
-                    ),
-           
+            children: [
+              const Icon(Icons.location_on, color: Colors.grey, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                '${apartment.governorate}, ${apartment.city}',
+                style: AppConstants.titleText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
- Widget _buildStatusCard(ApartmentDetail apartment) {
+  Widget _buildStatusCard(ApartmentDetail apartment, bool isDark, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Container(
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: kPrimaryColor.withOpacity(0.05),
+          color: isDark ? theme.cardColor : kPrimaryColor.withOpacity(0.05),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: kPrimaryColor.withOpacity(0.1)),
+          border: Border.all(color: isDark ? Colors.grey[800]! : kPrimaryColor.withOpacity(0.1)),
         ),
         child: Row(
           children: [
-            // أيقونة التحقق
             const Icon(Icons.verified_rounded, color: Colors.teal, size: 28),
             const SizedBox(width: 12),
-            
-            // عمود معلومات التحقق
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Verification Status", 
-                      style: TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text("Status", style: TextStyle(fontSize: 12, color: Colors.grey)),
                   Text("Verified Property", 
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: kPrimaryColor)),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : kPrimaryColor)),
                 ],
               ),
             ),
-
-            // خط فاصل صغير عمودي لإعطاء جمالية
             Container(
-              height: 30,
-              width:1,
-              color: Colors.grey.withOpacity(0.3),
+              height: 30, width: 1, color: Colors.grey.withOpacity(0.3),
               margin: const EdgeInsets.symmetric(horizontal: 10),
             ),
-
-            // عمود سند الملكية
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Title Deed", 
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(apartment.titleDeed, // هنا يظهر "Green" أو نوع السند
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.teal)),
+                const Text("Title Deed", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                Text(apartment.titleDeed, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.teal)),
               ],
             ),
           ],
@@ -258,25 +252,27 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   }
 
   Widget _buildFeaturesGrid(ApartmentDetail apartment) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _featureIcon(Icons.king_bed, "${apartment.rooms} Rooms"),
-        _featureIcon(Icons.bathtub, "${apartment.bathrooms} Baths"),
-        _featureIcon(Icons.square_foot, "${apartment.space} m²"),
-        _featureIcon(Icons.layers, "Floor ${apartment.floor}"),
-        _featureIcon(Icons.calendar_month, "Built in${apartment.builtDate.split('-')[0]}")
-      ],
-    );
-  }
+  return Wrap(
+    spacing: 20, // المسافة الأفقية بين العناصر
+    runSpacing: 15, // المسافة الرأسية في حال نزل لسطر جديد
+    alignment: WrapAlignment.spaceBetween,
+    children: [
+      _featureIcon(Icons.king_bed, "${apartment.rooms} Rooms"),
+      _featureIcon(Icons.bathtub, "${apartment.bathrooms} Baths"),
+      _featureIcon(Icons.square_foot, "${apartment.space} m²"),
+      _featureIcon(Icons.layers, "Floor ${apartment.floor}"),
+      _featureIcon(Icons.calendar_month, "Built: ${apartment.builtDate.split('-')[0]}"),
+    ],
+  );
+}
 
-  Widget _buildOwnerCard(ApartmentDetail apartment) {
+  Widget _buildOwnerCard(ApartmentDetail apartment, bool isDark, ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: isDark ? theme.cardColor : kPrimaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[200]!),
       ),
       child: ListTile(
         contentPadding: EdgeInsets.zero,
@@ -285,8 +281,9 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
           backgroundColor: kPrimaryColor.withOpacity(0.1),
           child: const Icon(Icons.person, color: kPrimaryColor, size: 30),
         ),
-        title: Text("${apartment.first_name} ${apartment.last_name}", style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text("Contact: ${apartment.owner_phone}"),
+        title: Text("${apartment.first_name} ${apartment.last_name}", 
+          style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
+        subtitle: Text("Contact: ${apartment.owner_phone}", style: const TextStyle(color: Colors.grey)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -304,7 +301,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: kPrimaryColor.withOpacity(0.05), shape: BoxShape.circle),
+          decoration: BoxDecoration(color: kPrimaryColor.withOpacity(0.08), shape: BoxShape.circle),
           child: Icon(icon, color: kPrimaryColor, size: 22),
         ),
         const SizedBox(height: 6),

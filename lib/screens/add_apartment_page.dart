@@ -87,7 +87,7 @@ String? _selectedCity; // بدلاً من _cityController
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF020617),
+       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -101,6 +101,11 @@ String? _selectedCity; // بدلاً من _cityController
               fit: BoxFit.cover,
             ),
           ),
+Container(
+  color: Theme.of(context).brightness == Brightness.dark 
+      ? Colors.black.withOpacity(0.6) 
+      : Colors.transparent,
+),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -123,14 +128,14 @@ String? _selectedCity; // بدلاً من _cityController
                     ),
                     const SizedBox(height: 25),
 
-                    buildLabel("Apartment Photos"),
+                    buildLabel(context,"Apartment Photos"),
                     const SizedBox(height: 8),
                     _buildPhotoUploadWidget(),
                     if (_selectedImages.isNotEmpty) _buildImagePreview(),
 
                     const SizedBox(height: 20),
 
-                    buildLabel("Price (\$)"),
+                    buildLabel(context,"Price (\$)"),
                     CustomTextFiled(
                       controller: _priceController,
                       hintText: " 1200",
@@ -152,7 +157,7 @@ String? _selectedCity; // بدلاً من _cityController
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildLabel("Rooms"),
+                              buildLabel(context,"Rooms"),
                               CustomTextFiled(
                                 controller: _roomsController,
                                 hintText: "3",
@@ -172,7 +177,7 @@ String? _selectedCity; // بدلاً من _cityController
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildLabel("Bathrooms"),
+                              buildLabel(context,"Bathrooms"),
                               CustomTextFiled(
                                 controller: _bathroomsController,
                                 hintText: "2",
@@ -199,7 +204,7 @@ Row(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildLabel("Space (m²)"),
+          buildLabel(context,"Space (m²)"),
           CustomTextFiled(
             controller: _spaceController, 
             hintText: "120",
@@ -221,7 +226,7 @@ Row(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildLabel("Floor"),
+          buildLabel(context,"Floor"),
           CustomTextFiled(
             controller: _floorController, 
             hintText: "2",
@@ -243,7 +248,7 @@ Row(
 // ... الآن يكمل الكود لـ buildLabel("governorate")
 
                     const SizedBox(height: 15),
-                    buildLabel("Governorate"),
+                    buildLabel(context,"Governorate"),
                     CustomDropdown(
                       hint: "Select Governorate",
                       value: _selectedgovernorates,
@@ -260,7 +265,7 @@ Row(
 
                     const SizedBox(height: 15),
 
-                    buildLabel("City"),
+                    buildLabel(context,"City"),
                     CustomDropdown(
                      hint: _selectedgovernorates == null ? "Select Governorate First": "Select City",
                      value: _selectedCity,
@@ -275,7 +280,7 @@ Row(
 
                     const SizedBox(height: 15),
                     
-                    buildLabel("builtYear"),
+                    buildLabel(context,"builtYear"),
                     CustomTextFiled(
                       controller: _builtController,
                       hintText: "2000",
@@ -286,7 +291,7 @@ Row(
 
                     const SizedBox(height: 15),
 
-                    buildLabel("Title Deed Type"),
+                  buildLabel(context,"Title Deed Type"),
                     CustomDropdown(
                       hint: "Select Title Deed",
                       value: _selectedTitleDeed,
@@ -299,7 +304,7 @@ Row(
 
                     const SizedBox(height: 15),
 
-                    buildLabel("Description"),
+                    buildLabel(context,"Description"),
                     CustomTextFiled(
                       controller: _descriptionController,
                       hintText: "Describe your apartment...",
@@ -342,7 +347,7 @@ Row(
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+color: Theme.of(context).cardColor, // يأخذ لون الثيم الموحد
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: hasImages ? kPrimaryColor : Colors.grey.shade400,
@@ -403,7 +408,7 @@ Row(
                     setState(() {
                       _selectedImages.removeAt(
                         index,
-                      ); // حذف الصورة من القائمة حسب رقمها (index)
+                      );
                     });
                   },
                   child: const CircleAvatar(

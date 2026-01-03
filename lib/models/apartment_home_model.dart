@@ -4,6 +4,7 @@ class Apartment{
   final String governorate;
   final String city;
   final int space;
+  final int ?averageRating; 
   final String imagePath;
 
 
@@ -14,21 +15,27 @@ class Apartment{
     required this.city,
     required this.space,
     required this.imagePath,
+     this.averageRating,
 });
-  factory Apartment.fromJson(Map<String,dynamic> json){
-    String rawPath = json['main_image']['path']?? '';
-    String correctedPath = rawPath.replaceAll('localhost', '10.0.2.2');
-    // String localAsset = "assets/images/apartment_default.jpg"; 
+
+  factory Apartment.fromJson(Map<String, dynamic> json) {
+    String rawPath = json['main_image'] != null ? json['main_image']['path'] : '';
     
-    
-    // String  localAsset = "assets/images/${rawPath.split('/').last}";
+    String baseUrl = "http://192.168.1.105:8000"; 
+    String correctedPath = rawPath.startsWith('http') 
+        ? rawPath.replaceAll('localhost', '192.168.1.105') 
+        : "$baseUrl${rawPath.startsWith('/') ? '' : '/'}$rawPath";
 
     return Apartment(
         id: json['id'],
         price:json['price'],
         governorate:(json['governorate'] as String).capitalize(),
         city:(json['city'] as String).capitalize(),
-        space:json['space'] ,
+averageRating: json['average_rating'] != null 
+        ? (json['average_rating'] as num).toInt() 
+        : 0,
+
+     space:json['space'] ,
         imagePath: correctedPath,
     );
   }

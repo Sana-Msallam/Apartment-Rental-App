@@ -33,9 +33,7 @@ class ApiService {
         print(' code ${response.statusCode}');
         return UserModel.fromJson(userData, token: token);
       }
-
-    }
-    on DioException catch (e) {
+    } on DioException catch (e) {
       _handleDioError(e);
       return null;
     } catch (e) {
@@ -72,15 +70,13 @@ class ApiService {
         'email': email,
       });
 
-
-
       Response response = await _dio.post(
         '$_baseUrl/signUp',
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
 
-     print(' ${response.statusCode}');
+      print(' ${response.statusCode}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         final userData =
             response.data['user'] ?? response.data['data'] ?? response.data;
@@ -99,71 +95,42 @@ class ApiService {
     return null;
   }
 
+// أضف هذا التابع داخل كلاس ApiService في ملف api_service.dart
+
+Future<bool> logout(String token) async {
+  try {
+    final response = await _dio.post(
+      '$_baseUrl/logout',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      print("Logout successful from Backend");
+      return true;
+    }
+    return false;
+  } on DioException catch (e) {
+    print("Logout Error: ${e.response?.data}");
+    return false;
+  } catch (e) {
+    print("Logout Unexpected Error: $e");
+    return false;
+  }
+}
+
+
   void _handleDioError(DioException e) {
     print("Server Response Error: ${e.response?.data}");
     if (e.response != null) {
-
       print("Error:${e.response?.data}");
     } else {
       print(" ${e.message}");
     }
     return null;
-  }
-
-  Future<double?> calculatePrice({
-    required int apartmentId,
-    required String startDate,
-    required String endDate,
-    
-  }) async {
-    try {
-      final response = await _dio.get(
-        '$_baseUrl/api/some_endpoint',
-        data: {
-          'apartment_id': apartmentId,
-          'start_date': startDate,
-          'end_date': endDate,
-        },
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final responseData = response.data;
-        double price = responseData['total_price']?.toDouble() ?? 0.0;
-        return price;
-      }
-    } catch (e) {
-      print('error calculate price:$e');
-    }
-    return null;
-  }
-
-   Future<bool> confirmBooking({
-    required int apartmentId,
-    required String startDate,
-    required String endDate,
-    required double totalPrice,
-    required int userId,
-  }) async {
-    try {
-      final response = await _dio.post(
-        '$_baseUrl/api/BookApartment',
-        data: {
-          'apartment_id': apartmentId,
-          'start_date': startDate,
-          'end_date': endDate,
-          'total_price': totalPrice,
-          'user_id': userId,
-          'status': 'pending',
-        },
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-      return response.statusCode == 200 || response.statusCode == 201;
-       } else {
-        print('Failed to confirm booking. Status code: ${response.statusCode}');
-      return false;
-      }
-    } catch (e) {
-      print('Error confirming booking: $e');
-      return false;
-    }
   }
 }

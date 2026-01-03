@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
+import 'package:apartment_rental_app/controller/profile_controller.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
-import 'package:apartment_rental_app/screens/log_in.dart'; // تأكدي من المسار الصحيح
+import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,7 +13,7 @@ import 'package:apartment_rental_app/widgets/photo_upload.dart';
 const Color kPrimaryColor = Color(0xFF234F68);
 const Color vBorderColor = Color(0xFFC0C0C0);
 
-class UploadPhotosScreen extends StatefulWidget {
+class UploadPhotosScreen extends ConsumerStatefulWidget {
   final String firstName, lastName, phone, email, dateOfBirth, password;
 
   const UploadPhotosScreen({
@@ -25,20 +27,15 @@ class UploadPhotosScreen extends StatefulWidget {
   });
 
   @override
-  State<UploadPhotosScreen> createState() => _UploadPhotosScreenState();
+  // تأكدي أن هذه هي ConsumerState وليس State فقط
+  ConsumerState<UploadPhotosScreen> createState() => _UploadPhotosScreenState();
 }
 
-class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
+class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
   final ApiService _apiService = ApiService();
   File? personalImage;
   File? idImage;
   bool _isLoading = false;
-
-  void _updateProgress(int sent, int total) {
-    if (total != 0) {
-      setState(() {});
-    }
-  }
 
   void _handleRegister() async {
     if (personalImage == null || idImage == null) {
@@ -67,6 +64,7 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
 
       if (response != null) {
         if (!mounted) return;
+        ref.invalidate(profileProvider);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Registration Successful!'),
@@ -81,8 +79,9 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
             );
           }
         });
-      } else
+      } else {
         _showError('Registration failed. Please try again.');
+      }
     } catch (e) {
       _showError('Unexpected error occurred: $e');
     } finally {
@@ -128,8 +127,10 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
   }
 
   void showImageSourceOptions({required bool isPersonalPhoto}) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
+      backgroundColor: theme.cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -137,8 +138,11 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library, color: kPrimaryColor),
-              title: const Text('Choose from Gallery'),
+              leading: Icon(Icons.photo_library, color: theme.primaryColor),
+              title: Text(
+                'Choose from Gallery',
+                style: theme.textTheme.bodyLarge,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(
@@ -148,8 +152,8 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: kPrimaryColor),
-              title: const Text('Take a Photo'),
+              leading: Icon(Icons.camera_alt, color: theme.primaryColor),
+              title: Text('Take a Photo', style: theme.textTheme.bodyLarge),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(
@@ -164,116 +168,115 @@ class _UploadPhotosScreenState extends State<UploadPhotosScreen> {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final dynamicColor = isDark ? Colors.white : theme.primaryColor;
+
     return Scaffold(
-      // 1. هذا السطر هو الأهم لمنع اهتزاز أو تحرك الخلفية عند ظهور الكيبورد
-      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
-      backgroundColor: const Color(0xFF020617),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      extendBody: true,
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: Image(
-              image: AssetImage('assets/images/start.png'),
-              fit: BoxFit.cover,
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/start.png',
+              fit: BoxFit.cover, 
             ),
           ),
 
           Positioned.fill(
+            child: Container(color: Colors.black.withOpacity(0.4)),
+          ),
+
+          Positioned.fill(
             child: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
+              child: SingleChildScrollView(
+
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 20,
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
-                  ),
-                  child: Center(
-                    child: GlassContainer(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 40,
-                      ),
-                     
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.verified_user_outlined,
-                              size: 60,
-                              color:
-                                  kPrimaryColor,
-                            ),
-                            const SizedBox(height: 15),
-                            const Text(
-                              "Upload Documents",
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: kPrimaryColor,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Please upload your photos for verification.",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 44, 44, 44),
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-
-                            PhotoUpload(
-                              hintText: 'Personal Photo',
-                              icon: Icons.person_pin,
-                              imageFile: personalImage,
-                              onTap: () =>
-                                  showImageSourceOptions(isPersonalPhoto: true),
-                              primaryColor: kPrimaryColor,
-                              borderColor: Colors.white10,
-                            ),
-                            const SizedBox(height: 20),
-
-                            PhotoUpload(
-                              hintText: 'ID Photo',
-                              icon: Icons.credit_card,
-                              imageFile: idImage,
-                              onTap: () => showImageSourceOptions(
-                                isPersonalPhoto: false,
-                              ),
-                              primaryColor: kPrimaryColor,
-                              borderColor: Colors.white10,
-                            ),
-
-                            const SizedBox(height: 40),
-
-                            _isLoading
-                                ? const CircularProgressIndicator(
-                                    color:kPrimaryColor,
-                                  )
-                                : CustomButton(
-                                    textButton: 'Finish Registration',
-                                    onTap: _handleRegister,
-                                    width: double.infinity,
-                                    vTextColor: Colors.white,
-                                    kPrimaryColor: kPrimaryColor,
-                                  ),
-                          ],
+                child: Center(
+                  child: GlassContainer(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 40,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.verified_user_outlined,
+                          size: 60,
+                          color: dynamicColor,
                         ),
-                      ),
+                        const SizedBox(height: 15),
+                        Text(
+                          "Upload Documents",
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: dynamicColor,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "Please upload your photos for verification.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        PhotoUpload(
+                          hintText: 'Personal Photo',
+                          icon: Icons.person_pin,
+                          imageFile: personalImage,
+                          onTap: () =>
+                              showImageSourceOptions(isPersonalPhoto: true),
+                          primaryColor: theme.primaryColor,
+                          borderColor: isDark
+                              ? Colors.white24
+                              : Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 20),
+                        PhotoUpload(
+                          hintText: 'ID Photo',
+                          icon: Icons.credit_card,
+                          imageFile: idImage,
+                          onTap: () =>
+                              showImageSourceOptions(isPersonalPhoto: false),
+                          primaryColor: theme.primaryColor,
+                          borderColor: isDark
+                              ? Colors.white24
+                              : Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 40),
+                        _isLoading
+                            ? CircularProgressIndicator(
+                                color: theme.primaryColor,
+                              )
+                            : CustomButton(
+                                textButton: 'Finish Registration',
+                                onTap: _handleRegister,
+                                width: double.infinity,
+                                kPrimaryColor: isDark
+                                    ? Colors.white
+                                    : theme.primaryColor,
+                                vTextColor: isDark
+                                    ? Colors.black
+                                    : Colors.white,
+                              ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-          
+          ),
         ],
       ),
     );

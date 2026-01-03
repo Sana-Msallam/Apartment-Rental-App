@@ -71,9 +71,10 @@ Future<List<Apartment>> fetchFilteredApartments({
     print("Final URL: ${_apiClient.dio.options.baseUrl}filter?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}");
 
     final response = await _apiClient.dio.get(
-      'apartment/filter',
-      queryParameters: queryParams,
-    );
+        'apartment/filter', 
+        queryParameters: queryParams,
+      );
+     print("Data from API: ${response.data}");
     
     print("Data from API: ${response.data}");
 
@@ -81,17 +82,13 @@ Future<List<Apartment>> fetchFilteredApartments({
       final rawData = response.data['data'];
       List<Apartment> apartments = [];
 
-      // معالجة ذكية لنوع البيانات القادم من السيرفر
       if (rawData is List) {
-        // إذا كان السيرفر أرسل قائمة عادية [...]
         apartments = rawData.map((e) => Apartment.fromJson(e)).toList();
       } else if (rawData is Map) {
-        // إذا كان السيرفر أرسل كائن {0: {}, 1: {}}
-        // نقوم باستخراج القيم (values) فقط وتحويلها لقائمة
         apartments = rawData.values.map((e) => Apartment.fromJson(e)).toList();
       }
       
-      return apartments; // إرجاع القائمة النهائية للواجهة
+      return apartments; 
       
     } else {
       throw Exception('Failed to filter apartments');

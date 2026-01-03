@@ -1,25 +1,27 @@
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:apartment_rental_app/main.dart';
-import 'package:apartment_rental_app/models/user_model.dart';
-import 'package:apartment_rental_app/screens/add_apartment_page.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
+import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/apartmentCard.dart';
-// import '../widgets/property_card.dart';
 import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/add_apartment_page.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: _buildCustomAppBar(),
+ backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: _buildCustomAppBar(context, isDark),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
@@ -31,6 +33,7 @@ class HomeScreen extends ConsumerWidget {
               style: GoogleFonts.lato(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
             const SizedBox(height: 5),
@@ -42,7 +45,8 @@ class HomeScreen extends ConsumerWidget {
                   return apartmentsAsyncValue.when(
                     data: (apartments) {
                       if (apartments.isEmpty) {
-                        return const Center(child: Text('No apartments found.'));
+                        return Center(child: Text('No apartments found.',
+                        style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),));
                       }
                       
                       return GridView.builder(
@@ -73,6 +77,7 @@ class HomeScreen extends ConsumerWidget {
                               governorate: apartment.governorate,
                               city: apartment.city,
                               space: apartment.space,
+                              average_rating: apartment.averageRating,
                             ),
                           );
                         },
@@ -80,9 +85,8 @@ class HomeScreen extends ConsumerWidget {
                     },
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => Center(
-                      child: Text('Something went wrong: ${error.toString()}'),
+                      child: Text('Something went wrong: ${error.toString()}',style: TextStyle(color: isDark ? Colors.red[200] : Colors.red),),
                     ),
-                    //    ),
                   );
                 },
               ), 
@@ -107,13 +111,12 @@ class HomeScreen extends ConsumerWidget {
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }
-  PreferredSizeWidget _buildCustomAppBar() {
-    return PreferredSize(
+PreferredSizeWidget _buildCustomAppBar(BuildContext context, bool isDark) {
+      return PreferredSize(
       preferredSize: const Size.fromHeight(100.0),
       child: Padding(
         padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
-        child: Row(
-          children: [
+        child: Row(children: [
             Image(
               image: AssetImage('assets/images/Logo.png'),
               height: 60,
@@ -124,14 +127,12 @@ class HomeScreen extends ConsumerWidget {
               'Sakani',
               style: GoogleFonts.lemon(
                 fontSize: 18,
-                color: AppConstants.primaryColor,
-              ),
+color: AppConstants.primaryColor,              ),
             ),
             const Spacer(),
            IconButton(
             icon: Icon(Icons.notifications_none,
-        color: Colors.grey[800],
-        size: 28,
+color: isDark ? Colors.white : Colors.grey[800],        size: 28,
       ),
       onPressed: (){
         // Navigator.push(
@@ -145,6 +146,8 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+
+  
   Widget _buildCustomBottomNavBar() {
     return Container(
       height: 65,
@@ -177,6 +180,7 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+  
   Widget _buildNavBarItem(BuildContext context, IconData icon, bool isActive) {
     return IconButton(
       icon: Icon(
@@ -197,7 +201,8 @@ class HomeScreen extends ConsumerWidget {
         } else if (icon == Icons.favorite_border) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+            MaterialPageRoute(builder: (context) =>  const FavoritesScreen()),
+          
           );
         } else if (icon == Icons.person) { 
           Navigator.push(

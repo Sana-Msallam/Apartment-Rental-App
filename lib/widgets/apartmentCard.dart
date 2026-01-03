@@ -11,6 +11,7 @@ class Apartmentcard extends StatelessWidget {
   final String governorate;
   final String city;
   final int space;
+  final dynamic average_rating; // استعملت dynamic ليتناسب مع أي نوع بيانات قادم من الباك
   final VoidCallback onTap;
 
   const Apartmentcard({
@@ -22,17 +23,26 @@ class Apartmentcard extends StatelessWidget {
     required this.city,
     required this.space,
     required this.onTap,
+    this.average_rating,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final secondaryTextColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
     return Card(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       margin: const EdgeInsets.all(5.0),
-      elevation: 4,
+      elevation: isDark ? 0 : 4, 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
+        side: isDark 
+            ? BorderSide(color: Colors.white.withOpacity(0.1), width: 1) 
+            : BorderSide.none,
+      
       ),
+      
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20.0),
@@ -65,48 +75,61 @@ class Apartmentcard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '$price \$',
-                      style: AppConstants.secondText,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '$price \$',
+                          style: AppConstants.secondText,
+                        ),
+                        Row(
+                          children: [
+                            const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+                            const SizedBox(width: 2),
+                            Text(
+                              average_rating?.toString() ?? "0", 
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // الجزء الخاص بالموقع والمساحة
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          child: Row(
                             children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.location_on, color: Colors.grey, size: 12),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      '$governorate, $city',
-                                      style: AppConstants.thirdText,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.square_foot, color: Colors.grey, size: 14),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '$space m²',
-                                    style: AppConstants.thirdText,
-                                  ),
-                                ],
+                              const Icon(Icons.location_on, color: Colors.grey, size: 12),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  '$governorate, $city',
+                                  style: AppConstants.thirdText,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.favorite_border_outlined, size: 18, color: Colors.grey),
+                        const Icon(Icons.favorite_border_outlined, size: 18),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.square_foot, color: Colors.grey, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$space m²',
+                          style: AppConstants.thirdText,
+                        ),
                       ],
                     ),
                   ],
