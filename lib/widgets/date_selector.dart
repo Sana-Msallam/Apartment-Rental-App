@@ -21,6 +21,7 @@ class DateSelector extends StatelessWidget {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
+        
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: vBorderColor.withOpacity(0.5), width: 1),
       ),

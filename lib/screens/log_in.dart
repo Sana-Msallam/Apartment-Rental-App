@@ -43,8 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final user = await _apiService.login(phone, password);
 
-      if (user != null) {
-
+      if (user != null && user.token != null) {
         if (user.token != null && user.token!.isNotEmpty) {
           await storage.write(key: 'jwt_token', value: user.token);
 
@@ -147,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 35),
 
-                          buildLabel("Phone number"),
+                          buildLabel("Phone Number"),
 
                           CustomTextFiled(
                             controller: _phoneController,
@@ -162,6 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           const SizedBox(height: 8),
 
+                          //   buildLabel("Password"),
                           CustomTextFiled(
                             controller: _passwordController,
                             hintText: "••••••••",

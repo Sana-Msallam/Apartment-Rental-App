@@ -1,4 +1,7 @@
 // import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:convert';
+
+import 'package:apartment_rental_app/models/user_model.dart' show UserModel;
 import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
 import 'package:flutter/material.dart';
@@ -6,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_app_bar.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../controller/apartment_home_controller.dart'; 
 import '../constants/app_constants.dart';
 
@@ -102,15 +106,22 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                   textButton: "Rent Now",
                   kPrimaryColor: kPrimaryColor,
                   vTextColor: Colors.white,
-                  onTap: () {
+                  onTap: () async { 
+                    const storage = FlutterSecureStorage();
+                    String? userData = await storage.read(key: 'jwt_token');
+                    if (userData != null) {
+                     final user = UserModel.fromJson(jsonDecode(userData), token: userData);
                     Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => BookingApp(
-                                    
-                                  ),
-                                ),
-                              );
+                                   user:user ,
+                                    apartmentId: apartment.id,
+                         ),
+                      
+                       ),
+                    );
+                    }
                   },
                 ),
               ),

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/screens/log_in.dart'; // تأكدي من المسار الصحيح
 import 'package:apartment_rental_app/widgets/glass_container.dart';

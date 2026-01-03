@@ -39,7 +39,6 @@ class _CustomTextFiledState extends State<CustomTextFiled> {
     super.initState();
     _obscureText = widget.isPassword;
     
-    // إضافة مستمع للمتحكم لتحديث لون الإطار تلقائياً عند مسح النص أو كتابته
     widget.controller?.addListener(_handleControllerChange);
   }
 

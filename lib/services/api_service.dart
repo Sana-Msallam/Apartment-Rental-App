@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final String _baseUrl = 'http://10.0.2.2:8000/api';
+  final String _baseUrl = 'http://192.168.1.7:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -108,5 +108,62 @@ class ApiService {
       print(" ${e.message}");
     }
     return null;
+  }
+
+  Future<double?> calculatePrice({
+    required int apartmentId,
+    required String startDate,
+    required String endDate,
+    
+  }) async {
+    try {
+      final response = await _dio.get(
+        '$_baseUrl/api/some_endpoint',
+        data: {
+          'apartment_id': apartmentId,
+          'start_date': startDate,
+          'end_date': endDate,
+        },
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        double price = responseData['total_price']?.toDouble() ?? 0.0;
+        return price;
+      }
+    } catch (e) {
+      print('error calculate price:$e');
+    }
+    return null;
+  }
+
+   Future<bool> confirmBooking({
+    required int apartmentId,
+    required String startDate,
+    required String endDate,
+    required double totalPrice,
+    required int userId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$_baseUrl/api/BookApartment',
+        data: {
+          'apartment_id': apartmentId,
+          'start_date': startDate,
+          'end_date': endDate,
+          'total_price': totalPrice,
+          'user_id': userId,
+          'status': 'pending',
+        },
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.statusCode == 200 || response.statusCode == 201;
+       } else {
+        print('Failed to confirm booking. Status code: ${response.statusCode}');
+      return false;
+      }
+    } catch (e) {
+      print('Error confirming booking: $e');
+      return false;
+    }
   }
 }

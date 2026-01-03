@@ -38,9 +38,8 @@ class ApartmentDetail{
     var imageList =json['apartment_images'] as List?? [];
     List<String> parsedImages =imageList.map((img){
       String path =img['path']?? '';
-      return path.replaceAll('localhost', '10.0.2.2');
+      return path.replaceAll('localhost', '192.168.1.7');
     }).toList();
-
     return ApartmentDetail(
      id: json['id'],
       price: json['price'],

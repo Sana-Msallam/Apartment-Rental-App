@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "334307797736",
+    "project_id": "my-app-sakani",
+    "storage_bucket": "my-app-sakani.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334307797736:android:e28e93fdfe63d9e909375d",
+        "android_client_info": {
+          "package_name": "com.example.apartment_rental_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbo4mVyqYfBy9S0pM5_PUu3U4f3gjHYcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

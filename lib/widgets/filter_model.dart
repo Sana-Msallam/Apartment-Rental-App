@@ -13,7 +13,7 @@ class FilterModel extends ConsumerStatefulWidget{
   class _FilterModelState extends ConsumerState<FilterModel>{
     String _selectedGovernorate='All';
     String _selectedCity='All';
-    RangeValues _priceRange= const RangeValues(500, 500000);
+    RangeValues _priceRange= const RangeValues(1000, 50000);
     
     RangeValues _spaceRange= const RangeValues(50, 500);
 
@@ -210,9 +210,9 @@ class FilterModel extends ConsumerStatefulWidget{
   Widget _buildPriceRangeSlider() {
     return RangeSlider(
       values: _priceRange,
-      min: 500,
-      max: 500000,
-      divisions: 10,
+      min: 1000,
+      max: 50000,
+      divisions: 49,
       activeColor: AppConstants.primaryColor,
       inactiveColor: AppConstants.secondColor,
       labels: RangeLabels(
@@ -231,7 +231,7 @@ Widget _buildSpaceRangeSlider(){
     values: _spaceRange, 
     min: 50,
     max: 500,
-    divisions: 10,
+    divisions: 15,
     activeColor:AppConstants.primaryColor,
     inactiveColor: AppConstants.secondColor,
      labels: RangeLabels(

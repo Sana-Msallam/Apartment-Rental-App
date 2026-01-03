@@ -1,5 +1,7 @@
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:apartment_rental_app/main.dart';
+import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/screens/add_apartment_page.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
@@ -80,6 +82,7 @@ class HomeScreen extends ConsumerWidget {
                     error: (error, stack) => Center(
                       child: Text('Something went wrong: ${error.toString()}'),
                     ),
+                    //    ),
                   );
                 },
               ), 
@@ -87,6 +90,20 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        elevation: 8, // لجعله نافر بشكل واضح
+        backgroundColor: AppConstants.primaryColor,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddApartmentPage()),
+          );
+        },
+        child: const Icon(Icons.add, size: 30, color: Colors.white),
+      ),
+      
+      // اختيار مكان الزر (اختياري)
+       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: _buildCustomBottomNavBar(),
     );
   }

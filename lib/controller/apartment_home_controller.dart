@@ -2,8 +2,9 @@ import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/apartment_home_model.dart';
 import '../services/apartment_home_service.dart';
+import '../services/add_apartment_service.dart';
 
-final apartmentHomeServiceProvider =Provider((ref)=> ApartmentHomeService.create());
+final apartmentHomeServiceProvider =Provider((ref)=> ApartmentHomeService());
 class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>>{
   final ApartmentHomeService _service;
   ApartmentNotifier(this._service): super(const AsyncValue.loading()){
@@ -54,3 +55,4 @@ final FutureProviderFamily<ApartmentDetail, int> apartmentDetailProvider =
   final service = ref.read(apartmentHomeServiceProvider);
   return service.fetchApartmentDetails(id);
 });
+final addApartmentServiceProvider = Provider((ref) => AddApartmentService());

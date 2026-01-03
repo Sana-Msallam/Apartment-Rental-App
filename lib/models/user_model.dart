@@ -1,4 +1,5 @@
 class UserModel {
+  static UserModel? currentUser; // متغير "عالمي" ثابت في الذاكرة
   final int? id;
   final String firstName;
   final String lastName;
@@ -31,8 +32,7 @@ class UserModel {
       dateOfBirth: json['date_of_birth'],
       personalPhoto: json['personal_photo'],
       idPhoto: json['ID_photo'],
-      token: json['token'], // تأكدي أن  التوكن داخل مصفوفة اليوزر أو مرريه يدوياً
-    );
+token: token ?? json['token'],    );
   }
 
   // إذا احتجتِ تحويل الكائن إلى Map لإرساله للسيرفر (اختياري)
