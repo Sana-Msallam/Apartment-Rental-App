@@ -141,8 +141,8 @@ onReview: (status.toLowerCase() == 'completed') ? () {
     }
 } : null,
 
-      onEdit: status == "pending" ? () async {
-              final result = await Navigator.push(
+onEdit: status.toLowerCase() == "pending" ? () async {
+                final result = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => BookingApp(

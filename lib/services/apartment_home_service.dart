@@ -10,7 +10,7 @@ class ApartmentHomeService{
   
   Future<List<Apartment>>fetchApartments()async{
     try{
-final response = await _apiClient.dio.get('http://192.168.1.105:8000/api/apartment/home');
+final response = await _apiClient.dio.get('http://192.168.1.107:8000/api/apartment/home');
       if(response.statusCode==200){
         final List<dynamic> rawData= response.data['data'];
         print("Data from API: ${response.data}");

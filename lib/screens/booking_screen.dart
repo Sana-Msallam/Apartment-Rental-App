@@ -164,52 +164,152 @@ class _BookingAppState extends State<BookingApp> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
   }
+void _showConfirmationDialog(double price, String start, String end, String token) {
+  final theme = Theme.of(context);
+  
+  showDialog(
+    context: context,
+    builder: (dialogContext) => Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 10,
+      backgroundColor: theme.cardColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min, 
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            decoration: BoxDecoration(
+              color: kPrimaryColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: const Center(
+              child: Icon(Icons.verified_outlined, color: Colors.white, size: 50),
+            ),
+          ),
 
-  void _showConfirmationDialog(double price, String start, String end, String token) {
-    final theme = Theme.of(context);
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: theme.cardColor,
-        title: Text('Confirm Reservation', style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-                leading: Icon(Icons.calendar_today, color: theme.primaryColor), 
-                title: const Text("Period"), 
-                subtitle: Text("$start to $end", style: theme.textTheme.bodyMedium)),
-            ListTile(
-                leading: const Icon(Icons.attach_money, color: Colors.green), 
-                title: const Text("Total"), 
-                subtitle: Text("\$${price.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
+          // 2. محتوى البيانات
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Text(
+                  'Confirm Reservation',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                
+                // عرض الفترة الزمنية بتنسيق نظيف
+                _buildInfoRow(Icons.calendar_month, "Booking Period", "$start ➔ $end", theme),
+                const Divider(height: 30, thickness: 0.5),
+                
+                // عرض السعر بشكل بارز
+                _buildInfoRow(Icons.payments_outlined, "Total Amount", "\$${price.toStringAsFixed(2)}", theme, isPrice: true),
+              ],
+            ),
+          ),
+
+          // 3. أزرار التحكم
+          
+// 3. أزرار التحكم (تصميم ناعم وصغير)
+Padding(
+  padding: const EdgeInsets.only(bottom: 24, left: 20, right: 20),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.end, // جعل الأزرار في جهة اليمين لتبدو أرقى
+    children: [
+      // رابط الإلغاء كنص بسيط
+      TextButton(
+        onPressed: () => Navigator.pop(dialogContext),
+        child: Text(
+          "Cancel",
+          style: TextStyle(
+            color: theme.hintColor.withOpacity(0.7), 
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
+        ),
+      ),
+      
+      const SizedBox(width: 15), // مسافة كافية بين النص والزر
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: kPrimaryColor,
+    foregroundColor: Colors.white,
+    elevation: 0,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4)),
+    ), 
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+    minimumSize: const Size(90, 35), 
+  ),
+onPressed: () async {
+          Navigator.pop(dialogContext);
+          _showLoadingDialog();
+          bool success = await BookingService().confirmBooking(
+            apartmentId: widget.apartmentId,
+            startDate: start,
+            endDate: end,
+            token: token,
+          );
+          if (!mounted) return;
+          Navigator.pop(context);
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Reservation Successful!'), backgroundColor: Colors.green)
+            );
+            Navigator.pop(context);
+          }
+        },
+        child: const Text(
+    'Confirm',
+    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+  ),
+  ),
+                ],
+              ),
+            ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text("Cancel", style: TextStyle(color: theme.hintColor))),
-          CustomButton(
-            textButton: 'Confirm',
-            onTap: () async {
-              Navigator.pop(dialogContext);
-              _showLoadingDialog();
-              bool success = await BookingService().confirmBooking(
-                apartmentId: widget.apartmentId,
-                startDate: start,
-                endDate: end,
-                token: token,
-              );
-              if (mounted) Navigator.pop(context); 
-              if (success) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reservation Successful!'), backgroundColor: Colors.green));
-                Navigator.pop(context);
-              }
-            },
-            kPrimaryColor: theme.primaryColor, vTextColor: Colors.white, width: 100,
-          ),
-        ],
       ),
     );
   }
+// دالة مساعدة لبناء صفوف المعلومات داخل الدايالوج
+Widget _buildInfoRow(IconData icon, String title, String value, ThemeData theme, {bool isPrice = false}) {
+  return Row(
+    children: [
+      Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: theme.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: isPrice ? Colors.green : theme.primaryColor, size: 22),
+      ),
+      const SizedBox(width: 2),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: TextStyle(color: theme.hintColor, fontSize: 12)),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: isPrice ? 18 : 14,
+                fontWeight: isPrice ? FontWeight.bold : FontWeight.w600,
+                color: isPrice ? Colors.green : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {
