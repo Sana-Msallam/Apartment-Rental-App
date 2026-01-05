@@ -43,7 +43,11 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
           backgroundColor: theme.appBarTheme.backgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           bottom: const TabBar(
@@ -54,20 +58,26 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
               Tab(text: "Active"),
-              Tab(text: "History"),   // مكتمل ومرفوض
-              Tab(text: "Cancelled"), // ملغي من المستخدم
+              Tab(text: "History"), // مكتمل ومرفوض
+              Tab(text: "Archived"), // ملغي من المستخدم
             ],
           ),
         ),
         body: bookingState.isLoading
-            ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
+            ? Center(
+                child: CircularProgressIndicator(color: theme.primaryColor),
+              )
             : TabBarView(
                 physics: const BouncingScrollPhysics(),
                 children: [
                   // نمرر نوع القائمة لكل دالة بناء
                   _buildList(bookingState.currentBookings, "active", isDark),
                   _buildList(bookingState.historyBookings, "history", isDark),
-                  _buildList(bookingState.cancelledBookings, "cancelled", isDark),
+                  _buildList(
+                    bookingState.cancelledBookings,
+                    "cancelled",
+                    isDark,
+                  ),
                 ],
               ),
       ),
@@ -83,15 +93,21 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              type == "active" ? Icons.calendar_today_rounded : 
-              type == "history" ? Icons.history_rounded : Icons.cancel_presentation_rounded,
+              type == "active"
+                  ? Icons.calendar_today_rounded
+                  : type == "history"
+                  ? Icons.history_rounded
+                  : Icons.cancel_presentation_rounded,
               size: 60,
               color: isDark ? Colors.white10 : Colors.grey[300],
             ),
             const SizedBox(height: 15),
             Text(
-              type == "active" ? "No active bookings" : 
-              type == "history" ? "No past bookings" : "No cancelled bookings",
+              type == "active"
+                  ? "No active bookings"
+                  : type == "history"
+                  ? "No past bookings"
+                  : "No cancelled bookings",
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: isDark ? Colors.white60 : Colors.grey[600],
               ),
@@ -113,66 +129,77 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
           padding: const EdgeInsets.only(bottom: 15),
           child: BookingCard(
             booking: booking,
-            // تحديد الخصائص بناءً على النوع
-           isCancelled: type == "cancelled",
-      // اجعلي isHistory تظهر true إذا كان التبويب هو history 👈
-      isHistory: type == "history", 
-      status: status,
-      
-      onCancel: () => _showCancelDialog(booking['id']),
+            isCancelled: type == "cancelled",
+            isHistory: type == "history",
+            status: status,
 
-onReview: (status.toLowerCase() == 'completed') ? () { 
-    // تأكد أن المعرفات ليست Null
-    final bId = booking['id'];
-    final aId = booking['apartment_id'] ?? booking['apartment']?['id']; 
+            onCancel: () => _showCancelDialog(booking['id']),
 
-    if (aId != null) {
-      showRatingDialog(
-          context, 
-          ref, 
-          bId, 
-          aId, 
-          booking['apartment']?['title'] ?? "Apartment"
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error: Apartment ID not found"))
-      );
-    }
-} : null,
+            onReview: (status.toLowerCase() == 'completed')
+                ? () {
+                    final bId = booking['id'];
+                    final aId =
+                        booking['apartment_id'] ?? booking['apartment']?['id'];
 
-      onEdit: status == "pending" ? () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BookingApp(
-                    apartmentId: booking['apartment_id'],
-pricePerNight: double.parse(booking['total_price'].toString()).round(),
-                    bookingId: booking['id'],
-                    initialStart: DateTime.parse(booking['start_date']),
-                    initialEnd: DateTime.parse(booking['end_date']),
-                  ),
-                ),
-              );
-              if (result == true) {
-                ref.read(bookingProvider.notifier).fetchMyBookings();
-              }
-            } : null,
+                    if (aId != null) {
+                      showRatingDialog(
+                        context,
+                        ref,
+                        bId,
+                        aId,
+                        booking['apartment']?['title'] ?? "Apartment",
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Error: Apartment ID not found"),
+                        ),
+                      );
+                    }
+                  }
+                : null,
+
+            onEdit: status.toLowerCase() == "pending"
+                ? () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookingApp(
+                          apartmentId: booking['apartment_id'],
+                          pricePerNight: double.parse(
+                            booking['total_price'].toString(),
+                          ).round(),
+                          bookingId: booking['id'],
+                          initialStart: DateTime.parse(booking['start_date']),
+                          initialEnd: DateTime.parse(booking['end_date']),
+                        ),
+                      ),
+                    );
+                    if (result == true) {
+                      ref.read(bookingProvider.notifier).fetchMyBookings();
+                    }
+                  }
+                : null,
           ),
         );
       },
     );
   }
 
- void _showCancelDialog(int bookingId) {
+  void _showCancelDialog(int bookingId) {
     final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: theme.cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Cancel Booking"),
-        content: const Text("Are you sure you want to cancel this reservation?"),
+        title: const Text(
+          "Cancel Booking",
+          style: TextStyle(color: kPrimaryColor),
+        ),
+        content: const Text(
+          "Are you sure you want to cancel this reservation?",
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -183,10 +210,10 @@ pricePerNight: double.parse(booking['total_price'].toString()).round(),
               Navigator.pop(context);
               ref.read(bookingProvider.notifier).cancelBooking(bookingId);
             },
-            child: const Text("Yes, Cancel", style: TextStyle(color: Colors.red)),
+            child: const Text("Yes", style: TextStyle(color: Colors.red)),
           ),
         ],
-      ), // إغلاق الـ AlertDialog
-    ); // إغلاق الـ showDialog
-  } // إغلاق الدالة _showCancelDialog
-} // 👈 هذا هو القوس الأهم: إغلاق كلاس الـ _MyBookingsScreenState
+      ),
+    );
+  }
+}

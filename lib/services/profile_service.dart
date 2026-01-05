@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ProfileService {
-  final String _baseUrl = 'http://192.168.0.113:8000/api';
+  final String _baseUrl = 'http://192.168.0.110:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
