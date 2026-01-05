@@ -3,8 +3,10 @@ import 'package:apartment_rental_app/main.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
+import 'package:apartment_rental_app/services/local_notifications_service.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/apartmentCard.dart';
@@ -12,13 +14,29 @@ import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/add_apartment_page.dart';
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+class _HomeScreenState extends ConsumerState<HomeScreen>{
+  @override
+  void initState() {
+    super.initState();
+    
+    // 3. هنا نضع المستمع للإشعارات المحلية (الآن لن يظهر خطأ أحمر)
+    LocalNotificationService.streamController.stream.listen((NotificationResponse response) {
+       // مثال: الانتقال لصفحة الإشعارات عند الضغط على الإشعار
+       Navigator.push(
+         context, 
+         MaterialPageRoute(builder: (context) => const NotificationScreen())
+       );
+       print("User tapped on notification: ${response.payload}");
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-
-
     return Scaffold(
  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildCustomAppBar(context, isDark),
