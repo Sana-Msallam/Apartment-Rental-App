@@ -100,10 +100,7 @@ Future<List<Apartment>> fetchFilteredApartments({
     print("General Error: $e");
     throw Exception('An unexpected error occurred');
   }
-}
-
-
- 
+} 
 Future<List<Apartment>> getOwnerApartments(String token) async { 
   try {
     final response = await _apiClient.dio.get(
@@ -126,5 +123,23 @@ Future<List<Apartment>> getOwnerApartments(String token) async {
     throw Exception('An unknown error occurred: $e');
   }
 }
-
+Future<bool> toggleFavorite(int apartmentId) async {
+  try {
+    final response = await _apiClient.dio.post(
+      'favorite/$apartmentId',
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print("Toggle Favorite Success: ${response.data}");
+      return true;
+    }
+    return false;
+  } on DioException catch (e) {
+    print("Error ${e.response?.statusCode} - ${e.response?.data}");
+    return false;
+  }
 }
+Future<List<Apartment>> fetchFavorites() async{
+  final response =await _apiClient.dio.get('favorite');
+  return( response.data['date'] as List).map((e)=> Apartment.fromJson(e)).toList();
+}
+} 

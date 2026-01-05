@@ -96,9 +96,39 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
   } catch (e) {
     print("❌ خطأ تقني: $e");
   }
-}
+} 
+// أضيفي هذه الدالة داخل كلاس ApartmentNotifier
+Future<void> toggleFavoriteStatus(int apartmentId) async {
+  try {
+    // 1. استدعاء الخدمة لتغيير الحالة في السيرفر
+    final success = await _service.toggleFavorite(apartmentId);
 
-  
+    if (success && state.hasValue) {
+      // 2. تحديث الحالة محلياً (Local State Update) لكي يشعر المستخدم بالسرعة
+      final currentApartments = state.asData!.value;
+      
+      final updatedList = currentApartments.map((apt) {
+        if (apt.id == apartmentId) {
+          return Apartment(
+            id: apt.id,
+            price: apt.price,
+            governorate: apt.governorate,
+            city: apt.city,
+            space: apt.space,
+            imagePath: apt.imagePath,
+            averageRating: apt.averageRating,
+            is_favorite: !(apt.is_favorite), 
+          );
+        }
+        return apt;
+      }).toList();
+
+      state = AsyncValue.data(updatedList);
+    }
+  } catch (e) {
+    print("Error toggling favorite in Notifier: $e");
+  }
+} 
 }
 
 final apartmentProvider = StateNotifierProvider<ApartmentNotifier, AsyncValue<List<Apartment>>>((ref) {

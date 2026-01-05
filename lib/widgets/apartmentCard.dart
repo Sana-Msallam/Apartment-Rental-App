@@ -1,10 +1,12 @@
 import 'dart:developer';
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class Apartmentcard extends StatelessWidget {
+class Apartmentcard extends ConsumerWidget {
   final int id;
   final String imagePath;
   final int price;
@@ -13,6 +15,7 @@ class Apartmentcard extends StatelessWidget {
   final int space;
   final dynamic average_rating; // استعملت dynamic ليتناسب مع أي نوع بيانات قادم من الباك
   final VoidCallback onTap;
+  final bool is_favorite;
 
   const Apartmentcard({
     super.key,
@@ -24,10 +27,11 @@ class Apartmentcard extends StatelessWidget {
     required this.space,
     required this.onTap,
     this.average_rating,
+    this.is_favorite=false,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     final secondaryTextColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.grey;
@@ -111,14 +115,22 @@ class Apartmentcard extends StatelessWidget {
                                 child: Text(
                                   '$governorate, $city',
                                   style: AppConstants.thirdText,
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.favorite_border_outlined, size: 18),
+                        IconButton(
+                          onPressed: (){
+                          ref.read(apartmentProvider.notifier).toggleFavoriteStatus(id);
+
+                        }, icon: Icon(
+                          is_favorite? Icons.favorite: Icons.favorite_border,
+                          color: is_favorite? Colors.red: Colors.grey,
+                        ))
+                        //const Icon(Icons.favorite_border_outlined, size: 18),
                       ],
                     ),
                     const SizedBox(height: 4),

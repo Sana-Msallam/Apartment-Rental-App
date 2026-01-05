@@ -6,6 +6,7 @@ class Apartment{
   final int space;
   final int ?averageRating; 
   final String imagePath;
+  final bool is_favorite;
 
 
   Apartment({
@@ -16,6 +17,7 @@ class Apartment{
     required this.space,
     required this.imagePath,
      this.averageRating,
+     this.is_favorite= false,
 });
 
   factory Apartment.fromJson(Map<String, dynamic> json) {
@@ -31,12 +33,12 @@ class Apartment{
         price:json['price'],
         governorate:(json['governorate'] as String).capitalize(),
         city:(json['city'] as String).capitalize(),
-averageRating: json['average_rating'] != null 
+        averageRating: json['average_rating'] != null 
         ? (json['average_rating'] as num).toInt() 
         : 0,
-
-     space:json['space'] ,
+        space:json['space'] ,
         imagePath: correctedPath,
+        is_favorite: json['is_favorite']?? false,
     );
   }
 }
