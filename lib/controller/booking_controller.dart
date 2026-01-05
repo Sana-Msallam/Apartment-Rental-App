@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// 1. تعريف الـ State بشكل كامل
 class BookingState {
   final List<dynamic> currentBookings;
   final List<dynamic> cancelledBookings;
@@ -31,14 +30,12 @@ class BookingState {
   }
 }
 
-// 2. الكنترولر مع كافة التوابع
 class BookingController extends StateNotifier<BookingState> {
   BookingController() : super(BookingState());
 
   final BookingService _service = BookingService();
   final _storage = const FlutterSecureStorage();
 
-  // جلب الحجوزات
   Future<void> fetchMyBookings() async {
     try {
       state = state.copyWith(isLoading: true);

@@ -2,6 +2,7 @@
 import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
 import 'package:flutter/material.dart';
+import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
