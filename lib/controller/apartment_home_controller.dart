@@ -20,6 +20,7 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
   ApartmentNotifier(this._service, this._bookingService, this._storage, this.ref) 
       : super(const AsyncValue.loading()) {
     loadApartments();
+    
   }
 
   Future<void> loadApartments() async {
@@ -55,8 +56,23 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
     }
+
   }
 
+// جلب شقق المالك فقط
+  Future<void> loadOwnerApartments() async {
+    state = const AsyncValue.loading();
+    try {
+      final token = await _storage.read(key: 'jwt_token');
+      if (token == null) throw Exception("User not authenticated");
+
+      // تأكد من إضافة هذه الدالة في ApartmentHomeService
+      final ownerApartments = await _service.getOwnerApartments(token); 
+      state = AsyncValue.data(ownerApartments);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
  Future<void> addReview(int bookingId, int stars, int apartmentId) async {
   final token = await _storage.read(key: 'jwt_token');
   if (token == null) return;
@@ -81,6 +97,7 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
     print("❌ خطأ تقني: $e");
   }
 }
+
   
 }
 
@@ -98,3 +115,16 @@ final FutureProviderFamily<ApartmentDetail, int> apartmentDetailProvider =
   return service.fetchApartmentDetails(id);
 });
 final addApartmentServiceProvider = Provider((ref) => AddApartmentService());
+// Provider مخصص لشقق المالك فقط
+final ownerApartmentsProvider = StateNotifierProvider<ApartmentNotifier, AsyncValue<List<Apartment>>>((ref) {
+  final service = ref.watch(apartmentHomeServiceProvider);
+  final bookingService = ref.watch(bookingServiceProvider);
+  final storage = ref.watch(storageProvider);
+  
+  final notifier = ApartmentNotifier(service, bookingService, storage, ref);
+  
+  // استدعاء دالة جلب شقق المالك فور تشغيل الـ Provider
+  notifier.loadOwnerApartments(); 
+  
+  return notifier;
+});

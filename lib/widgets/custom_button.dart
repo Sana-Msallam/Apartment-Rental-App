@@ -1,21 +1,27 @@
 import 'package:flutter/material.dart';
+const Color kPrimaryColor = Color(0xFF234F68);
 
 class CustomButton extends StatelessWidget {
-  CustomButton({
-    required this.textButton,
-    required this.vTextColor,
-    required this.kPrimaryColor,
-    this.width,
-    this.vfont = 'Lato-Regular',
-    this.onTap,
-  });
 
   final String? textButton;
   final Color? vTextColor;
   final Color? kPrimaryColor;
   final double? width;
   final String? vfont;
+    final double? height;
+
   final VoidCallback? onTap;
+
+    CustomButton({
+    required this.textButton,
+    required this.vTextColor,
+    required this.kPrimaryColor,
+    this.width,
+    this.height,
+    this.vfont = 'Lato-Regular',
+    this.onTap,
+  });
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +39,10 @@ class CustomButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: width,
-        padding: const EdgeInsets.symmetric(vertical: 22),
+
+
+
+        height: height ?? 66,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: kPrimaryColor ?? defaultButtonColor,

@@ -276,9 +276,10 @@ Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
             trailing: Switch.adaptive(
               value: isDark,
               activeColor: theme.primaryColor,
-              onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
-            ),
-            onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
+           onChanged: (val) => ref.read(themeProvider.notifier).toggleTheme(),
+  ),
+  // يفضل أن يكون الضغط على السطر كاملاً يؤدي لتغيير المود
+  onTap: () => ref.read(themeProvider.notifier).toggleTheme(),
           ),
           _divider(context),
           _buildMenuTile(

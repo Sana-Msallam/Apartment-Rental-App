@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-// 1. تعريف الـ State بشكل كامل
 class BookingState {
   final List<dynamic> currentBookings;
   final List<dynamic> cancelledBookings;
@@ -31,14 +30,12 @@ class BookingState {
   }
 }
 
-// 2. الكنترولر مع كافة التوابع
 class BookingController extends StateNotifier<BookingState> {
   BookingController() : super(BookingState());
 
   final BookingService _service = BookingService();
   final _storage = const FlutterSecureStorage();
 
-  // جلب الحجوزات
   Future<void> fetchMyBookings() async {
     try {
       state = state.copyWith(isLoading: true);
@@ -49,19 +46,25 @@ class BookingController extends StateNotifier<BookingState> {
 
         if (response != null && response is Map) {
           final List<dynamic> bookingsList = response['data'] ?? [];
+state = state.copyWith(
+            // 1. القائمة النشطة: pending, confirmed, accepted, active
+            currentBookings: bookingsList.where((b) {
+              final s = b['status'].toString().toLowerCase();
+              return s == 'pending' || s == 'confirmed' || s == 'accepted' || s == 'active';
+            }).toList(),
 
-          state = state.copyWith(
-            currentBookings: bookingsList
-                .where((b) =>
-                    b['status'].toString().toLowerCase() != 'cancelled' &&
-                    b['status'].toString().toLowerCase() != 'completed')
-                .toList(),
-            cancelledBookings: bookingsList
-                .where((b) => b['status'].toString().toLowerCase() == 'cancelled')
-                .toList(),
-            historyBookings: bookingsList
-                .where((b) => b['status'].toString().toLowerCase() == 'completed')
-                .toList(),
+            // 2. قائمة الأرشيف: تشمل الملغي من المستخدم (cancelled) والمرفوض من المؤجر (rejected) 👈
+            cancelledBookings: bookingsList.where((b) {
+              final s = b['status'].toString().toLowerCase();
+              return s == 'cancelled' || s == 'rejected';
+            }).toList(),
+
+            // 3. السجل: الحجوزات المكتملة فقط 👈
+            historyBookings: bookingsList.where((b) {
+              final s = b['status'].toString().toLowerCase();
+              return s == 'completed';
+            }).toList(),
+            
             isLoading: false,
           );
         } else {

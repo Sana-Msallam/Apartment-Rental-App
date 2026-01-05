@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/services/push_notifications_service.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final String _baseUrl = 'http://192.168.1.7:8000/api';
+  final String _baseUrl = 'http://192.168.0.113:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -30,6 +31,10 @@ class ApiService {
             responseData['user'] ?? responseData['data'] ?? responseData;
 
         final String? token = responseData['token'] ?? userData['token'];
+        String? fcm_token =await PushNotificationsService.getDeviceToken();
+        if( fcm_token !=null && token != null){
+          await PushNotificationsService.sendTokenToServer(fcm_token, authToken:token!);
+        }
         print(' code ${response.statusCode}');
         return UserModel.fromJson(userData, token: token);
       }
@@ -41,7 +46,6 @@ class ApiService {
       return null;
     }
   }
-
   Future<UserModel?> register({
     required String firstName,
     required String lastName,
@@ -81,6 +85,10 @@ class ApiService {
         final userData =
             response.data['user'] ?? response.data['data'] ?? response.data;
         final String? token = response.data['token'] ?? userData?['token'];
+        String? fcm_token =await PushNotificationsService.getDeviceToken();
+        if(fcm_token != null && token != null){
+          await PushNotificationsService.sendTokenToServer(fcm_token, authToken:token!);
+        }
         return UserModel.fromJson(userData, token: token);
       } else if (response.statusCode == 422) {
         print("422: ${response.data}");
@@ -122,8 +130,6 @@ Future<bool> logout(String token) async {
     return false;
   }
 }
-
-
   void _handleDioError(DioException e) {
     print("Server Response Error: ${e.response?.data}");
     if (e.response != null) {

@@ -1,4 +1,5 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/controller/ThemeNotifier_controller.dart';
 import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/booking_screen.dart';
@@ -12,7 +13,6 @@ import 'package:firebase_core/firebase_core.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
-final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
   // 💡 التصحيح المطلوب: استخدام الدالة الصحيحة (initializeDateFormatting)

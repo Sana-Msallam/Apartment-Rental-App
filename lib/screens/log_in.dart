@@ -40,7 +40,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     try {
       final user = await _apiService.login(phone, password);
 
-      if (user != null && user.token != null) {
+      if (user != null && user.token != null) { 
         // 1. حفظ التوكن أولاً
         await storage.write(key: 'jwt_token', value: user.token);
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:apartment_rental_app/screens/account_pending_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
 import 'package:apartment_rental_app/controller/profile_controller.dart';
@@ -75,7 +76,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
+              MaterialPageRoute(builder: (context) =>/* AccountPendingScreen()*/   LoginPage()),
             );
           }
         });
