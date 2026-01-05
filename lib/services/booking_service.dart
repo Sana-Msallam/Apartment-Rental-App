@@ -35,7 +35,6 @@ Future<dynamic> calculatePrice({
     if (response.statusCode == 200) {
       return response.data['data']; // يعيد السعر (double)
     } else {
-      // هنا نجلب الرسالة التي كتبتها في Laravel Exception
       return response.data['message'] ?? "Error calculation"; 
     }
   } catch (e) {
@@ -100,7 +99,7 @@ Future<bool> confirmBooking({
 
   Future<bool> cancelBookings(int bookingId, String token) async {
     try {
-      final response = await _dio.put(
+      final response = await _dio.patch(
         '$_baseUrl/booking/$bookingId/cancel',
         options: Options(
           headers: {
@@ -127,7 +126,7 @@ Future<bool> confirmBooking({
     String token,
   ) async {
     try {
-      final response = await _dio.put(
+      final response = await _dio.patch(
         '$_baseUrl/booking/$bookingId/update',
         data: {'start_date': start, 'end_date': end},
 
@@ -162,4 +161,24 @@ Future<bool> confirmBooking({
       return false;
     }
   }
+
+
+  Future<bool> rejectBooking(int bookingId, String token) async {
+  try {
+    final response = await _dio.patch(
+      '$_baseUrl/booking/$bookingId/reject', 
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer ${token.trim()}',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    return response.statusCode == 200;
+  } on DioException catch (e) {
+    print("خطأ عند رفض الحجز: ${e.response?.data}");
+    return false;
+  }
+}
 }

@@ -101,4 +101,30 @@ Future<List<Apartment>> fetchFilteredApartments({
     throw Exception('An unexpected error occurred');
   }
 }
+
+
+ 
+Future<List<Apartment>> getOwnerApartments(String token) async { 
+  try {
+    final response = await _apiClient.dio.get(
+      'apartment/owner',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token', 
+        },
+      ),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> rawData = response.data['data'];
+      return rawData.map((json) => Apartment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load apartments');
+    }
+  } on DioException catch (e) {
+    throw Exception('Failed to load apartments: ${e.message}');
+  } catch (e) {
+    throw Exception('An unknown error occurred: $e');
+  }
+}
+
 }

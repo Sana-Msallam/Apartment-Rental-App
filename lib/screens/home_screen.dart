@@ -20,20 +20,20 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 class _HomeScreenState extends ConsumerState<HomeScreen>{
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
     
-    // 3. هنا نضع المستمع للإشعارات المحلية (الآن لن يظهر خطأ أحمر)
-    LocalNotificationService.streamController.stream.listen((NotificationResponse response) {
-       // مثال: الانتقال لصفحة الإشعارات عند الضغط على الإشعار
-       Navigator.push(
-         context, 
-         MaterialPageRoute(builder: (context) => const NotificationScreen())
-       );
-       print("User tapped on notification: ${response.payload}");
-    });
-  }
+  //   // 3. هنا نضع المستمع للإشعارات المحلية (الآن لن يظهر خطأ أحمر)
+  //   LocalNotificationService.streamController.stream.listen((NotificationResponse response) {
+  //      // مثال: الانتقال لصفحة الإشعارات عند الضغط على الإشعار
+  //      Navigator.push(
+  //        context, 
+  //        MaterialPageRoute(builder: (context) => const NotificationScreen())
+  //      );
+  //      print("User tapped on notification: ${response.payload}");
+  //   });
+  // }
   @override
   Widget build(BuildContext context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -189,6 +189,13 @@ color: isDark ? Colors.white : Colors.grey[800],        size: 28,
           Builder(
             builder: (context) => _buildNavBarItem(context, Icons.tune, false),
           ),
+          
+  Builder(
+            builder: (context) => _buildNavBarItem(context, Icons.all_inbox, false),
+          ),
+
+
+
 
           Builder(
             builder: (context) =>

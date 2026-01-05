@@ -46,19 +46,25 @@ class BookingController extends StateNotifier<BookingState> {
 
         if (response != null && response is Map) {
           final List<dynamic> bookingsList = response['data'] ?? [];
+state = state.copyWith(
+            // 1. القائمة النشطة: pending, confirmed, accepted, active
+            currentBookings: bookingsList.where((b) {
+              final s = b['status'].toString().toLowerCase();
+              return s == 'pending' || s == 'confirmed' || s == 'accepted' || s == 'active';
+            }).toList(),
 
-          state = state.copyWith(
-            currentBookings: bookingsList
-                .where((b) =>
-                    b['status'].toString().toLowerCase() != 'cancelled' &&
-                    b['status'].toString().toLowerCase() != 'completed')
-                .toList(),
-            cancelledBookings: bookingsList
-                .where((b) => b['status'].toString().toLowerCase() == 'cancelled')
-                .toList(),
-            historyBookings: bookingsList
-                .where((b) => b['status'].toString().toLowerCase() == 'completed')
-                .toList(),
+            // 2. قائمة الأرشيف: تشمل الملغي من المستخدم (cancelled) والمرفوض من المؤجر (rejected) 👈
+            cancelledBookings: bookingsList.where((b) {
+              final s = b['status'].toString().toLowerCase();
+              return s == 'cancelled' || s == 'rejected';
+            }).toList(),
+
+            // 3. السجل: الحجوزات المكتملة فقط 👈
+            historyBookings: bookingsList.where((b) {
+              final s = b['status'].toString().toLowerCase();
+              return s == 'completed';
+            }).toList(),
+            
             isLoading: false,
           );
         } else {
