@@ -4,7 +4,7 @@ import 'package:apartment_rental_app/services/push_notifications_service.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final String _baseUrl = 'http://192.168.0.110:8000/api';
+  final String _baseUrl = 'http://192.168.0.107:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(

@@ -5,6 +5,7 @@ import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/services/local_notifications_service.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,7 @@ import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/add_apartment_page.dart';
+import '../screens/my_apartments.dart';
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
   @override
@@ -61,46 +63,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen>{
                   final apartmentsAsyncValue = ref.watch(apartmentProvider);
                   
                   return apartmentsAsyncValue.when(
-                    data: (apartments) {
-                      if (apartments.isEmpty) {
-                        return Center(child: Text('No apartments found.',
-                        style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),));
-                      }
-                      
-                      return GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 6,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 0.68,
-                        ),
-                        itemCount: apartments.length,
-                        itemBuilder: (context, index) {
-                          final apartment = apartments[index];
-                          return GestureDetector(
-                            child: Apartmentcard(
-                              id:apartment.id,
-                              onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ApartmentDetailsScreen(
-                                    apartmentId: apartment.id,
-                                  ),
-                                ),
-                              );
-                            },
-                              imagePath: apartment.imagePath,
-                              price: apartment.price,
-                              governorate: apartment.governorate,
-                              city: apartment.city,
-                              space: apartment.space,
-                              average_rating: apartment.averageRating,
-                            ),
-                          );
-                        },
-                      );
-                    },
+       data: (apartments) {
+  if (apartments.isEmpty) {
+    return RefreshIndicator(
+      onRefresh: () async => await ref.read(apartmentProvider.notifier).loadApartments(),
+      child: const SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Center(child: Text('No apartments found.')),
+      ),
+    );
+  }
+
+  return RefreshIndicator(
+    onRefresh: () async => await ref.read(apartmentProvider.notifier).loadApartments(),
+    child: GridView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.68,
+      ),
+      itemCount: apartments.length,
+      itemBuilder: (context, index) {
+        final apartment = apartments[index];
+        
+        // تم إزالة GestureDetector الخارجي لأن الكارد يعالج الـ Tap داخلياً
+        return Apartmentcard(
+          id: apartment.id,
+          is_favorite: apartment.is_favorite,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ApartmentDetailsScreen(
+                  apartmentId: apartment.id,
+                ),
+              ),
+            );
+          },
+          onFavoriteToggle: () {
+            ref.read(apartmentProvider.notifier).toggleFavoriteStatus(apartment.id);
+          },
+          imagePath: apartment.imagePath,
+          price: apartment.price,
+          governorate: apartment.governorate,
+          city: apartment.city,
+          space: apartment.space,
+          average_rating: apartment.averageRating,
+
+        ); // إغلاق Apartmentcard
+      }, // إغلاق itemBuilder
+    ), // إغلاق GridView.builder
+  ); // إغلاق RefreshIndicator
+}, // إغلاق data
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (error, stack) => Center(
                       child: Text('Something went wrong: ${error.toString()}',style: TextStyle(color: isDark ? Colors.red[200] : Colors.red),),
@@ -168,7 +184,7 @@ color: isDark ? Colors.white : Colors.grey[800],        size: 28,
   
   Widget _buildCustomBottomNavBar() {
     return Container(
-      height: 65,
+      height: 75,
       decoration: BoxDecoration(
         color: AppConstants.primaryColor,
         borderRadius: const BorderRadius.only(
@@ -229,7 +245,14 @@ color: isDark ? Colors.white : Colors.grey[800],        size: 28,
             MaterialPageRoute(builder: (context) =>  const FavoritesScreen()),
           
           );
-        } else if (icon == Icons.person) { 
+        }
+        // else if (icon == Icons.all_inbox) {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(builder: (context) =>  const MyApartmentsScreen()),
+        //   );
+        // }
+         else if (icon == Icons.person) { 
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -238,4 +261,10 @@ color: isDark ? Colors.white : Colors.grey[800],        size: 28,
       },
     );
   }
-}
+}  
+
+
+
+
+
+

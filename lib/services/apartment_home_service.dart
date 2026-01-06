@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -101,15 +100,10 @@ Future<List<Apartment>> fetchFilteredApartments({
     throw Exception('An unexpected error occurred');
   }
 } 
-Future<List<Apartment>> getOwnerApartments(String token) async { 
+Future<List<Apartment>> getOwnerApartments() async { 
   try {
     final response = await _apiClient.dio.get(
       'apartment/owner',
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token', 
-        },
-      ),
     );
     if (response.statusCode == 200) {
       final List<dynamic> rawData = response.data['data'];
@@ -126,9 +120,13 @@ Future<List<Apartment>> getOwnerApartments(String token) async {
 Future<bool> toggleFavorite(int apartmentId) async {
   try {
     final response = await _apiClient.dio.post(
-      'favorite/$apartmentId',
+      'favorite',
+      data: {
+        'apartment_id': apartmentId, // نرسله هنا كما يظهر في الـ JSON في بوست مان
+      },
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
+    
       print("Toggle Favorite Success: ${response.data}");
       return true;
     }
@@ -138,8 +136,20 @@ Future<bool> toggleFavorite(int apartmentId) async {
     return false;
   }
 }
-Future<List<Apartment>> fetchFavorites() async{
-  final response =await _apiClient.dio.get('favorite');
-  return( response.data['date'] as List).map((e)=> Apartment.fromJson(e)).toList();
-}
+Future<List<Apartment>> fetchFavorites() async {
+  try { // أضفنا بداية الـ try هنا
+    final response = await _apiClient.dio.get('favorite');
+    if (response.statusCode == 200) {
+      final List<dynamic> rawData = response.data['data'];
+      return rawData.map((json) => Apartment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load favorites');
+    }
+  } on DioException catch (e) { 
+    throw Exception('Failed to load favorites: ${e.message}');
+  } catch (e) {
+    throw Exception('An unknown error occurred: $e');
+  }
 } 
+}
+

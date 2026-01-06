@@ -11,7 +11,8 @@ class AddApartmentService {
     try{
       FormData formData= FormData.fromMap({
         ...data,
-        "images[]": images.map((image)=>MultipartFile.fromFileSync(image.path, filename: image.path.split('/').last)).toList(),
+        "images[]": images.map((image)=>MultipartFile.fromFileSync(
+          image.path, filename: image.path.split('/').last)).toList(),
 
        });
       final response = await _apiClient.dio.post(

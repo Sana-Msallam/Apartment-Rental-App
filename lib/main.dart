@@ -10,6 +10,7 @@ import 'package:apartment_rental_app/services/push_notifications_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
@@ -22,7 +23,7 @@ Future<void> main() async {
     // يمكنك طباعة الخطأ إذا حدث فشل في التهيئة
     print('Initialization failed: $e');
   }
-  // await const FlutterSecureStorage().deleteAll();
+  await const FlutterSecureStorage().deleteAll();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ) ;

@@ -138,6 +138,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   controller: _phoneController,
                                   hintText: "09xx xxx xxx",
                                   prefixIcon: Icons.phone_android_rounded,
+                                  keyboardType: TextInputType.number,
                                 ),
                                 const SizedBox(height: 20),
                                 buildLabel(context, "Password"),

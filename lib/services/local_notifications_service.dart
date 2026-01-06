@@ -28,26 +28,23 @@ class LocalNotificationService {
       onDidReceiveBackgroundNotificationResponse: onTap,
     );
   }
+
   //basic Notification
   static void  showBasicNotification(RemoteMessage message) async {
     AndroidNotificationDetails android = AndroidNotificationDetails(
-      'high_importance_channel', // معرف القناة (يجب أن يكون موحداً)
-      'High Importance Notifications',
+      'id 1',
+      'basic notification',
       importance: Importance.max,
       priority: Priority.high, 
-      showWhen: true,
-      playSound: true,
     );
     NotificationDetails details = NotificationDetails(
       android: android,
-      iOS: DarwinNotificationDetails(),
     );
     await flutterLocalNotificationsPlugin.show(
-      message.hashCode,
+      0,
       message.notification?.title,
       message.notification?.body,
       details,
-      payload: jsonEncode(message.data),
     );
   }
 }
