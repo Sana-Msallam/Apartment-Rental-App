@@ -1,162 +1,135 @@
 import 'dart:convert';
-
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/apartment_home_model.dart';
 import '../services/api_client.dart';
-class ApartmentHomeService{
-  final ApiClient _apiClient = ApiClient();
-  
-  Future<List<Apartment>>fetchApartments()async{
-    try{
-      final response =await _apiClient.dio.get('apartment/home');
-            print("Home Data Response: ${response.data}"); // هذا السطر سيخبرنا ماذا أرسل السيرفر
 
-      if(response.statusCode==200){
-        final List<dynamic> rawData= response.data['data'];
-        print("Data from API: ${response.data}");
-        return rawData.map((json)=> Apartment.fromJson(json)).toList();
+class ApartmentHomeService {
+  final ApiClient _apiClient = ApiClient();
+
+  // 1. جلب الشقق للهوم
+  Future<List<Apartment>> fetchApartments() async {
+    try {
+      final response = await _apiClient.dio.get('apartment/home');
+      if (response.statusCode == 200) {
+        final List<dynamic> rawData = response.data['data'];
+        return rawData.map((json) => Apartment.fromJson(json)).toList();
       } else {
         throw Exception('Failed to load apartments');
       }
-
-    }on DioException catch(e){
+    } on DioException catch (e) {
       throw Exception('Failed to load apartments: ${e.message}');
-    } catch (e){
-      throw Exception('An unknown error occurred: $e');
     }
   }
-Future<ApartmentDetail> fetchApartmentDetails(int id) async {
-  try {
-    final response = await _apiClient.dio.get('apartment/$id');
-     print("Data from API: ${response.data}");
-     
-    if (response.data['data']!=null ) {
-     
-      return ApartmentDetail.fromJson(response.data['data']);
-    } else {
-      throw Exception("Failed to load apartment details");
-    }
-  }on DioException catch (e) {
-    print("Dio Error: ${e.response?.data}");
-    throw Exception("Network Error: ${e.message}");
-  }
-   catch (e) {
-    throw Exception(" Error connecting to the server: $e");
-  }
-}
-Future<List<Apartment>> fetchFilteredApartments({
-  String? governorate,
-  String? city,
-  double? minPrice,
-  double? maxPrice,
-  double? minSpace,
-  double? maxSpace,
-}) async {
-  try {
-    final Map<String, dynamic> queryParams = {};
-    
-    // تحويل القيم إلى lowercase لتطابق قاعدة بيانات السيرفر
-    if (governorate != null && governorate != "All") {
-      queryParams['governorate'] = governorate.toLowerCase();
-    }
-    if (city != null && city != 'All' && city.isNotEmpty) {
-      queryParams['city'] = city.toLowerCase();
-    }
-    if (minPrice != null) queryParams['min_price'] = minPrice.toInt();
-    if (maxPrice != null) queryParams['max_price'] = maxPrice.toInt();
-    if (minSpace != null) queryParams['min_space'] = minSpace.toInt();
-    if (maxSpace != null) queryParams['max_space'] = maxSpace.toInt();
 
-    // طباعة الرابط النهائي للتأكد
-    print("Final URL: ${_apiClient.dio.options.baseUrl}filter?${queryParams.entries.map((e) => '${e.key}=${e.value}').join('&')}");
-
-    final response = await _apiClient.dio.get(
-        'apartment/filter', 
-        queryParameters: queryParams,
-      );
-     print("Data from API: ${response.data}");
-    
-    print("Data from API: ${response.data}");
-
-    if (response.statusCode == 200) {
-      final rawData = response.data['data'];
-      List<Apartment> apartments = [];
-
-      if (rawData is List) {
-        apartments = rawData.map((e) => Apartment.fromJson(e)).toList();
-      } else if (rawData is Map) {
-        apartments = rawData.values.map((e) => Apartment.fromJson(e)).toList();
+  // 2. جلب تفاصيل شقة
+  Future<ApartmentDetail> fetchApartmentDetails(int id) async {
+    try {
+      final response = await _apiClient.dio.get('apartment/$id');
+      if (response.data['data'] != null) {
+        return ApartmentDetail.fromJson(response.data['data']);
+      } else {
+        throw Exception("Failed to load apartment details");
       }
-      
-      return apartments; 
-      
-    } else {
-      throw Exception('Failed to filter apartments');
+    } catch (e) {
+      throw Exception("Error connecting to server: $e");
     }
-  } on DioException catch (e) {
-    print("Dio Error: ${e.response?.data ?? e.message}");
-    throw Exception('Filter Error: ${e.message}');
-  } catch (e) {
-    print("General Error: $e");
-    throw Exception('An unexpected error occurred');
   }
-}
 
+  // 3. الفلترة
+  Future<List<Apartment>> fetchFilteredApartments({
+    String? governorate,
+    String? city,
+    double? minPrice,
+    double? maxPrice,
+    double? minSpace,
+    double? maxSpace,
+  }) async {
+    try {
+      final Map<String, dynamic> queryParams = {};
+      if (governorate != null && governorate != "All") queryParams['governorate'] = governorate.toLowerCase();
+      if (city != null && city != 'All' && city.isNotEmpty) queryParams['city'] = city.toLowerCase();
+      if (minPrice != null) queryParams['min_price'] = minPrice.toInt();
+      if (maxPrice != null) queryParams['max_price'] = maxPrice.toInt();
+      if (minSpace != null) queryParams['min_space'] = minSpace.toInt();
+      if (maxSpace != null) queryParams['max_space'] = maxSpace.toInt();
 
-Future<bool> deleteApartment(int id, String token) async {
-  try {
-    final response = await _apiClient.dio.delete(
-      'apartment/$id', // المسار الذي حددتيه في Laravel
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      ),
-    );
-
-    // في Laravel الـ 200 تعني نجاح الحذف
-    return response.statusCode == 200;
-  } on DioException catch (e) {
-    print("Error deleting apartment: ${e.response?.data ?? e.message}");
-    return false;
-  } catch (e) {
-    print("Unexpected error: $e");
-    return false;
-  }
-}
-
-
-Future<List<Apartment>> getOwnerApartments(String token) async { 
-  
-  try {
-    final response = await _apiClient.dio.get(
-      'apartment/owner',
+      final response = await _apiClient.dio.get('apartment/filter', queryParameters: queryParams);
       
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $token', 
-        },
-        
-      ),
-      
-    );print("DEBUG: Owner Data -> ${response.data}");
-    print("Full API Response: ${response.data}"); // هذا سيكشف لكِ المسميات الحقيقية
-    if (response.statusCode == 200) {
-      final List<dynamic> rawData = response.data['data'];
-      return rawData.map((json) => Apartment.fromJson(json)).toList();
-    } else {
-      throw Exception('Failed to load apartments');
+      if (response.statusCode == 200) {
+        final rawData = response.data['data'];
+        if (rawData is List) {
+          return rawData.map((e) => Apartment.fromJson(e)).toList();
+        } else if (rawData is Map) {
+          return rawData.values.map((e) => Apartment.fromJson(e)).toList();
+        }
+        return [];
+      } else {
+        throw Exception('Failed to filter apartments');
+      }
+    } catch (e) {
+      throw Exception('Filter Error: $e');
     }
-  } on DioException catch (e) {
-    throw Exception('Failed to load apartments: ${e.message}');
-  } catch (e) {
-    throw Exception('An unknown error occurred: $e');
   }
-  
-}
 
+  // 4. حذف شقة (للمالك)
+  Future<bool> deleteApartment(int id, String token) async {
+    try {
+      final response = await _apiClient.dio.delete(
+        'apartment/$id',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 
+  // 5. شقق المالك
+  Future<List<Apartment>> getOwnerApartments(String token) async {
+    try {
+      final response = await _apiClient.dio.get(
+        'apartment/owner',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> rawData = response.data['data'];
+        return rawData.map((json) => Apartment.fromJson(json)).toList();
+      }
+      throw Exception('Failed');
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  // 6. تبديل المفضلة (إضافة/إزالة)
+  Future<bool> toggleFavorite(int apartmentId, String token) async {
+    try {
+      final response = await _apiClient.dio.post(
+        'favorite',
+        data: {'apartment_id': apartmentId},
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 7. جلب قائمة المفضلة
+  Future<List<Apartment>> fetchFavorites(String token) async {
+    try {
+      final response = await _apiClient.dio.get(
+        'favorite',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> rawData = response.data['data'];
+        return rawData.map((json) => Apartment.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      throw Exception('Failed to load favorites');
+    }
+  }
 }

@@ -13,6 +13,7 @@ import 'package:flutter_localizations/flutter_localizations.dart'; // ضروري
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart'; // أو المسار الذي وضعتِ فيه كود الـ Providers
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
@@ -24,7 +25,7 @@ Future<void> main() async {
   } catch (e) {
     print('Initialization failed: $e');
   }
-  // await const FlutterSecureStorage().deleteAll();
+  await const FlutterSecureStorage().deleteAll();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

@@ -3,7 +3,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiClient {
   late Dio dio;
-  static const _storage= FlutterSecureStorage();
+  static const _storage= FlutterSecureStorage(aOptions: AndroidOptions(
+    encryptedSharedPreferences: true, // تفعيل التشفير المتوافق مع أندرويد الحديث
+  ),
+);
 
   ApiClient(){
     dio= Dio(

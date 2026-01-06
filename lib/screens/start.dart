@@ -20,7 +20,12 @@ const Color kGradientColorEnd = Color(0xCC234F68);
 class StartPage extends ConsumerWidget {
   StartPage({super.key});
 
-  final storage = const FlutterSecureStorage();
+  final storage = const FlutterSecureStorage(
+    aOptions: AndroidOptions(
+    encryptedSharedPreferences: true, // تفعيل التشفير المتوافق مع أندرويد الحديث
+  ),
+
+  );
 
   Future<void> _handleStartButton(BuildContext context) async {
     String? token = await storage.read(key: 'jwt_token');

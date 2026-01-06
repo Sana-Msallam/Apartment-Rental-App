@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -13,7 +15,9 @@ class Apartmentcard extends StatelessWidget {
   final int space;
   final dynamic average_rating;
   final VoidCallback onTap;
-  final VoidCallback? onDelete; // إضافة دالة الحذف كخيار
+  final bool is_favorite;
+  final VoidCallback? onDelete;
+  final VoidCallback onFavoriteToggle;
 
   const Apartmentcard({
     super.key,
@@ -24,8 +28,10 @@ class Apartmentcard extends StatelessWidget {
     required this.city,
     required this.space,
     required this.onTap,
-    this.onDelete, // تمرير الدالة هنا
+    required this.onFavoriteToggle,
+    this.onDelete,
     this.average_rating,
+    this.is_favorite = false,
   });
 
   @override
@@ -48,12 +54,10 @@ class Apartmentcard extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20.0),
           child: Stack(
-            // تغليف المحتوى بـ Stack لإظهار زر الحذف فوق الصورة
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // عرض الصورة
                   CachedNetworkImage(
                     imageUrl: imagePath,
                     
@@ -95,53 +99,52 @@ class Apartmentcard extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Theme.of(
-                                      context,
-                                    ).textTheme.bodyLarge?.color,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Row(
                                 children: [
-                                  const Icon(
-                                    Icons.location_on,
-                                    color: Colors.grey,
-                                    size: 12,
-                                  ),
-                                  const SizedBox(width: 4),
+                                  const Icon(Icons.location_on, color: Colors.grey, size: 12),
+                                  const SizedBox(width: 2),
                                   Expanded(
                                     child: Text(
                                       '$governorate, $city',
                                       style: AppConstants.thirdText,
-                                      maxLines: 2,
+                                      maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(
-                              Icons.favorite_border_outlined,
-                              size: 18,
-                            ),
+                            //  const SizedBox(width: 6),
+                            IconButton(
+  onPressed: () {
+    // هنا نستدعي الدالة التي تم تمريرها للكارد
+    // إذا كان الكلاس StatefulWidget نستخدم widget.onFavoriteToggle()
+    // إذا كان StatelessWidget نستخدم onFavoriteToggle() مباشرة
+    onFavoriteToggle(); 
+  },
+  icon: Icon(
+    is_favorite ? Icons.favorite : Icons.favorite_border,
+    color: is_favorite ? Colors.red : Colors.grey,size: 18
+  ),
+),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(
-                              Icons.square_foot,
-                              color: Colors.grey,
-                              size: 14,
-                            ),
+                            const Icon(Icons.square_foot, color: Colors.grey, size: 14),
                             const SizedBox(width: 4),
                             Text('$space m²', style: AppConstants.thirdText),
                           ],
@@ -151,7 +154,6 @@ class Apartmentcard extends StatelessWidget {
                   ),
                 ],
               ),
-
               if (onDelete != null)
                 Positioned(
                   top: 10,

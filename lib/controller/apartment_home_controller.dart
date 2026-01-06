@@ -7,11 +7,13 @@ import '../models/apartment_home_model.dart';
 import '../services/apartment_home_service.dart';
 import '../services/add_apartment_service.dart';
 
+// 1. Providers الخدمات (تعريف لمرة واحدة فقط)
 final apartmentHomeServiceProvider = Provider((ref) => ApartmentHomeService());
 final bookingServiceProvider = Provider((ref) => BookingService());
 final storageProvider = Provider((ref) => const FlutterSecureStorage());
 final addApartmentServiceProvider = Provider((ref) => AddApartmentService());
 
+// 2. كلاس Notifier الموحد (للرئيسية والمفضلة)
 class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
   final ApartmentHomeService _service;
   final BookingService _bookingService;
@@ -19,28 +21,58 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
   final Ref ref;
 
   ApartmentNotifier(this._service, this._bookingService, this._storage, this.ref)
-      : super(const AsyncValue.loading()) {
-    loadApartments();
-  }
+      : super(const AsyncValue.loading());
 
+  // تحميل الشقق العامة
   Future<void> loadApartments() async {
     state = const AsyncValue.loading();
     try {
       final apartments = await _service.fetchApartments();
+      if (!mounted) return;
       state = AsyncValue.data(apartments);
     } catch (e, stackTrace) {
-      print(" Actual Error: $e");
       state = AsyncValue.error(e, stackTrace);
     }
   }
 
+  // تحميل المفضلة (تأكدي من وجود fetchFavoriteApartments في السيرفس)
+  Future<void> loadFavoriteApartments() async {
+    state = const AsyncValue.loading();
+    try {
+      final token = await _storage.read(key: 'jwt_token');
+      final apartments = await _service.fetchFavorites(token ?? "");
+      if (!mounted) return;
+      state = AsyncValue.data(apartments);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
+
+  // ميزة تبديل المفضلة (القلب)
+  Future<void> toggleFavorite(int id) async {
+    if (!state.hasValue) return;
+
+    final currentList = state.value!;
+    // تحديث الواجهة فوراً (Optimistic UI)
+    state = AsyncValue.data([
+      for (final apt in currentList)
+        if (apt.id == id) apt.copyWith(is_favorite: !apt.is_favorite) else apt
+    ]);
+
+    try {
+      final token = await _storage.read(key: 'jwt_token');
+      await _service.toggleFavorite(id, token ?? "");
+    } catch (e) {
+      // في حال فشل الاتصال، نعيد تحميل القائمة لضمان دقة البيانات
+      loadApartments();
+    }
+  }
+
+  // الفلترة
   Future<void> applyFilter({
-    String? governorate,
-    String? city,
-    double? minPrice,
-    double? maxPrice,
-    double? minSpace,
-    double? maxSpace,
+    String? governorate, String? city,
+    double? minPrice, double? maxPrice,
+    double? minSpace, double? maxSpace,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -58,19 +90,7 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
     }
   }
 
-  // Future<void> loadOwnerApartments() async {
-  //   state = const AsyncValue.loading();
-  //   try {
-  //     final token = await _storage.read(key: 'jwt_token');
-  //     if (token == null) throw Exception("User not authenticated");
-
-  //     final ownerApartments = await _service.getOwnerApartments(token);
-  //     state = AsyncValue.data(ownerApartments);
-  //   } catch (e, stackTrace) {
-  //     state = AsyncValue.error(e, stackTrace);
-  //   }
-  // }
-
+  // تقييم الشقة بعد الحجز
   Future<void> addReview(int bookingId, int stars, int apartmentId) async {
     final token = await _storage.read(key: 'jwt_token');
     if (token == null) return;
@@ -85,50 +105,42 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
 
       if (success) {
         ref.read(bookingProvider.notifier).fetchMyBookings();
-        loadApartments();
-        print("✅ تم الإرسال، التحديث يجري في الخلفية");
+        loadApartments(); // تحديث القائمة الرئيسية لتظهر النجوم الجديدة
       }
     } catch (e) {
-      print("❌ خطأ تقني: $e");
+      print("Review Error: $e");
     }
   }
+}
 
-  Future<void> deleteApartment(int id) async {
-    try {
-      final token = await _storage.read(key: 'jwt_token');
-      if (token == null) return;
+// 3. الـ Providers (الربط النهائي)
 
-
-
-      if (state.hasValue) {
-        final currentList = state.value!;
-        state = AsyncValue.data(
-          currentList.where((apartment) => apartment.id != id).toList(),
-        );
-      }
-    } catch (e, stack) {
-      print("Error deleting apartment: $e");
-    }
-  }
-} 
+// شاشة الهوم الرئيسية
 final apartmentProvider = StateNotifierProvider<ApartmentNotifier, AsyncValue<List<Apartment>>>((ref) {
-  final service = ref.watch(apartmentHomeServiceProvider);
-  final bookingService = ref.watch(bookingServiceProvider);
-  final storage = ref.watch(storageProvider);
-  return ApartmentNotifier(service, bookingService, storage, ref);
+  final notifier = ApartmentNotifier(
+    ref.watch(apartmentHomeServiceProvider),
+    ref.watch(bookingServiceProvider),
+    ref.watch(storageProvider),
+    ref,
+  );
+  notifier.loadApartments(); // يبدأ التحميل فوراً عند تشغيل الهوم
+  return notifier;
 });
 
+// شاشة المفضلة
+final favoriteApartmentsProvider = StateNotifierProvider.autoDispose<ApartmentNotifier, AsyncValue<List<Apartment>>>((ref) {
+  final notifier = ApartmentNotifier(
+    ref.watch(apartmentHomeServiceProvider),
+    ref.watch(bookingServiceProvider),
+    ref.watch(storageProvider),
+    ref,
+  );
+  notifier.loadFavoriteApartments(); // يبدأ التحميل من قائمة المفضلة
+  return notifier;
+});
+
+// تفاصيل شقة واحدة
 final apartmentDetailProvider = FutureProvider.family<ApartmentDetail, int>((ref, id) async {
   final service = ref.read(apartmentHomeServiceProvider);
   return service.fetchApartmentDetails(id);
 });
-
-// final ownerApartmentsProvider = StateNotifierProvider<ApartmentNotifier, AsyncValue<List<Apartment>>>((ref) {
-//   final service = ref.watch(apartmentHomeServiceProvider);
-//   final bookingService = ref.watch(bookingServiceProvider);
-//   final storage = ref.watch(storageProvider);
-
-  // final notifier = ApartmentNotifier(service, bookingService, storage, ref);
-  // notifier.loadOwnerApartments(); 
-  // return notifier;
-// });

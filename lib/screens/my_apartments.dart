@@ -12,7 +12,7 @@ import '../screens/add_apartment_page.dart';
 class MyApartmentsScreen extends ConsumerStatefulWidget {
   const MyApartmentsScreen({super.key});
 
-  @override // تم تصحيح هذا السطر
+  @override 
   ConsumerState<MyApartmentsScreen> createState() => _MyApartmentsScreenState();
 }
 
@@ -30,11 +30,11 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
             onPressed: () async {
               // تخزين المراجع قبل الـ await لضمان عملها
               final messenger = ScaffoldMessenger.of(context);
-              final nav = Navigator.of(ctx); // استخدام context الحوار لإغلاقه
+              final nav = Navigator.of(ctx); 
               
               await ref.read(ownerApartmentsProvider.notifier).deleteApartment(apartmentId);
               
-              if (!mounted) return; // تأكد أن الشاشة لا تزال موجودة
+              if (!mounted) return; 
               
               nav.pop();
               messenger.showSnackBar(SnackBar(content: Text(texts.addSuccess))); 
@@ -68,7 +68,7 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
             data: (apartments) {
               if (apartments.isEmpty) {
                 return ListView(
-                  physics: const AlwaysScrollableScrollPhysics(), // لضمان عمل السحب للتحديث
+                  physics: const AlwaysScrollableScrollPhysics(), 
                   children: [
                     SizedBox(height: MediaQuery.of(context).size.height * 0.3),
                     Center(child: Text(texts.noApartments)),
@@ -103,6 +103,8 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
                     city: apartment.city,
                     space: apartment.space,
                     average_rating: apartment.averageRating,
+                   
+                    onFavoriteToggle: () {  },
                   );
                 },
               );
@@ -117,7 +119,11 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AddApartmentPage()),
-        ).then((_) => ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments()),
+        ).then((_) {
+          if (mounted) {
+            ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments();
+          }
+        }),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
