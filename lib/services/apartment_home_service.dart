@@ -11,6 +11,8 @@ class ApartmentHomeService{
   Future<List<Apartment>>fetchApartments()async{
     try{
       final response =await _apiClient.dio.get('apartment/home');
+            print("Home Data Response: ${response.data}"); // هذا السطر سيخبرنا ماذا أرسل السيرفر
+
       if(response.statusCode==200){
         final List<dynamic> rawData= response.data['data'];
         print("Data from API: ${response.data}");
@@ -103,17 +105,45 @@ Future<List<Apartment>> fetchFilteredApartments({
 }
 
 
- 
+Future<bool> deleteApartment(int id, String token) async {
+  try {
+    final response = await _apiClient.dio.delete(
+      'apartment/$id', // المسار الذي حددتيه في Laravel
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    // في Laravel الـ 200 تعني نجاح الحذف
+    return response.statusCode == 200;
+  } on DioException catch (e) {
+    print("Error deleting apartment: ${e.response?.data ?? e.message}");
+    return false;
+  } catch (e) {
+    print("Unexpected error: $e");
+    return false;
+  }
+}
+
+
 Future<List<Apartment>> getOwnerApartments(String token) async { 
+  
   try {
     final response = await _apiClient.dio.get(
       'apartment/owner',
+      
       options: Options(
         headers: {
           'Authorization': 'Bearer $token', 
         },
+        
       ),
-    );
+      
+    );print("DEBUG: Owner Data -> ${response.data}");
+    print("Full API Response: ${response.data}"); // هذا سيكشف لكِ المسميات الحقيقية
     if (response.statusCode == 200) {
       final List<dynamic> rawData = response.data['data'];
       return rawData.map((json) => Apartment.fromJson(json)).toList();
@@ -125,6 +155,8 @@ Future<List<Apartment>> getOwnerApartments(String token) async {
   } catch (e) {
     throw Exception('An unknown error occurred: $e');
   }
+  
 }
+
 
 }

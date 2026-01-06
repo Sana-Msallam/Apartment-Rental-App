@@ -8,9 +8,9 @@ class ApiClient {
   ApiClient(){
     dio= Dio(
       BaseOptions(
-        baseUrl: 'http://192.168.0.113:8000/api/',
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        baseUrl: 'http://192.168.1.102:8000/api/',
+        connectTimeout: const Duration(seconds: 45),
+        receiveTimeout: const Duration(seconds: 45),
         headers: {
           'Accept': 'application/json',
         },
@@ -18,12 +18,12 @@ class ApiClient {
     );
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, hanler) async{
+        onRequest: (options, handler) async{
           String? token =await _storage.read(key: 'jwt_token');
           if(token != null){
             options.headers['Authorization'] = 'Bearer $token';
           }
-          return hanler.next(options);
+          return handler.next(options);
         },
         onError: (DioException e, handler){
           print("API Error: ${e.response?.statusCode} - ${e.message}");

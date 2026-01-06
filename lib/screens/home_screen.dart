@@ -1,7 +1,9 @@
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:apartment_rental_app/main.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/booking_screen.dart';
+import 'package:apartment_rental_app/screens/my_apartments.dart';
 import 'package:apartment_rental_app/screens/notification_screen.dart';
 import 'package:apartment_rental_app/services/local_notifications_service.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
@@ -14,6 +16,7 @@ import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/add_apartment_page.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
   @override
@@ -36,6 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>{
   // }
   @override
   Widget build(BuildContext context) {
+    final texts = ref.watch(stringsProvider); // إضافة السطر هنا
         final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -47,7 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>{
           children: [
             const SizedBox(height: 5),
             Text(
-              'Our Recommendation',
+            texts.recommendation,
               style: GoogleFonts.lato(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -59,11 +63,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>{
               child: Consumer(
                 builder: (context, ref, child) {
                   final apartmentsAsyncValue = ref.watch(apartmentProvider);
-                  
+                  final texts = ref.watch(stringsProvider);
                   return apartmentsAsyncValue.when(
-                    data: (apartments) {
-                      if (apartments.isEmpty) {
-                        return Center(child: Text('No apartments found.',
+                  data: (apartments) {
+          if (apartments.isEmpty) {
+            // الآن سيجد noApartments بدون مشاكل
+            return Center(
+              child: Text(
+                
+                texts.noApartments,
                         style: TextStyle(color: isDark ? Colors.white70 : Colors.black54),));
                       }
                       
@@ -92,8 +100,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>{
                             },
                               imagePath: apartment.imagePath,
                               price: apartment.price,
-                              governorate: apartment.governorate,
-                              city: apartment.city,
+                            governorate: texts.translate(apartment.governorate), // ترجمة المحافظة
+      city: texts.translate(apartment.city),
                               space: apartment.space,
                               average_rating: apartment.averageRating,
                             ),
@@ -233,13 +241,13 @@ color: isDark ? Colors.white : Colors.grey[800],        size: 28,
         else if (icon == Icons.all_inbox) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  const MyApartment()),
+            MaterialPageRoute(builder: (context) =>  const MyApartmentsScreen()),
           
           );
         }
         
         
-         else if (icon == Icons.person) { 
+          else if (icon == Icons.person) { 
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ProfileScreen()),

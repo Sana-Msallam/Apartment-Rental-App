@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/controller/profile_controller.dart';
 import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
@@ -83,7 +84,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
+final texts = ref.watch(stringsProvider); // السطر المطلوب
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
@@ -122,7 +123,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 const SizedBox(height: 20),
                                 Center(
                                   child: Text(
-                                    "Welcome Back",
+                                    texts.welcomeBack,
                                     style: theme.textTheme.headlineSmall
                                         ?.copyWith(
                                           fontWeight: FontWeight.bold,
@@ -133,14 +134,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 35),
-                                buildLabel(context, "Phone Number"),
+                                buildLabel(context, texts.phoneLabel),
                                 CustomTextFiled(
                                   controller: _phoneController,
                                   hintText: "09xx xxx xxx",
                                   prefixIcon: Icons.phone_android_rounded,
                                 ),
                                 const SizedBox(height: 20),
-                                buildLabel(context, "Password"),
+                                buildLabel(context, texts.passwordLabel),
                                 CustomTextFiled(
                                   controller: _passwordController,
                                   hintText: "••••••••",
@@ -154,7 +155,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                           color: theme.primaryColor,
                                         )
                                       : CustomButton(
-                                          textButton: 'LOGIN',
+                                          textButton: texts.loginButton,
                                           kPrimaryColor: isDark
                                               ? Colors.white
                                               : theme.primaryColor,
@@ -188,12 +189,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildRegisterLink(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
+    final texts = ref.watch(stringsProvider); // إضافة السطر هنا
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text(
-          'Don\'t Have An Account? ',
-          style: TextStyle(
+        Text(
+          texts.noAccount,
+          style: const TextStyle(
             color: Colors.white70,
           ),
         ),
@@ -203,7 +205,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             MaterialPageRoute(builder: (context) => RegisterPage()),
           ),
           child: Text(
-            'Register',
+            texts.registerNow,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : theme.primaryColor,

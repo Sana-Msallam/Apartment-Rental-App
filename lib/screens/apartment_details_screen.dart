@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/models/user_model.dart' show UserModel;
 import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
 import 'package:flutter/material.dart';
-import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
@@ -40,13 +40,16 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
+    // استدعاء نصوص اللغة
+    final texts = ref.watch(stringsProvider);
     final apartmentAsync = ref.watch(apartmentDetailProvider(widget.apartmentId));
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: const CustomAppBar(title: "Apartment Details"),
+      // ترجمة عنوان الأب بار
+      appBar: CustomAppBar(title: texts.apartmentDetails), 
       body: apartmentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: kPrimaryColor)),
         error: (err, stack) => Center(child: Text("Error: $err")),
@@ -64,17 +67,17 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                       const SizedBox(height: 25),
                       _buildPriceHeader(apartment),
                       const SizedBox(height: 20),
-                      _buildStatusCard(apartment, isDark, theme), // دمجنا الثيم هنا
+                      _buildStatusCard(apartment, isDark, theme, texts), // نمرر texts
                       const SizedBox(height: 25),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildFeaturesGrid(apartment),
+                            _buildFeaturesGrid(apartment, texts), // نمرر texts
                             const SizedBox(height: 30),
                             Text(
-                              "Description",
+                              texts.description, // مترجم
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white : Colors.black87,
@@ -92,12 +95,12 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                             const SizedBox(height: 30),
                             const Divider(),
                             const SizedBox(height: 20),
-                            const Text(
-                              "Property Owner",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kPrimaryColor),
+                            Text(
+                              isDark && !texts.isAr ? "Property Owner" : (texts.isAr ? "صاحب العقار" : "Property Owner"),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kPrimaryColor),
                             ),
                             const SizedBox(height: 15),
-                            _buildOwnerCard(apartment, isDark, theme),
+                            _buildOwnerCard(apartment, isDark, theme, texts),
                             const SizedBox(height: 150),
                           ],
                         ),
@@ -111,14 +114,13 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                 left: 20,
                 right: 20,
                 child: CustomButton(
-                  textButton: "Rent Now",
+                  textButton: texts.isAr ? "احجز الآن" : "Rent Now", // يمكنك إضافتها للـ AppStrings
                   kPrimaryColor: kPrimaryColor,
                   vTextColor: Colors.white,
                   onTap: () async { 
                     const storage = FlutterSecureStorage();
                     String? userData = await storage.read(key: 'jwt_token');
                     if (userData != null) {
-                      // منطق الانتقال لشاشة الحجز
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -139,7 +141,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  // --- Widgets المقسمة لترتيب الكود ---
+  // --- Widgets المعدلة لتدعم الترجمة ---
 
   Widget _buildImageSlider(ApartmentDetail apartment) {
     return Column(
@@ -188,6 +190,8 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   }
 
   Widget _buildPriceHeader(ApartmentDetail apartment) {
+        final texts = ref.watch(stringsProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Row(
@@ -199,8 +203,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
               const Icon(Icons.location_on, color: Colors.grey, size: 18),
               const SizedBox(width: 4),
               Text(
-                '${apartment.governorate}, ${apartment.city}',
-                style: AppConstants.titleText,
+'${texts.translate(apartment.governorate)}, ${texts.translate(apartment.city)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -211,7 +214,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  Widget _buildStatusCard(ApartmentDetail apartment, bool isDark, ThemeData theme) {
+  Widget _buildStatusCard(ApartmentDetail apartment, bool isDark, ThemeData theme, dynamic texts) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Container(
@@ -229,8 +232,8 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Status", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text("Verified Property", 
+                  Text(texts.isAr ? "الحالة" : "Status", style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(texts.isAr ? "عقار مؤكد" : "Verified Property", 
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : kPrimaryColor)),
                 ],
               ),
@@ -242,8 +245,10 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Title Deed", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(apartment.titleDeed, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.teal)),
+                Text(texts.titleDeedType, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+             // ابحث عن هذا السطر داخل _buildStatusCard
+                Text(texts.translate(apartment.titleDeed), // تم استخدام translate هنا
+                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.teal)),
               ],
             ),
           ],
@@ -252,22 +257,22 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  Widget _buildFeaturesGrid(ApartmentDetail apartment) {
+  Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
   return Wrap(
-    spacing: 20, // المسافة الأفقية بين العناصر
-    runSpacing: 15, // المسافة الرأسية في حال نزل لسطر جديد
+    spacing: 20, 
+    runSpacing: 15, 
     alignment: WrapAlignment.spaceBetween,
     children: [
-      _featureIcon(Icons.king_bed, "${apartment.rooms} Rooms"),
-      _featureIcon(Icons.bathtub, "${apartment.bathrooms} Baths"),
-      _featureIcon(Icons.square_foot, "${apartment.space} m²"),
-      _featureIcon(Icons.layers, "Floor ${apartment.floor}"),
-      _featureIcon(Icons.calendar_month, "Built: ${apartment.builtDate.split('-')[0]}"),
+      _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),
+      _featureIcon(Icons.bathtub, "${apartment.bathrooms} ${texts.bathrooms}"),
+      _featureIcon(Icons.square_foot, "${apartment.space} ${texts.isAr ? 'م²' : 'm²'}"),
+      _featureIcon(Icons.layers, "${texts.floor} ${apartment.floor}"),
+      _featureIcon(Icons.calendar_month, "${texts.builtYear}: ${apartment.builtDate.split('-')[0]}"),
     ],
   );
 }
 
-  Widget _buildOwnerCard(ApartmentDetail apartment, bool isDark, ThemeData theme) {
+  Widget _buildOwnerCard(ApartmentDetail apartment, bool isDark, ThemeData theme, dynamic texts) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -284,7 +289,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
         ),
         title: Text("${apartment.first_name} ${apartment.last_name}", 
           style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
-        subtitle: Text("Contact: ${apartment.owner_phone}", style: const TextStyle(color: Colors.grey)),
+        subtitle: Text("${texts.isAr ? 'تواصل' : 'Contact'}: ${apartment.owner_phone}", style: const TextStyle(color: Colors.grey)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

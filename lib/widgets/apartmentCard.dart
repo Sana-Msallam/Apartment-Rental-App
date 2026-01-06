@@ -56,11 +56,13 @@ class Apartmentcard extends StatelessWidget {
                   // عرض الصورة
                   CachedNetworkImage(
                     imageUrl: imagePath,
+                    
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     httpHeaders: const {'Connection': 'keep-alive'},
                     placeholder: (context, url) => Container(
+                      
                       height: 150,
                       color: Colors.grey[200],
                       child: const Center(child: CircularProgressIndicator()),
