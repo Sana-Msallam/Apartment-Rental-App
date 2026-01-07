@@ -1,14 +1,16 @@
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
 import 'package:apartment_rental_app/widgets/date_selector.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 
-class BookingApp extends StatefulWidget {
+class BookingApp extends ConsumerStatefulWidget {
   final int apartmentId;
   final int pricePerNight;
   final int? bookingId;
@@ -25,10 +27,10 @@ class BookingApp extends StatefulWidget {
   });
 
   @override
-  State<BookingApp> createState() => _BookingAppState();
+  ConsumerState<BookingApp> createState() => _BookingAppState();
 }
 
-class _BookingAppState extends State<BookingApp> {
+class _BookingAppState extends ConsumerState<BookingApp> {
   DateTime? _startDate;
   DateTime? _endDate;
 
@@ -104,7 +106,7 @@ class _BookingAppState extends State<BookingApp> {
       return;
     }
 
-    const storage = FlutterSecureStorage();
+     final storage = ref.read(storageProvider);
     String? token = await storage.read(key: 'jwt_token');
 
     if (token == null) {
@@ -125,7 +127,7 @@ class _BookingAppState extends State<BookingApp> {
 
   void _handleUpdate(String token, String start, String end) async {
     _showLoadingDialog();
-    bool success = await BookingService().updateBookingDate(
+     bool success = await ref.read(bookingServiceProvider).updateBookingDate(
       widget.bookingId!,
       start,
       end,
@@ -151,8 +153,9 @@ class _BookingAppState extends State<BookingApp> {
  void _handleNewBooking(String token, String start, String end) async {
   _showLoadingDialog();
   try {
+    final bookingService = ref.read(bookingServiceProvider);
     // استدعاء الخدمة (التي قمنا بتعديلها لتعيد رقم أو نص)
-    final result = await BookingService().calculatePrice(
+    final result = await bookingService.calculatePrice(
       apartmentId: widget.apartmentId,
       startDate: start,
       endDate: end,
@@ -300,7 +303,7 @@ onPressed: () async {
   _showLoadingDialog(); // إظهار لودينج
 
   try {
-    bool success = await BookingService().confirmBooking(
+    bool success = await ref.read(bookingServiceProvider).confirmBooking(
       apartmentId: widget.apartmentId,
       startDate: start,
       endDate: end,

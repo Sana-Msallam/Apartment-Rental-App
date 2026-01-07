@@ -11,49 +11,45 @@ import '../widgets/custom_app_bar.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 
-class ProfileScreen extends ConsumerWidget {
-  const ProfileScreen({super.key});
+
 
 Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
   try {
-    const storage = FlutterSecureStorage();
-    
+    final storage = ref.read(storageProvider);
+    final apiService = ref.read(apiServiceProvider);
 
-    String? token = await storage.read(key: 'jwt_token');
+     String? token = await storage.read(key: 'jwt_token');
 
-
-    await storage.delete(key: 'jwt_token');
+    if (token != null) {
+      try {
+        await apiService.logout(); 
+        debugPrint("Backend logout successful");
+      } catch (e) {
+        debugPrint("Backend logout failed but we will continue local logout: $e");
+      }
+    }
+  await storage.delete(key: 'jwt_token');
     
     ref.invalidate(profileProvider);
 
+    if (!context.mounted) return;
 
-    if (context.mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()), 
-        (route) => false, 
-      );
-    }
-
-    if (token != null) {
-      ApiService().logout(token).then((success) {
-        debugPrint("Backend logout status: $success");
-      }).catchError((e) {
-        debugPrint("Backend logout background error: $e");
-      });
-    }
-
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
+    
+  
   } catch (e) {
     debugPrint("Logout Error: $e");
-    if (context.mounted) {
-       Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) =>  LoginPage()),
-        (route) => false,
-      );
-    }
   }
 }
+
+
+class ProfileScreen extends ConsumerWidget {
+  const ProfileScreen({super.key});
+
 
   void _showEditDialog(BuildContext context, UserModel user, bool isDark) {
     showDialog(
@@ -98,10 +94,6 @@ Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: Stack(
         children: [
-       
-              
-            
-
           Column(
             children: [
               const CustomAppBar(title: "My Profile"),
@@ -163,7 +155,7 @@ Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
               child: CircleAvatar(
                 radius: 54,
                 backgroundColor: theme.cardColor,
-                backgroundImage: user.personalPhoto != null ? NetworkImage(user.personalPhoto!) : null,
+                backgroundImage: user.personalPhoto != null && user.personalPhoto!.isNotEmpty ? NetworkImage(user.personalPhoto!) : null,
                 child: user.personalPhoto == null
                     ? Icon(Icons.person, size: 50, color: isDark ? Colors.white : theme.primaryColor)
                     : null,
@@ -294,30 +286,28 @@ Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
       ),
     );
   }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref, bool isDark) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).cardColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: Theme.of(context).dividerColor), 
+void _showLogoutDialog(BuildContext pageContext, WidgetRef ref, bool isDark) {
+  showDialog(
+    context: pageContext,
+    builder: (dialogContext) => AlertDialog( 
+      title: const Text("Logout"),
+      content: const Text("Are you sure?"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext), 
+          child: const Text("No"),
         ),
-        title: const Text("Logout"),
-        content: const Text("Are you sure?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("No")),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              handleLogout(context, ref);
-            },
-            child: const Text("Yes", style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+        TextButton(
+          onPressed: () {
+            Navigator.pop(dialogContext);
+            handleLogout(pageContext, ref); 
+          },
+          child: const Text("Yes", style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+
   }
 
   Widget _buildMenuTile({

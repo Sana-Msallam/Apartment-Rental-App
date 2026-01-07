@@ -23,8 +23,6 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final storage = const FlutterSecureStorage();
-  final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
  void _handleLogin() async {
@@ -38,16 +36,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     setState(() => _isLoading = true);
     try {
-      final user = await _apiService.login(phone, password);
+      final user = await ref.read(apiServiceProvider).login(phone, password);
 
       if (user != null && user.token != null) { 
         // 1. حفظ التوكن أولاً
-        await storage.write(key: 'jwt_token', value: user.token);
-
+        await ref.read(storageProvider).write(key: 'jwt_token', value: user.token);
+        print("✅ Token saved successfully: ${user.token}");  
         // 2. تحديث الـ ProfileProvider يدوياً بالتوكن الجديد
         // هذه الخطوة تضمن أن البروفايل سيُجلب فوراً دون انتظار إعادة تشغيل التطبيق
         await ref.read(profileProvider.notifier).getProfile(user.token!);
-
         if (!mounted) return;
         
         // 3. الانتقال للشاشة الرئيسية

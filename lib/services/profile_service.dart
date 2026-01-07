@@ -1,18 +1,12 @@
 import 'dart:io';
 import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/services/api_client.dart';
 import 'package:dio/dio.dart';
 
 class ProfileService {
-  final String _baseUrl = 'http://192.168.0.107:8000/api';
-
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 60),
-      receiveTimeout: const Duration(seconds: 60),
-      headers: {'Accept': 'application/json'},
-    //  validateStatus: (status) => status! < 500,
-    ),
-  );
+final ApiClient _apiClient;
+ProfileService(this._apiClient);
+  Dio get _dio => _apiClient.dio;
 
   void _handleDioError(DioException e) {
     print("Server Response Error: ${e.response?.data}");
@@ -27,13 +21,7 @@ class ProfileService {
   Future<UserModel?> fetchUserProfile(String token) async {
     try {
       final response = await _dio.get(
-        '$_baseUrl/profile',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        ),
+        'profile',
       );
       print("Server Raw Data: ${response.data}");    
       if (response.statusCode == 200) {

@@ -1,18 +1,15 @@
 import 'dart:io';
 import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/services/api_client.dart';
 import 'package:dio/dio.dart';
+import '../models/booking_request_model.dart';
 
 class BookingService {
-  final String _baseUrl = 'http://192.168.0.107:8000/api';
+  final ApiClient _apiClient;
+  BookingService(this._apiClient);
+  Dio get _dio => _apiClient.dio;
 
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 60),
-      receiveTimeout: const Duration(seconds: 60),
-      headers: {'Accept': 'application/json'},
-      validateStatus: (status) => status! < 500,
-    ),
-  );
+ 
 
  // 1. تعديل دالة حساب السعر لتعيد إما السعر أو رسالة الخطأ
 Future<dynamic> calculatePrice({
@@ -23,7 +20,7 @@ Future<dynamic> calculatePrice({
 }) async {
   try {
     final response = await _dio.get(
-      '$_baseUrl/booking/calculate',
+      'booking/calculate',
       queryParameters: {
         'apartment_id': apartmentId,
         'start_date': startDate,
@@ -51,7 +48,7 @@ Future<bool> confirmBooking({
 }) async {
   try {
     final response = await _dio.post(
-      '$_baseUrl/booking',
+      'booking',
       data: {
         'apartment_id': apartmentId,
         'start_date': startDate,
@@ -79,7 +76,7 @@ Future<bool> confirmBooking({
   Future<dynamic> getMyBookings(String token) async {
     try {
       final response = await _dio.get(
-        '$_baseUrl/booking',
+        'http://192.168.0.105:8000/api/booking',
         options: Options(
           headers: {
             'Authorization': 'Bearer ${token.trim()}',
@@ -100,7 +97,7 @@ Future<bool> confirmBooking({
   Future<bool> cancelBookings(int bookingId, String token) async {
     try {
       final response = await _dio.patch(
-        '$_baseUrl/booking/$bookingId/cancel',
+        'booking/$bookingId/cancel',
         options: Options(
           headers: {
             'Authorization': 'Bearer ${token.trim()}',
@@ -127,7 +124,7 @@ Future<bool> confirmBooking({
   ) async {
     try {
       final response = await _dio.patch(
-        '$_baseUrl/booking/$bookingId/update',
+        'booking/$bookingId/update',
         data: {'start_date': start, 'end_date': end},
 
         options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -147,7 +144,7 @@ Future<bool> confirmBooking({
   }) async {
     try {
       final response = await _dio.post(
-        '$_baseUrl/review',
+        'review',
         data: {
           'booking_id': bookingId,
           'apartment_id': apartmentId,
@@ -162,23 +159,50 @@ Future<bool> confirmBooking({
     }
   }
 
+Future<List<BookingRequestModel>> fetchAllBookingRequests() async{
+  try{
+      final response =await _apiClient.dio.get('booking/request');
+      if(response.statusCode==200){
+        final List<dynamic> rawData= response.data['data'];
+        print("Data from API: ${response.data}");
+        return rawData.map((json)=> BookingRequestModel.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load apartments');
+      }
 
-  Future<bool> rejectBooking(int bookingId, String token) async {
-  try {
-    final response = await _dio.patch(
-      '$_baseUrl/booking/$bookingId/reject', 
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer ${token.trim()}',
-          'Accept': 'application/json',
-        },
-      ),
-    );
-
-    return response.statusCode == 200;
+    }on DioException catch(e){
+      throw Exception('Failed to load apartments: ${e.message}');
+    } catch (e){
+      throw Exception('An unknown error occurred: $e');
+    }
+}
+Future<void> acceptBooking(int bookingId) async{
+  try{
+    final response = await _apiClient.dio.patch('booking/$bookingId/accept');
+    if (response.statusCode == 200) {
+      print("Booking accepted successfully");
+    } else {
+      throw Exception('Failed to accept booking');
+    }
   } on DioException catch (e) {
-    print("خطأ عند رفض الحجز: ${e.response?.data}");
-    return false;
+    throw Exception('Error: ${e.message}');
+  }
+  }
+  
+Future<void> rejectBooking(int bookingId) async{
+  try{
+    final response = await _apiClient.dio.patch('booking/$bookingId/reject');
+    if (response.statusCode == 200) {
+      print("Booking rejected successfully");
+    } else {
+      throw Exception('Failed to reject booking');
+    }
+  } on DioException catch (e) {
+    throw Exception('Error: ${e.message}');
+  }
+    
   }
 }
-}
+
+
+

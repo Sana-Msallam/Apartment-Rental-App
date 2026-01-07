@@ -5,7 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/apartment_home_model.dart';
 import '../services/api_client.dart';
 class ApartmentHomeService{
-  final ApiClient _apiClient = ApiClient();
+  final ApiClient _apiClient ;
+  ApartmentHomeService(this._apiClient);
   
   Future<List<Apartment>>fetchApartments()async{
     try{

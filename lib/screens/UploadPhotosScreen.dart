@@ -33,7 +33,6 @@ class UploadPhotosScreen extends ConsumerStatefulWidget {
 }
 
 class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
-  final ApiService _apiService = ApiService();
   File? personalImage;
   File? idImage;
   bool _isLoading = false;
@@ -52,7 +51,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final response = await _apiService.register(
+      final response = await ref.read(apiServiceProvider).register(
         firstName: widget.firstName,
         lastName: widget.lastName,
         phone: widget.phone,

@@ -246,12 +246,12 @@ color: isDark ? Colors.white : Colors.grey[800],        size: 28,
           
           );
         }
-        // else if (icon == Icons.all_inbox) {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(builder: (context) =>  const MyApartmentsScreen()),
-        //   );
-        // }
+        else if (icon == Icons.all_inbox) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>  const MyApartmentsScreen()),
+          );
+         }
          else if (icon == Icons.person) { 
           Navigator.push(
             context,

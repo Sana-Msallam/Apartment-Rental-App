@@ -1,14 +1,18 @@
 // 1. تأكدي أن الـ Provider ينشئ ProfileService
 import 'package:apartment_rental_app/models/user_model.dart';
+import 'package:apartment_rental_app/services/api_client.dart';
+import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/services/profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-final profileServiceProvider = Provider((ref) => ProfileService());
 
-final storageProvider = Provider((ref) => const FlutterSecureStorage());
-
+final storageProvider = Provider((ref) => const FlutterSecureStorage(
+  aOptions: AndroidOptions(
+    encryptedSharedPreferences: true,
+  ),
+));
 class ProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   final ProfileService _service;
   final FlutterSecureStorage _storage;
@@ -45,15 +49,25 @@ Future<void> updateTokenAndFetch(String token) async {
     }
   }
 }
+final apiClientProvider = Provider((ref) => ApiClient());
 
-final profileProvider =
-    StateNotifierProvider<ProfileNotifier, AsyncValue<UserModel?>>((ref) {
-      final service = ref.watch(profileServiceProvider);
-      final storage = ref.watch(storageProvider);
-      return ProfileNotifier(
-        service,
-        storage,
-      );
+final profileServiceProvider = Provider((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return ProfileService(apiClient); 
+});
       
-       
+      
+    // هذا البروفايدر هو الذي سيحل المشكلة
+final apiServiceProvider = Provider<ApiService>((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return ApiService(apiClient);
+});
+final profileProvider = StateNotifierProvider<ProfileNotifier, AsyncValue<UserModel?>>((ref) {
+    final service = ref.watch(profileServiceProvider);
+    final storage = ref.watch(storageProvider);
+    return ProfileNotifier(service,storage,
+
+      );
+
     });
+    

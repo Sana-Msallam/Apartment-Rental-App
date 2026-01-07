@@ -111,26 +111,41 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                 left: 20,
                 right: 20,
                 child: CustomButton(
-                  textButton: "Rent Now",
-                  kPrimaryColor: kPrimaryColor,
-                  vTextColor: Colors.white,
-                  onTap: () async { 
-                    const storage = FlutterSecureStorage();
-                    String? userData = await storage.read(key: 'jwt_token');
-                    if (userData != null) {
-                      // منطق الانتقال لشاشة الحجز
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookingApp(
-                            apartmentId: apartment.id,
-                            pricePerNight: apartment.price,
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
+  textButton: "Rent Now",
+  kPrimaryColor: kPrimaryColor,
+  vTextColor: Colors.white,
+  onTap: () async { 
+    print("Button Clicked");
+    // 1. الوصول للـ storage عبر الـ Provider لضمان نفس الإعدادا  
+  // محاولة قراءة التوكن بكل المفاتيح المحتملة
+  final storage = ref.read(storageProvider);
+    String? token = await storage.read(key: 'jwt_token');
+    print("DEBUG: Final Token Check: $token");
+    if (token != null&& token.isNotEmpty ) {
+      // 2. إذا كان التوكن موجوداً، ننتقل لواجهة الحجز
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BookingApp(
+            apartmentId: apartment.id,
+            pricePerNight: apartment.price,
+          ),
+        ),
+      );
+    } else {
+      print("DEBUG: Token is null or empty!");
+      // 3. إذا كان التوكن غير موجود، يجب توجيه المستخدم لتسجيل الدخول
+      ScaffoldMessenger.of(context).showSnackBar(
+       const SnackBar(
+        content: Text("Access Denied: Please login again"),
+        backgroundColor: Colors.red,
+      ),
+      );
+      // يمكنك هنا عمل Navigator لشاشة الـ Login
+    }
+  },
+),
               ),
             ],
           );

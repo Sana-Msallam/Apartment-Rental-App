@@ -1,5 +1,6 @@
 import 'package:apartment_rental_app/controller/booking_controller.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
+import 'package:apartment_rental_app/services/api_client.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,10 +8,25 @@ import '../models/apartment_home_model.dart';
 import '../services/apartment_home_service.dart';
 import '../services/add_apartment_service.dart';
 
-final apartmentHomeServiceProvider = Provider((ref) => ApartmentHomeService());
-final bookingServiceProvider = Provider((ref) => BookingService());
-final storageProvider = Provider((ref) => const FlutterSecureStorage());
+final apiClientProvider= Provider(( ref)=> ApiClient());
+final bookingServiceProvider = Provider((ref) {
+  final apiClient = ref.watch(apiClientProvider); // جلب الـ apiClient أولاً
+  return BookingService(apiClient); // تمريره للسيرفس
+});
 
+// تأكدي أيضاً من تحديث ApartmentHomeService إذا كان يعتمد على ApiClient
+final apartmentHomeServiceProvider = Provider((ref) {
+  final apiClient = ref.watch(apiClientProvider);
+  return ApartmentHomeService(apiClient); 
+});
+
+final storageProvider = Provider<FlutterSecureStorage>((ref) {
+  return const FlutterSecureStorage(
+    aOptions: AndroidOptions(
+      encryptedSharedPreferences: true, // هنا نضعها لتوحيد القراءة والكتابة
+    ),
+  );
+});
 class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
   final ApartmentHomeService _service;
   final BookingService _bookingService;
