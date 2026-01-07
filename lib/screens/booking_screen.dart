@@ -1,4 +1,5 @@
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
@@ -12,7 +13,7 @@ const Color kPrimaryColor = Color(0xFF234F68);
 
 class BookingApp extends ConsumerStatefulWidget {
   final int apartmentId;
-  final int pricePerNight;
+  final double pricePerNight;
   final int? bookingId;
   final DateTime? initialStart;
   final DateTime? initialEnd;
@@ -63,8 +64,9 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   }
 
   Future<void> _selectEndDate() async {
+   final texts = ref.read(stringsProvider); // جلب النصوص
     if (_startDate == null) {
-      _showErrorSnackBar('Please select the start date first.');
+      _showErrorSnackBar(texts.selectStartFirstError); // استخدام المترجم
       return;
     }
     final DateTime minRequiredEndDate = DateTime(
@@ -101,8 +103,9 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   }
 
   void _submitBooking() async {
+   final texts = ref.read(stringsProvider); // جلب النصوص
     if (_startDate == null || _endDate == null) {
-      _showErrorSnackBar('Please select both dates.');
+      _showErrorSnackBar(texts.datesRequiredError); // مترجم
       return;
     }
 
@@ -110,7 +113,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
     String? token = await storage.read(key: 'jwt_token');
 
     if (token == null) {
-      _showErrorSnackBar('Please login first.');
+_showErrorSnackBar(texts.loginRequiredError); // مترجم
       Navigator.pushNamed(context, '/login');
       return;
     }
@@ -126,6 +129,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   }
 
   void _handleUpdate(String token, String start, String end) async {
+    final texts = ref.read(stringsProvider);
     _showLoadingDialog();
      bool success = await ref.read(bookingServiceProvider).updateBookingDate(
       widget.bookingId!,
@@ -137,20 +141,22 @@ class _BookingAppState extends ConsumerState<BookingApp> {
     if (!mounted) return;
     Navigator.pop(context);
 
-    if (success) {
+   if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Update Successful!'),
+        SnackBar(
+          content: Text(texts.bookingSuccess), // مترجم
           backgroundColor: Colors.green,
         ),
       );
       Navigator.pop(context, true);
     } else {
-      _showErrorSnackBar('Update failed. Check dates availability.');
+_showErrorSnackBar(texts.addError); // مترجم
     }
   }
 
  void _handleNewBooking(String token, String start, String end) async {
+final texts = ref.read(stringsProvider);
+
   _showLoadingDialog();
   try {
     final bookingService = ref.read(bookingServiceProvider);
@@ -172,11 +178,11 @@ class _BookingAppState extends ConsumerState<BookingApp> {
       // إذا كان نص، فهذه هي رسالة الـ Exception من Laravel
       _showErrorSnackBar(result); 
     } else {
-      _showErrorSnackBar('Dates unavailable or property ownership issue.');
+_showErrorSnackBar(texts.addError); // مترجم
     }
   } catch (e) {
     if (mounted) Navigator.pop(context);
-    _showErrorSnackBar('Server error. Please check your connection.');
+_showErrorSnackBar(texts.serverError); // مترجم
   }
 }
   void _showLoadingDialog() {
@@ -202,7 +208,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
     String token,
   ) {
     final theme = Theme.of(context);
-
+final texts = ref.read(stringsProvider); // جلب النصوص
     showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -235,7 +241,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
               child: Column(
                 children: [
                   Text(
-                    'Confirm Reservation',
+texts.confirmBooking, // مترجم: تأكيد الحجز
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.primaryColor,
@@ -244,22 +250,11 @@ class _BookingAppState extends ConsumerState<BookingApp> {
                   const SizedBox(height: 20),
 
                   // عرض الفترة الزمنية بتنسيق نظيف
-                  _buildInfoRow(
-                    Icons.calendar_month,
-                    "Booking Period",
-                    "$start ➔ $end",
-                    theme,
-                  ),
+                 _buildInfoRow(Icons.calendar_month, texts.bookingPeriod, "$start ➔ $end", theme), // مترجم
                   const Divider(height: 30, thickness: 0.5),
 
                   // عرض السعر بشكل بارز
-                  _buildInfoRow(
-                    Icons.payments_outlined,
-                    "Total Amount",
-                    "\$${price.toStringAsFixed(2)}",
-                    theme,
-                    isPrice: true,
-                  ),
+                _buildInfoRow(Icons.payments_outlined, texts.totalAmount, "\$${price.toStringAsFixed(2)}", theme, isPrice: true), // مترجم
                 ],
               ),
             ),
@@ -274,7 +269,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
                   TextButton(
                     onPressed: () => Navigator.pop(dialogContext),
                     child: Text(
-                      "Cancel",
+                      texts.cancel,
                       style: TextStyle(
                         color: theme.hintColor.withOpacity(0.7),
                         fontWeight: FontWeight.w500,
@@ -328,8 +323,8 @@ onPressed: () async {
   }
 
                     },
-                    child: const Text(
-                      'Confirm',
+                    child:  Text(
+                      texts.confirm,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -392,10 +387,10 @@ onPressed: () async {
 
   @override
   Widget build(BuildContext context) {
+    final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final dynamicTitleColor = isDark ? Colors.white : theme.primaryColor;
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -421,30 +416,25 @@ onPressed: () async {
                     children: [
                       const SizedBox(height: 15),
                       Text(
-                        widget.bookingId == null
-                            ? "Select Stay Period"
-                            : "Edit Stay Period",
+                       widget.bookingId == null
+                ? texts.selectStayPeriod  // مفتاح العنوان من ملف اللغة
+                : texts.editStayPeriod,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: dynamicTitleColor,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "Minimum reservation period is one month.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white70),
-                      ),
+                      
                       const SizedBox(height: 30),
                       DateSelector(
-                        title: 'Check-in',
-                        date: _startDate,
+title: texts.checkInDate, // "تاريخ الدخول" مترجمة                     
+   date: _startDate,
                         onTap: _selectStartDate,
                       ),
                       const SizedBox(height: 20),
                       DateSelector(
-                        title: 'Check-out',
+                        title: texts.checkOutDate,
                         date: _endDate,
                         onTap: _selectEndDate,
                       ),
@@ -452,8 +442,8 @@ onPressed: () async {
                       CustomButton(
                         onTap: _submitBooking,
                         textButton: widget.bookingId == null
-                            ? 'Confirm Booking'
-                            : 'Update Dates',
+                          ? texts.confirmBooking // "تأكيد الحجز" مترجمة
+                : texts.updateBooking,
                         kPrimaryColor: isDark
                             ? Colors.white
                             : theme.primaryColor,

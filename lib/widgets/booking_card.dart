@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 
-class BookingCard extends StatelessWidget {
+class BookingCard extends ConsumerWidget {
   final dynamic booking;
   final bool isCancelled;
   final bool isHistory;
@@ -38,31 +40,40 @@ class BookingCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
     final String currentStatus = (status ?? "pending").toLowerCase();
-    
-    final Color mainTextColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
     final Color secondaryTextColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
-
-    Color statusColor;
-    switch (currentStatus) {
+Color statusColor;
+String statusLabel;
+   switch (currentStatus) {
       case 'completed':
         statusColor = Colors.green;
+        statusLabel = texts.history; // "السجل" أو "مكتملة"
         break;
       case 'accepted':
         statusColor = Colors.blue;
+        statusLabel = texts.activeBookings; // "نشطة" أو "مقبولة"
         break;
       case 'pending':
         statusColor = Colors.orange;
+        statusLabel = texts.activeBookings; // "نشطة" أو "قيد الانتظار"
         break;
-      case 'rejected':
+      case 'rejected': // هنا التمييز للمرفوضة
         statusColor = Colors.redAccent;
+        // إذا كانت الواجهة إنجليزية يكتب Rejected وإذا عربية يكتب مرفوضة
+        statusLabel = texts.addSuccess == "Success" ? "Rejected" : "مرفوضة"; 
+        break;
+      case 'cancelled': // هنا التمييز للملغية
+        statusColor = Colors.redAccent;
+        // نستخدم texts.cancel لأنه غالباً يحتوي على كلمة "إلغاء" أو "Cancelled"
+        statusLabel = texts.cancel; 
         break;
       default:
         statusColor = Colors.grey;
+        statusLabel = currentStatus.toUpperCase();
     }
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -91,22 +102,19 @@ class BookingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Booking #${booking['id']}",
+                        // 1. ترجمة كلمة حجز (تستخدم My Bookings من ملفك)
+                        "${texts.myBookings} #${booking['id']}",
                         style: TextStyle(
-                          color: theme.brightness == Brightness.dark 
-                              ? Colors.white 
-                              : kPrimaryColor,
+                          color: theme.brightness == Brightness.dark ? Colors.white : kPrimaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        "${formatDate(booking['start_date'])} to ${formatDate(booking['end_date'])}",
-                        style: TextStyle(
-                          color: secondaryTextColor, 
-                          fontSize: 13,
-                        ),
+                        // 2. ترجمة الرابط بين التواريخ (to أو إلى)
+                        "${formatDate(booking['start_date'])} ${texts.cancel == "Cancel" ? "to" : "إلى"} ${formatDate(booking['end_date'])}",
+                        style: TextStyle(color: secondaryTextColor, fontSize: 13),
                       ),
                     ],
                   ),
@@ -118,12 +126,8 @@ class BookingCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    currentStatus.toUpperCase(),
-                    style: TextStyle(
-                      color: statusColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
+                    statusLabel, // 3. الحالة مترجمة بالكامل
+                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10),
                   ),
                 ),
               ],
@@ -137,27 +141,23 @@ class BookingCard extends StatelessWidget {
                     ElevatedButton.icon(
                       onPressed: onReview,
                       icon: const Icon(Icons.star_rate, size: 16),
-                      label: const Text("Rate Now"),
+                      // 4. ترجمة زر قيم الآن
+                      label: Text(texts.addSuccess == "Success" ? "Rate Now" : "قيم الآن"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,
-                        textStyle: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     )
                   else
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.check_circle, color: Colors.green, size: 18),
-                        SizedBox(width: 4),
+                        const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                        const SizedBox(width: 4),
                         Text(
-                          "Rated",
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          // 5. ترجمة كلمة "تم التقييم"
+                          texts.addSuccess == "Success" ? "Rated" : "تم التقييم",
+                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                         ),
                       ],
                     )
@@ -169,23 +169,20 @@ class BookingCard extends StatelessWidget {
                     children: [
                       TextButton(
                         onPressed: onCancel,
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(color: Colors.redAccent),
+                        child: Text(
+                          texts.cancel, // 6. زر الإلغاء مترجم أصلاً في ملفك
+                          style: const TextStyle(color: Colors.redAccent),
                         ),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: onEdit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.brightness == Brightness.dark 
-                              ? Colors.white 
-                              : kPrimaryColor,
-                          foregroundColor: theme.brightness == Brightness.dark 
-                              ? kPrimaryColor 
-                              : Colors.white,
+                          backgroundColor: theme.brightness == Brightness.dark ? Colors.white : kPrimaryColor,
+                          foregroundColor: theme.brightness == Brightness.dark ? kPrimaryColor : Colors.white,
                         ),
-                        child: const Text("Edit"),
+                        // 7. ترجمة زر التعديل
+                        child: Text(texts.addSuccess == "Success" ? "Edit" : "تعديل"),
                       ),
                     ],
                   ),

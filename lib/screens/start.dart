@@ -1,7 +1,9 @@
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // يجب استيراد شاشتك الرئيسية (واجهة الشقق)
 // import 'package:apartment_rental_app/screens/home_screen.dart';
@@ -15,7 +17,7 @@ const Color kGradientColorStart = Color(0x00234F68);
 const Color kGradientColorMid = Color(0x66234F68);
 const Color kGradientColorEnd = Color(0xCC234F68);
 
-class StartPage extends StatelessWidget {
+class StartPage extends ConsumerWidget {
   StartPage({super.key});
 
   final storage = const FlutterSecureStorage(
@@ -43,9 +45,8 @@ class StartPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+Widget build(BuildContext context, WidgetRef ref){    final isDark = Theme.of(context).brightness == Brightness.dark;
+final texts = ref.watch(stringsProvider);
     const Color myBlue = Color(0xFF234F68);
 
     return Scaffold(
@@ -93,7 +94,7 @@ class StartPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  "Find your perfect home easily",
+                  texts.startDescription,
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 18,
@@ -107,7 +108,7 @@ class StartPage extends StatelessWidget {
                     vertical: 40,
                   ),
                   child: CustomButton(
-                    textButton: 'Get Started',
+                    textButton: texts.getStarted,
                     kPrimaryColor: isDark ? Colors.white : myBlue,
                     vTextColor: isDark ? const Color(0xFF424242) : Colors.white,
                     width: double.infinity,

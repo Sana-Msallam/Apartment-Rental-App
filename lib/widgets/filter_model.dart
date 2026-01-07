@@ -1,48 +1,50 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+
+
 class FilterModel extends ConsumerStatefulWidget {
   const FilterModel({super.key});
 
   @override
-  ConsumerState<FilterModel> createState() => _FilterModelState(); 
-    
-  }
-  class _FilterModelState extends ConsumerState<FilterModel>{
-    String _selectedGovernorate='All';
-    String _selectedCity='All';
-    RangeValues _priceRange= const RangeValues(1000, 50000);
-    
-    RangeValues _spaceRange= const RangeValues(50, 500);
+  ConsumerState<FilterModel> createState() => _FilterModelState();
+} 
+
+class _FilterModelState extends ConsumerState<FilterModel> {
+  String _selectedGovernorate = 'All';
+  String _selectedCity = 'All';
+  RangeValues _priceRange = const RangeValues(1000, 50000);
+  RangeValues _spaceRange = const RangeValues(50, 500);
+
   final List<String> _governorates = [
     'All', 'Damascus', 'Aleppo', 'Homs', 'Hama', 'Draa', 'Latakia', 'Tartous', 'Suwayda', 'Deir ez-Zor', 'Idlib', 'Raqqa'
   ];
-  
-  final Map<String, List<String>> _citiesByGovernorate = {
-    'Damascus': ['All', 'Midan', 'Mazzeh', 'Afif'],
-    'Aleppo': ['All', 'As-Safira', 'Al-Bab', 'Manbij'],
-    'Homs': ['All', 'Talkalakh', 'Al-Qusayr', 'Al-Rastan'],
-    'Hama': ['All', 'Salamiyah', 'Masyaf', 'Al-Hamraa'],
-    'Draa': ['All', 'Bosra', 'Al-Hirak', 'Nawa'],
-    'Latakia': ['All', 'Kessab', 'Jableh', 'Mashqita'],
-    'Tartous': ['All', 'Baniyas', 'Arwad', 'Safita'],
-    'Suwayda': ['All', 'Shahba', 'Salkhad', 'Shaqqa'],
-    'Deir ez-Zor': ['All', 'Mayadin', 'Abu Kamal', 'Al-Asharah'],
-    'Idlib': ['All', 'Ariha', 'Jisr ash-Shughur', 'Maarat al-Numan'],
-    'Raqqa': ['All', 'Al-Thawrah', 'Al-Karamah', 'Al-Mansoura'],
-  };
 
   @override
   Widget build(BuildContext context) {
-    // تحديد إذا كان الوضع ليلي أو نهاري
+    final texts = ref.watch(stringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // تجهيز القوائم المترجمة
+    List<String> govList = [texts.all, ...texts.citiesByGovernorate.keys];
+
+    List<String> cityList = [texts.all];
+    if (_selectedGovernorate != texts.all) {
+      cityList.addAll(texts.citiesByGovernorate[_selectedGovernorate] ?? []);
+    }
+
+    // التأكد من أن القيم المختارة موجودة في القوائم الجديدة لتجنب الأخطاء
+    if (!govList.contains(_selectedGovernorate)) _selectedGovernorate = texts.all;
+    if (!cityList.contains(_selectedCity)) _selectedCity = texts.all;
+
+
 
     return Container(
       decoration: BoxDecoration(
-        // تعديل لون الخلفية ليتغير مع الثيم
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
@@ -52,7 +54,6 @@ class FilterModel extends ConsumerStatefulWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // شريط السحب العلوي (الـ Handle)
             Center(
               child: Container(
                 width: 40,
@@ -65,37 +66,38 @@ class FilterModel extends ConsumerStatefulWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Filter',
+              texts.isAr ? "فلترة" : "Filter",
               style: AppConstants.titleText.copyWith(
                 color: isDark ? Colors.white : AppConstants.primaryColor,
               ),
             ),
             const SizedBox(height: 20),
             
-            _buildSectionTitle('Governorate', isDark),
+            _buildSectionTitle(texts.governorate, isDark),
             const SizedBox(height: 10),
-            _buildGovernorateDropdown(isDark),
+            _buildGovernorateDropdown(isDark, govList, texts),
 
             const SizedBox(height: 20),
-            _buildSectionTitle('City', isDark),
+            _buildSectionTitle(texts.city, isDark),
             const SizedBox(height: 10),
-            _buildCityDropdown(isDark),
+            _buildCityDropdown(isDark, cityList, texts), 
 
             const SizedBox(height: 20),
-            _buildSectionTitle('Price Range', isDark),
+            _buildSectionTitle(texts.priceRange, isDark),
             const SizedBox(height: 10),
             _buildPriceRangeSlider(isDark),
 
             const SizedBox(height: 20),
-            _buildSectionTitle('Space (m²)', isDark),
+            _buildSectionTitle(texts.spaceRange, isDark),
             const SizedBox(height: 10),
-            _buildSpaceRangeSlider(isDark), // تمرير isDark هنا أيضاً
+            _buildSpaceRangeSlider(isDark),
             const SizedBox(height: 30),
 
             Row(
               children: [
-                // زر الـ Reset
                 Expanded(
+
+
                   child: OutlinedButton(
                     onPressed: () {
                       ref.read(apartmentProvider.notifier).loadApartments();
@@ -111,7 +113,7 @@ class FilterModel extends ConsumerStatefulWidget {
                       ),
                     ),
                     child: Text(
-                      'Reset',
+                      texts.isAr ? "إعادة تعيين" : "Reset", 
                       style: AppConstants.secondText.copyWith(
                         color: isDark ? Colors.white70 : AppConstants.primaryColor,
                       ),
@@ -119,13 +121,16 @@ class FilterModel extends ConsumerStatefulWidget {
                   ),
                 ),
                 const SizedBox(width: 15),
-                // زر الـ Apply
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
+                      // التحويل العكسي للسيرفر
+                      final String? finalGov = _selectedGovernorate == texts.all ? null : texts.getEnglishValue(_selectedGovernorate);
+                      final String? finalCity = _selectedCity == texts.all ? null : texts.getEnglishValue(_selectedCity);
+                      
                       ref.read(apartmentProvider.notifier).applyFilter(
-                        governorate: _selectedGovernorate == 'All' ? null : _selectedGovernorate,
-                        city: _selectedCity == 'All' ? null : _selectedCity,
+                        governorate: finalGov,
+                        city: finalCity,
                         minPrice: _priceRange.start,
                         maxPrice: _priceRange.end,
                         minSpace: _spaceRange.start,
@@ -141,7 +146,7 @@ class FilterModel extends ConsumerStatefulWidget {
                       ),
                     ),
                     child: Text(
-                      'Apply',
+                      texts.isAr ? "تطبيق" : "Apply",
                       style: GoogleFonts.lato(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -166,65 +171,45 @@ class FilterModel extends ConsumerStatefulWidget {
     );
   }
 
-  Widget _buildGovernorateDropdown(bool isDark) {
+  // دالة التنسيق الموحدة للحقول
+  InputDecoration _inputDecoration(bool isDark) {
+    return InputDecoration(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: isDark ? Colors.white24 : AppConstants.secondColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: isDark ? Colors.white24 : AppConstants.secondColor),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+    );
+  }
+
+  Widget _buildGovernorateDropdown(bool isDark, List<String> list, AppStrings texts) {
     return DropdownButtonFormField<String>(
       value: _selectedGovernorate,
       dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
       style: TextStyle(color: isDark ? Colors.white : Colors.black),
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: isDark ? Colors.white24 : AppConstants.secondColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: isDark ? Colors.white24 : AppConstants.secondColor),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-      ),
-      items: _governorates.map((governorate) {
-        return DropdownMenuItem(
-          value: governorate,
-          child: Text(governorate),
-        );
-      }).toList(),
+      decoration: _inputDecoration(isDark),
+      items: list.map((gov) => DropdownMenuItem(value: gov, child: Text(gov))).toList(),
       onChanged: (newValue) {
         setState(() {
           _selectedGovernorate = newValue!;
-          _selectedCity = 'All';
+          _selectedCity = texts.all;
         });
       },
     );
   }
 
-  Widget _buildCityDropdown(bool isDark) {
-    final cities = _citiesByGovernorate[_selectedGovernorate] ?? [];
+  Widget _buildCityDropdown(bool isDark, List<String> list, AppStrings texts) {
     return DropdownButtonFormField<String>(
       value: _selectedCity,
       dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
       style: TextStyle(color: isDark ? Colors.white : Colors.black),
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: isDark ? Colors.white24 : AppConstants.secondColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: isDark ? Colors.white24 : AppConstants.secondColor),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-      ),
-      items: cities.map((city) {
-        return DropdownMenuItem(
-          value: city,
-          child: Text(city),
-        );
-      }).toList(),
-      onChanged: (newValue) {
-        setState(() {
-          _selectedCity = newValue!;
-        });
-      },
+      decoration: _inputDecoration(isDark),
+      items: list.map((city) => DropdownMenuItem(value: city, child: Text(city))).toList(),
+      onChanged: (newValue) => setState(() => _selectedCity = newValue!),
     );
   }
 
@@ -237,8 +222,8 @@ class FilterModel extends ConsumerStatefulWidget {
       activeColor: AppConstants.primaryColor,
       inactiveColor: AppConstants.secondColor,
       labels: RangeLabels(
-        '${(_priceRange.start).toStringAsFixed(0)}',
-        '${(_priceRange.end).toStringAsFixed(0)}',
+        _priceRange.start.toStringAsFixed(0),
+        _priceRange.end.toStringAsFixed(0),
       ),
       onChanged: (RangeValues values) {
         setState(() {
@@ -247,18 +232,21 @@ class FilterModel extends ConsumerStatefulWidget {
       },
     );
   }
-Widget _buildSpaceRangeSlider( bool isDark){
-  return RangeSlider(
-    values: _spaceRange, 
-    min: 50,
-    max: 500,
-    divisions: 15,
-    activeColor:AppConstants.primaryColor,
-    inactiveColor: AppConstants.secondColor,
-     labels: RangeLabels(
-        '${_spaceRange.start.round()} ',
-        '${_spaceRange.end.round()} ',
+
+  Widget _buildSpaceRangeSlider(bool isDark) {
+    return RangeSlider(
+      values: _spaceRange, 
+      min: 50,
+      max: 500,
+      divisions: 15,
+      activeColor: AppConstants.primaryColor,
+      inactiveColor: AppConstants.secondColor,
+      labels: RangeLabels(
+        '${_spaceRange.start.round()}',
+        '${_spaceRange.end.round()}',
       ),
+
+
       onChanged: (RangeValues values) {
         setState(() {
           _spaceRange = values;

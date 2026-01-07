@@ -30,7 +30,7 @@ class UserModel {
       if (rawPhoto.startsWith('http')) {
         processedPhoto = rawPhoto; 
       } else {
-        processedPhoto = "http://192.168.1.104:8000/storage/$rawPhoto";
+        processedPhoto = "http://192.168.1.102:8000/storage/$rawPhoto";
       }
     }
 

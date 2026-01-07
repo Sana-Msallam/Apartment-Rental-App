@@ -66,7 +66,7 @@ class FavoritesScreen extends ConsumerWidget {
                         // --- التعديل 2: إضافة التفاعل مع زر القلب ---
                         onFavoriteToggle: () {
                           // عند الضغط سيقوم الـ Notifier بحذفها وعمل invalidate للقائمة
-                          ref.read(apartmentProvider.notifier).toggleFavoriteStatus(apt.id);
+                          ref.read(apartmentProvider.notifier).toggleFavorite(apt.id);
                         },
                         onTap: () {
                           Navigator.push(

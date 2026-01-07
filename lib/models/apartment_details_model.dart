@@ -1,7 +1,7 @@
 
 class ApartmentDetail{
   final int id;
-  final int price;
+final double price; // تغيير لـ double ليتطابق مع الـ Migration
   final int rooms;                    
   final int bathrooms;                
   final int space;              
@@ -38,11 +38,11 @@ class ApartmentDetail{
     var imageList =json['apartment_images'] as List?? [];
     List<String> parsedImages =imageList.map((img){
       String path =img['path']?? '';
-      return path.replaceAll('localhost', '192.168.1.7');
+      return path.replaceAll('localhost', '192.168.1.107');
     }).toList();
     return ApartmentDetail(
      id: json['id'],
-      price: json['price'],
+price: (json['price'] as num? ?? 0.0).toDouble(),
       rooms: json['rooms'],
       bathrooms: json['bathrooms'],
       space: json['space'],

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/screens/account_pending_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
@@ -38,10 +39,11 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
   bool _isLoading = false;
 
   void _handleRegister() async {
+    final texts = ref.read(stringsProvider);
     if (personalImage == null || idImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please upload both images!"),
+        SnackBar(
+          content: Text(texts.errorUploadBoth),
           backgroundColor: Colors.orange,
         ),
       );
@@ -66,8 +68,8 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
         if (!mounted) return;
         ref.invalidate(profileProvider);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration Successful!'),
+          SnackBar(
+            content: Text(texts.isAr ? "تم التسجيل بنجاح!" : "Registration Successful!"),
             backgroundColor: Colors.green,
           ),
         );
@@ -128,6 +130,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
 
   void showImageSourceOptions({required bool isPersonalPhoto}) {
     final theme = Theme.of(context);
+    final texts = ref.read(stringsProvider);
     showModalBottomSheet(
       context: context,
       backgroundColor: theme.cardColor,
@@ -140,7 +143,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
             ListTile(
               leading: Icon(Icons.photo_library, color: theme.primaryColor),
               title: Text(
-                'Choose from Gallery',
+               texts.gallery,
                 style: theme.textTheme.bodyLarge,
               ),
               onTap: () {
@@ -153,7 +156,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
             ),
             ListTile(
               leading: Icon(Icons.camera_alt, color: theme.primaryColor),
-              title: Text('Take a Photo', style: theme.textTheme.bodyLarge),
+              title: Text(texts.camera, style: theme.textTheme.bodyLarge),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(
@@ -173,7 +176,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final dynamicColor = isDark ? Colors.white : theme.primaryColor;
-
+final texts = ref.watch(stringsProvider);
     return Scaffold(
       extendBodyBehindAppBar: true,
       extendBody: true,
@@ -215,7 +218,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
                         ),
                         const SizedBox(height: 15),
                         Text(
-                          "Upload Documents",
+                          texts.uploadDocuments,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -224,7 +227,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          "Please upload your photos for verification.",
+                          texts.uploadInstruction,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: isDark ? Colors.white70 : Colors.black54,
@@ -232,7 +235,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
                         ),
                         const SizedBox(height: 30),
                         PhotoUpload(
-                          hintText: 'Personal Photo',
+                          hintText: texts.personalPhoto,
                           icon: Icons.person_pin,
                           imageFile: personalImage,
                           onTap: () =>
@@ -244,7 +247,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
                         ),
                         const SizedBox(height: 20),
                         PhotoUpload(
-                          hintText: 'ID Photo',
+                          hintText: texts.idPhoto,
                           icon: Icons.credit_card,
                           imageFile: idImage,
                           onTap: () =>
@@ -260,7 +263,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
                                 color: theme.primaryColor,
                               )
                             : CustomButton(
-                                textButton: 'Finish Registration',
+                                textButton: texts.finishRegistration,
                                 onTap: _handleRegister,
                                 width: double.infinity,
                                 kPrimaryColor: isDark

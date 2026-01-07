@@ -1,76 +1,128 @@
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
-import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
-import 'package:apartment_rental_app/screens/booking_requests_tap.dart';
+import 'package:apartment_rental_app/models/apartment_home_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';
+import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/controller/my_apartment_controller.dart';
+import 'package:apartment_rental_app/screens/booking_requests_tap.dart'; // تأكدي من استيراد التبويب الثاني
 import '../widgets/apartmentCard.dart';
 import '../constants/app_constants.dart';
+import '../screens/apartment_details_screen.dart';
 import '../screens/add_apartment_page.dart';
 
-class MyApartmentsScreen extends ConsumerWidget {
+class MyApartmentsScreen extends ConsumerStatefulWidget {
   const MyApartmentsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApartmentsScreen> createState() => _MyApartmentsScreenState();
+}
+
+class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
+  
+  // دالة التأكيد على الحذف (من كود رفيقتك - مفيدة جداً)
+  void _confirmDelete(BuildContext context, WidgetRef ref, int apartmentId, AppStrings texts) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(texts.delete),
+        content: Text(texts.deleteConfirm),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(texts.cancel)),
+          TextButton(
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final nav = Navigator.of(ctx); 
+              
+              await ref.read(ownerApartmentsProvider.notifier).deleteApartment(apartmentId);
+              
+              if (!mounted) return; 
+              nav.pop();
+              messenger.showSnackBar(SnackBar(content: Text(texts.addSuccess))); 
+            },
+            child: Text(texts.delete, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
     return DefaultTabController(
-      length: 2, 
+      length: 2, // عدد التبويبات التي أضفتيها أنتِ
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
-            "My Apartment",
-            style: theme.appBarTheme.titleTextStyle,
+            texts.myApartments, // استخدام النصوص المعربة من كود رفيقتك
+            style: theme.appBarTheme.titleTextStyle ?? GoogleFonts.lato(fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
           backgroundColor: theme.appBarTheme.backgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
-          bottom: const TabBar(
+          bottom: TabBar(
             indicatorColor: Colors.white,
             indicatorWeight: 3,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white70,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
-              Tab(text: "All"),
-              Tab(text: "Reqeust"), // مكتمل ومرفوض // ملغي من المستخدم
+              Tab(text: texts.all ?? "All"), // استخدام نصوص رفيقتك إن وجدت
+              Tab(text: texts.requests ?? "Requests"),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            _buildMyApartmentsTab(ref, context),
-            const BookingRequestsTap(), // محتوى التبويب الأول
+            // التبويب الأول: شققي (مع إضافة ميزة السحب لتحديث الصفحة)
+            RefreshIndicator(
+              onRefresh: () => ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments(),
+              child: _buildMyApartmentsGrid(texts),
+            ),
+            // التبويب الثاني: طلبات الحجز (من شغلك أنتِ)
+            const BookingRequestsTap(),
           ],
         ),
         floatingActionButton: FloatingActionButton(
           backgroundColor: AppConstants.primaryColor,
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddApartmentPage())),
+          onPressed: () => Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => const AddApartmentPage())
+          ).then((_) {
+            // تحديث البيانات بعد العودة من صفحة الإضافة
+            if (mounted) {
+              ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments();
+            }
+          }),
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );
   }
 
-  // دالة بناء قائمة الشقق (التي كانت تسبب لكِ الخطأ)
-  Widget _buildMyApartmentsTab(WidgetRef ref, BuildContext context) {
-    // استخدمي ownerApartmentsProvider بدلاً من apartmentProvider لكي تظهر شققه فقط
-    final apartmentsAsyncValue = ref.watch(ownerApartmentsProvider); 
+  // دالة بناء الشبكة (Grid) مدمج فيها منطق الحذف والبيانات
+  Widget _buildMyApartmentsGrid(AppStrings texts) {
+    final apartmentsAsyncValue = ref.watch(ownerApartmentsProvider);
 
     return apartmentsAsyncValue.when(
-      data: (apartments) {
+      data: (List<Apartment> apartments) {
         if (apartments.isEmpty) {
-          return const Center(child: Text('You haven\'t added any apartments yet.'));
+          return ListView( // ListView ضروري هنا ليشتغل الـ RefreshIndicator حتى لو القائمة فارغة
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+              Center(child: Text(texts.noApartments)),
+            ],
+          );
         }
         return GridView.builder(
           padding: const EdgeInsets.all(10),
@@ -78,7 +130,7 @@ class MyApartmentsScreen extends ConsumerWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 0.68,
+            childAspectRatio: 0.65,
           ),
           itemCount: apartments.length,
           itemBuilder: (context, index) {
@@ -100,14 +152,10 @@ class MyApartmentsScreen extends ConsumerWidget {
                   ),
                 );
               },
-              // حل المشكلة: يجب تمرير onFavoriteToggle حتى لو لم نحتاجها هنا بقوة
               onFavoriteToggle: () {
-                ref.read(apartmentProvider.notifier).toggleFavoriteStatus(apartment.id);
+                ref.read(apartmentProvider.notifier).toggleFavorite(apartment.id);
               },
-              onDelete: () {
-                // كود الحذف
-                print("Delete apartment with id: ${apartment.id}");
-              },
+              onDelete: () => _confirmDelete(context, ref, apartment.id, texts),
             );
           },
         );

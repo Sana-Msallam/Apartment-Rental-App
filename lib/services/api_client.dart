@@ -21,12 +21,12 @@ class ApiClient {
     );
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, hanlder) async{
+        onRequest: (options, handler) async{
           String? token =await _storage.read(key: 'jwt_token');
           if(token != null){
             options.headers['Authorization'] = 'Bearer $token';
           }
-          return hanlder.next(options);
+          return handler.next(options);
         },
         onError: (DioException e, handler){
           print("API Error: ${e.response?.statusCode} - ${e.message}");

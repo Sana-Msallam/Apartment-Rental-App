@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/screens/PasswordScreen.dart';
 import 'package:apartment_rental_app/widgets/buildLabel.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_text_filed.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 
@@ -16,14 +18,14 @@ const Color kPrimaryColor = Color(0xFF234F68);
 const double vheight = 15;
 final String vfont = 'Lato-Regular';
 
-class RegisterPage extends StatefulWidget {
+class RegisterPage extends ConsumerStatefulWidget {
   RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+ ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _selectedDate;
   final TextEditingController _firstNameController = TextEditingController();
@@ -91,9 +93,10 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context ) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+final texts = ref.watch(stringsProvider);
 
     final titleColor = isDark ? Colors.white : theme.primaryColor;
 
@@ -133,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           Center(
                             child: Text(
-                              "Create Account",
+                              texts.createAccount,
                               style: theme.textTheme.headlineSmall?.copyWith(
                                 fontSize: 26,
                                 fontWeight: FontWeight.bold,
@@ -142,66 +145,61 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                           const SizedBox(height: 30),
-                          buildLabel(context, "First Name"),
+                          buildLabel(context, texts.firstName),
                           CustomTextFiled(
                             controller: _firstNameController,
-                            hintText: "Enter first name",
+                            hintText: texts.firstNameHint,
                             prefixIcon: Icons.person_outline,
                             validator: (v) => v!.isEmpty ? "Required" : null,
                           ),
                           const SizedBox(height: 15),
-                          buildLabel(context, "Last Name"),
+                          buildLabel(context, texts.lastName),
                           CustomTextFiled(
                             controller: _lastNameController,
-                            hintText: "Enter last name",
+hintText: texts.lastNameHint, // بدلاً من "Enter last name"
                             prefixIcon: Icons.person_outline,
                             validator: (v) => v!.isEmpty ? "Required" : null,
                           ),
                           const SizedBox(height: 15),
-                          buildLabel(context, "Email Address"),
+                          buildLabel(context, texts.emailAddress),
                           CustomTextFiled(
                             controller: _emailController,
-                            hintText: "name@example.com",
-                            prefixIcon: Icons.email_outlined,
+hintText: "example@mail.com", // أو texts.emailHint                            prefixIcon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) {
                               if (v == null || v.isEmpty) return "Email is required";
                               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v)) {
-                                return "Enter a valid email address";
-                              }
+return texts.invalidEmail;                              }
                               return null;
                             },
                           ),
                           const SizedBox(height: 15),
-                          buildLabel(context, "Phone Number"),
-                          CustomTextFiled(
+buildLabel(context, texts.phoneLabel), // تعديل الـ Label أيضاًد
+               CustomTextFiled(
                             controller: _phoneController,
                             hintText: "09xx xxx xxx",
                             prefixIcon: Icons.phone_android_outlined,
                             keyboardType: TextInputType.phone,
                             validator: (v) {
                               if (v == null || v.isEmpty) return "Phone number is required";
-                              if (v.length < 10) return "Phone must be at least 10 digits";
-                              return null;
+if (v.length < 10) return texts.phoneInvalid;                              return null;
                             },
                           ),
                           const SizedBox(height: 15),
-                          buildLabel(context, "Date of Birth"),
+                          buildLabel(context, texts.birthDate),
                           GestureDetector(
                             onTap: () => _selectDate(context),
                             child: AbsorbPointer(
                               child: CustomTextFiled(
                                 controller: _dateController,
-                                hintText: "Select your birthday",
-                                prefixIcon: Icons.calendar_today,
-                                validator: (v) => v!.isEmpty ? "Required" : null,
-                              ),
+hintText: texts.birthDateHint, // بدلاً من "Select your birthday"                                prefixIcon: Icons.calendar_today,
+validator: (v) => v!.isEmpty ? texts.requiredField : null,                              ),
                             ),
                           ),
                           const SizedBox(height: 40),
                           CustomButton(
                             onTap: _onNextPressed,
-                            textButton: "NEXT",
+                            textButton: texts.next,
                             kPrimaryColor: isDark ? Colors.white : theme.primaryColor, 
                             vTextColor: isDark ? Colors.black : Colors.white, 
                             width: double.infinity,

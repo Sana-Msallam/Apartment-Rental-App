@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
 import 'package:apartment_rental_app/widgets/custom_dropdown.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,8 @@ import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:apartment_rental_app/widgets/custom_text_filed.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/buildLabel.dart';
+// تأكد من استيراد ملف الـ Provider الخاص باللغة
+// import 'package:apartment_rental_app/provider/strings_provider.dart'; 
 
 Color kPrimaryColor = const Color(0xFF234F68);
 
@@ -20,56 +23,21 @@ class AddApartmentPage extends ConsumerStatefulWidget {
 }
 
 class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
-  final _formKey =GlobalKey<FormState>();
-  final Map<String, List<String>> _citiesByGovernorate = {
-  'Damascus': ['Midan', 'Mazzeh', 'Afif'],
- 'Aleppo':['As-Safira','Al-Bab','Manbij'],
-      'Homs': ['Talkalakh', 'Al-Qusayr','Al-Rastan'],
-      'Hama':['Salamiyah','Masyaf','Al-Hamraa'],
-      'Draa':['Bosra','Al-Hirak','Nawa'],
-      'Latakia':['Kessab','Jableh','Mashqita'],
-      'Tartous':['Baniyas','Arwad','Safita'],
-      'Suwayda':['Shahba','Salkhad','Shaqqa'],
-      'Deir ez-Zor':['Mayadin','Abu Kamal','Al-Asharah'],
-      'Idlib':['Ariha','Jisr ash-Shughur','Maarat al-Numan'],
-      'Raqqa':['Al-Thawrah','Al-Karamah','Al-Mansoura'],
-};
+  final _formKey = GlobalKey<FormState>();
 
-// متغير لتخزين القائمة الحالية للمدن (تبدأ فارغة)
-List<String> _currentCities = [];
-String? _selectedCity; // بدلاً من _cityController
-  
-    final TextEditingController _builtController = TextEditingController();
+  // المتغيرات التي تخزن الحالة
+  List<String> _currentCities = [];
+  String? _selectedCity;
+  String? _selectedgovernorates;
+  String? _selectedTitleDeed;
 
+  final TextEditingController _builtController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _roomsController = TextEditingController();
   final TextEditingController _bathroomsController = TextEditingController();
   final TextEditingController _spaceController = TextEditingController();
   final TextEditingController _floorController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
-  String? _selectedgovernorates;
-  String? _selectedTitleDeed;
-
-  final List<String> _governorates = [
-    'Damascus',
-    'Aleppo',
-    'Homs',
-    'Hama',
-    'Draa',
-    'Latakia',
-    'Tartous',
-    'Suwayda',
-    'Deir ez-Zor',
-    'Idlib',
-    'Raqqa',
-  ];
-
-  final List<String> _titleDeedTypes = [
-    'Green Tabo',
-    'Court Decision',
-    'Power of Attorney',
-  ];
 
   List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
@@ -82,12 +50,28 @@ String? _selectedCity; // بدلاً من _cityController
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    // استدعاء نصوص اللغة المختارة (عربي أو إنجليزي)
+    final texts = ref.watch(stringsProvider);
+  final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final dynamicColor = isDark ? Colors.white : theme.primaryColor;
+    // استخراج المحافظات من الـ Map الموجود في ملف اللغة
+    final List<String> governoratesList = texts.citiesByGovernorate.keys.toList();
+    
+    // قائمة أنواع الطابو المترجمة
+    final List<String> titleDeedTypes = [
+      texts.greenTabo,
+      texts.courtDecision,
+      texts.powerOfAttorney,
+    ];
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
-       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -100,236 +84,221 @@ String? _selectedCity; // بدلاً من _cityController
               image: AssetImage('assets/images/start.png'),
               fit: BoxFit.cover,
             ),
+
+
+
           ),
-Container(
-  color: Theme.of(context).brightness == Brightness.dark 
-      ? Colors.black.withOpacity(0.6) 
-      : Colors.transparent,
-),
+          Container(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.6)
+                : Colors.transparent,
+          ),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: GlassContainer(
-               child:  Form(
+                child: Form(
                   key: _formKey,
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Apartment Details",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: kPrimaryColor,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Text(
+                          texts.apartmentDetails, // مترجم
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: dynamicColor,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 25),
+                      const SizedBox(height: 25),
 
-                    buildLabel(context,"Apartment Photos"),
-                    const SizedBox(height: 8),
-                    _buildPhotoUploadWidget(),
-                    if (_selectedImages.isNotEmpty) _buildImagePreview(),
+                      buildLabel(context, texts.apartmentPhotos), // مترجم
+                      const SizedBox(height: 8),
+                      _buildPhotoUploadWidget(texts),
+                      if (_selectedImages.isNotEmpty) _buildImagePreview(),
 
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                    buildLabel(context,"Price (\$)"),
-                    CustomTextFiled(
-                      controller: _priceController,
-                      hintText: " 1200",
-                      prefixIcon: Icons.attach_money,
-                      keyboardType: TextInputType.number,
-                      validator: (v){
-              if (v == null || v.isEmpty)return "Price is required";
-              if(v== 0)return "Price must be greater than 0";
-              if (int.tryParse(v) == null) return "Please enter a valid number";
-            } ,
-                    ),
+                      buildLabel(context, texts.priceLabel), // مترجم
+                      CustomTextFiled(
+                        controller: _priceController,
+                        hintText: " 1200",
+                        prefixIcon: Icons.attach_money,
+                        keyboardType: TextInputType.number,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return texts.priceRequired;
+                          if (int.tryParse(v) == null) return texts.invalidNumber;
+                          return null;
+                        },
+                      ),
 
-                    const SizedBox(height: 15),
+                      const SizedBox(height: 15),
 
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildLabel(context,"Rooms"),
-                              CustomTextFiled(
-                                controller: _roomsController,
-                                hintText: "3",
-                                prefixIcon: Icons.bed,
-                                keyboardType: TextInputType.number,
-                                validator: (v){
-              if (v == null || v.isEmpty)return "rooms is required";
-              if(v== 0)return "rooms must be greater than 0";
-              if (int.tryParse(v) == null) return "Please enter a valid number";
-            } ,
-                              ),
-                            ],
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                buildLabel(context, texts.rooms), // مترجم
+                                CustomTextFiled(
+                                  controller: _roomsController,
+                                  hintText: "3",
+                                  prefixIcon: Icons.bed,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) => (v == null || v.isEmpty) ? texts.requiredField : null,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              buildLabel(context,"Bathrooms"),
-                              CustomTextFiled(
-                                controller: _bathroomsController,
-                                hintText: "2",
-                                prefixIcon: Icons.bathtub,
-                                keyboardType: TextInputType.number,
-                                validator: (v){
-              if (v == null || v.isEmpty)return "bathrooms is required";
-              if(v== 0)return "bathrooms must be greater than 0";
-              if (int.tryParse(v) == null) return "Please enter a valid number";
-            } ,
-                              ),
-                            ],
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                buildLabel(context, texts.bathrooms), // مترجم
+                                CustomTextFiled(
+                                  controller: _bathroomsController,
+                                  hintText: "2",
+                                  prefixIcon: Icons.bathtub,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) => (v == null || v.isEmpty) ? texts.requiredField : null,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                   
+                        ],
+                      ),
 
-const SizedBox(height: 15),
+                      const SizedBox(height: 15),
 
-Row(
-  children: [
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildLabel(context,"Space (m²)"),
-          CustomTextFiled(
-            controller: _spaceController, 
-            hintText: "120",
-            prefixIcon: Icons.square_foot,
-            validator: (v){
-              if (v == null || v.isEmpty)return "Space is required";
-              if(v== 0)return "space must be greater than 0";
-              if (int.tryParse(v) == null) return "Please enter a valid number";
-              
-              return null;
-            } ,
-            keyboardType: TextInputType.number, 
-          ),
-        ],
-      ),
-    ),
-    const SizedBox(width: 10),
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildLabel(context,"Floor"),
-          CustomTextFiled(
-            controller: _floorController, 
-            hintText: "2",
-            prefixIcon: Icons.layers,
-            keyboardType: TextInputType.number,
-            validator: (v){
-              if (v == null || v.isEmpty)return "Price is required";
-              if (int.tryParse(v) == null) return "Please enter a valid number";
-            } ,
-          ),
-        ],
-      ),
-    ),
-  ],
-),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                buildLabel(context, texts.spaceLabel), // مترجم
+                                CustomTextFiled(
+                                  controller: _spaceController,
+                                  hintText: "120",
+                                  prefixIcon: Icons.square_foot,
+                                  validator: (v) => (v == null || v.isEmpty) ? texts.requiredField : null,
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                buildLabel(context, texts.floor), // مترجم
+                                CustomTextFiled(
+                                  controller: _floorController,
+                                  hintText: "2",
+                                  prefixIcon: Icons.layers,
+                                  keyboardType: TextInputType.number,
+                                  validator: (v) => (v == null || v.isEmpty) ? texts.requiredField : null,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
-
-
-// ... الآن يكمل الكود لـ buildLabel("governorate")
-
-                    const SizedBox(height: 15),
-                    buildLabel(context,"Governorate"),
-                    CustomDropdown(
-                      hint: "Select Governorate",
-                      value: _selectedgovernorates,
-                      items: _governorates,
-                      icon: Icons.location_city,
-                      onChanged: (newValue) {
+                      const SizedBox(height: 15),
+                      buildLabel(context, texts.governorate), // مترجم
+                      CustomDropdown(
+                        hint: texts.selectGovernorate, // مترجم
+                        value: _selectedgovernorates,
+                        items: governoratesList,
+                        icon: Icons.location_city,
+                        onChanged: (newValue) {
                           setState(() {
-                          _selectedgovernorates = newValue;
-                          _selectedCity= null;
-                          _currentCities=_citiesByGovernorate[newValue]?? [];
-                      });
-                      },
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    buildLabel(context,"City"),
-                    CustomDropdown(
-                     hint: _selectedgovernorates == null ? "Select Governorate First": "Select City",
-                     value: _selectedCity,
-                     items: _currentCities,
-                     icon: Icons.map,
-                     onChanged: (newValue){
-                      setState(() {
-                        _selectedCity =newValue;
-                      });
-                     },
-                    ),
-
-                    const SizedBox(height: 15),
-                    
-                    buildLabel(context,"builtYear"),
-                    CustomTextFiled(
-                      controller: _builtController,
-                      hintText: "2000",
-                      prefixIcon: Icons.date_range,
-                      validator: (v) => v!.isEmpty ? "Required" : null,
-                      keyboardType: TextInputType.number,
-                    ),
-
-                    const SizedBox(height: 15),
-
-                  buildLabel(context,"Title Deed Type"),
-                    CustomDropdown(
-                      hint: "Select Title Deed",
-                      value: _selectedTitleDeed,
-                      items: _titleDeedTypes,
-                      icon: Icons.assignment,
-                      onChanged: (newValue) =>
-                          setState(() => _selectedTitleDeed = newValue),
-                
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    buildLabel(context,"Description"),
-                    CustomTextFiled(
-                      controller: _descriptionController,
-                      hintText: "Describe your apartment...",
-                      prefixIcon: Icons.description,
-                       keyboardType: TextInputType.text,
-                      validator: (value){
-                        if (value == null || value.isEmpty)return "Description is required";
-                        if (value.length < 20) return "Description must be at least 20 characters";
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    Center(
-                      child: CustomButton(
-                        onTap: _submitData,
-                        textButton: 'Add Apartment',
-                        vTextColor: Colors.white,
-                        kPrimaryColor: kPrimaryColor,
-                        width: double.infinity,
+                            _selectedgovernorates = newValue;
+                            _selectedCity = null;
+                            // جلب المدن من ملف اللغة بناءً على المحافظة المختارة
+                            _currentCities = texts.citiesByGovernorate[newValue] ?? [];
+                          });
+                        },
                       ),
-                    ),
-                  ],
-                ),
+
+                      const SizedBox(height: 15),
+
+                      buildLabel(context, texts.city), // مترجم
+                      CustomDropdown(
+                        hint: _selectedgovernorates == null ? texts.selectGovFirst : texts.selectCity,
+                        value: _selectedCity,
+                        items: _currentCities,
+                        icon: Icons.map,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedCity = newValue;
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      buildLabel(context, texts.builtYear), // مترجم
+                      CustomTextFiled(
+                        controller: _builtController,
+                        hintText: "2000",
+                        prefixIcon: Icons.date_range,
+                        validator: (v) => v!.isEmpty ? texts.requiredField : null,
+                        keyboardType: TextInputType.number,
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      buildLabel(context, texts.titleDeedType), // مترجم
+                      CustomDropdown(
+                        hint: texts.selectTitleDeed,
+                        value: _selectedTitleDeed,
+                        items: titleDeedTypes,
+                        icon: Icons.assignment,
+                        onChanged: (newValue) => setState(() => _selectedTitleDeed = newValue),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      buildLabel(context, texts.description), // مترجم
+                      CustomTextFiled(
+                        controller: _descriptionController,
+                        hintText: texts.descriptionHint,
+                        prefixIcon: Icons.description,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return texts.descriptionRequired;
+                          if (value.length < 20) return texts.descriptionTooShort;
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      Center(
+                        child: CustomButton(
+                        
+                          onTap: () => _submitData(texts), // نمرر نصوص اللغة للميثود
+                          textButton: texts.addApartmentButton, // مترجم
+                           kPrimaryColor: isDark
+                                    ? Colors.white
+                                    : theme.primaryColor,
+                                vTextColor: isDark
+                                    ? Colors.black
+                                    : Colors.white,
+                          width: double.infinity,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -339,7 +308,7 @@ Row(
     );
   }
 
-  Widget _buildPhotoUploadWidget() {
+  Widget _buildPhotoUploadWidget(var texts) {
     bool hasImages = _selectedImages.isNotEmpty;
     return GestureDetector(
       onTap: _pickImages,
@@ -347,7 +316,7 @@ Row(
         height: 58,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-color: Theme.of(context).cardColor, // يأخذ لون الثيم الموحد
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: hasImages ? kPrimaryColor : Colors.grey.shade400,
@@ -364,8 +333,8 @@ color: Theme.of(context).cardColor, // يأخذ لون الثيم الموحد
             Expanded(
               child: Text(
                 hasImages
-                    ? "${_selectedImages.length} Images Selected"
-                    : "upload apartment photos",
+                    ? "${_selectedImages.length} ${texts.imagesSelected}"
+                    : texts.uploadPhotos,
                 style: TextStyle(
                   color: hasImages ? Colors.black : Colors.grey,
                   fontSize: 16,
@@ -406,9 +375,7 @@ color: Theme.of(context).cardColor, // يأخذ لون الثيم الموحد
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedImages.removeAt(
-                        index,
-                      );
+                      _selectedImages.removeAt(index);
                     });
                   },
                   child: const CircleAvatar(
@@ -424,56 +391,61 @@ color: Theme.of(context).cardColor, // يأخذ لون الثيم الموحد
       ),
     );
   }
-  Future<void> _submitData() async{
-    if (!_formKey.currentState!.validate()) {
-    return;
-  }
-  if (_selectedImages.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please upload at least one image')),
+
+  Future<void> _submitData(var texts) async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    if (_selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(texts.imageError)),
+      );
+      return;
+    }
+    if (_selectedgovernorates == null || _selectedCity == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(texts.locationError)),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
-    return;
-  }
-  if (_selectedgovernorates == null || _selectedCity == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please select Governorate and City')),
-    );
-    return;
-  }
-    showDialog(context: context,
-    barrierDismissible: false,
-     builder: (context)=> const Center(child: CircularProgressIndicator()),
-     );
-     final Map<String, dynamic> apartmentData={
-    "price": int.tryParse(_priceController.text) ?? 0,
-    "rooms": int.tryParse(_roomsController.text) ?? 0,
-    "space": int.tryParse(_spaceController.text) ?? 0, 
-    "floor": int.tryParse(_floorController.text) ?? 0,
-    "bathrooms": int.tryParse(_bathroomsController.text) ?? 0,
-    "governorate": _selectedgovernorates,
-    "city": _selectedCity,
-    "built_date": "${_builtController.text}-1-1",
-    "title_deed": _selectedTitleDeed,
-    "description": _descriptionController.text,
-     };
-     final Service =ref.read(addApartmentServiceProvider);
-     final success =await Service.addApartment(
+
+    final Map<String, dynamic> apartmentData = {
+      "price": int.tryParse(_priceController.text) ?? 0,
+      "rooms": int.tryParse(_roomsController.text) ?? 0,
+      "space": int.tryParse(_spaceController.text) ?? 0,
+      "floor": int.tryParse(_floorController.text) ?? 0,
+      "bathrooms": int.tryParse(_bathroomsController.text) ?? 0,
+      "governorate": _selectedgovernorates,
+      "city": _selectedCity,
+      "built_date": "${_builtController.text}-1-1",
+      "title_deed": _selectedTitleDeed,
+      "description": _descriptionController.text,
+    };
+
+    final service = ref.read(addApartmentServiceProvider);
+    final success = await service.addApartment(
       data: apartmentData,
-    images: _selectedImages,
-     );
-     Navigator.pop(context);
-     if(success){
+      images: _selectedImages,
+    );
+
+    Navigator.pop(context); // إغلاق الـ Loading
+
+    if (success) {
       ref.invalidate(apartmentProvider);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Add Apartment Successfully!")),
+        SnackBar(content: Text(texts.addSuccess)),
       );
-      
-      Navigator.pop(context);
-     }else{
+      Navigator.pop(context); // العودة للشاشة السابقة
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Failed to add apartment. Try again.")),
-    );
-     }
-     }
+        SnackBar(content: Text(texts.addError)),
+      );
+    }
+    
   }
-
+}

@@ -1,28 +1,31 @@
 import 'dart:convert';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/models/user_model.dart' show UserModel;
 import 'package:apartment_rental_app/screens/booking_screen.dart';
-import 'package:cached_network_image/cached_network_image.dart' show CachedNetworkImage;
+import 'package:cached_network_image/cached_network_image.dart'
+    show CachedNetworkImage;
 import 'package:flutter/material.dart';
-import 'package:apartment_rental_app/screens/booking_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_app_bar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../controller/apartment_home_controller.dart'; 
+import '../controller/apartment_home_controller.dart';
 import '../constants/app_constants.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 
 class ApartmentDetailsScreen extends ConsumerStatefulWidget {
-  final int apartmentId; 
+  final int apartmentId;
   const ApartmentDetailsScreen({super.key, required this.apartmentId});
 
   @override
-  ConsumerState<ApartmentDetailsScreen> createState() => _ApartmentDetailsScreenState();
+  ConsumerState<ApartmentDetailsScreen> createState() =>
+      _ApartmentDetailsScreenState();
 }
 
-class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen> {
+class _ApartmentDetailsScreenState
+    extends ConsumerState<ApartmentDetailsScreen> {
   late PageController _pageController;
   int _currentPage = 0;
 
@@ -40,15 +43,20 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final apartmentAsync = ref.watch(apartmentDetailProvider(widget.apartmentId));
+    // استدعاء نصوص اللغة
+    final texts = ref.watch(stringsProvider);
+    final apartmentAsync =
+        ref.watch(apartmentDetailProvider(widget.apartmentId));
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: const CustomAppBar(title: "Apartment Details"),
+      // ترجمة عنوان الأب بار
+      appBar: CustomAppBar(title: texts.apartmentDetails),
       body: apartmentAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: kPrimaryColor)),
+        loading: () => const Center(
+            child: CircularProgressIndicator(color: kPrimaryColor)),
         error: (err, stack) => Center(child: Text("Error: $err")),
         data: (apartment) {
           return Stack(
@@ -60,21 +68,22 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      _buildImageSlider(apartment), 
+                      _buildImageSlider(apartment),
                       const SizedBox(height: 25),
                       _buildPriceHeader(apartment),
                       const SizedBox(height: 20),
-                      _buildStatusCard(apartment, isDark, theme), // دمجنا الثيم هنا
+                      _buildStatusCard(
+                          apartment, isDark, theme, texts), // نمرر texts
                       const SizedBox(height: 25),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildFeaturesGrid(apartment),
+                            _buildFeaturesGrid(apartment, texts), // نمرر texts
                             const SizedBox(height: 30),
                             Text(
-                              "Description",
+                              texts.description, // مترجم
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white : Colors.black87,
@@ -84,20 +93,28 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                             Text(
                               apartment.description,
                               style: TextStyle(
-                                fontSize: 15, 
-                                color: isDark ? Colors.grey[400] : Colors.grey[700], 
-                                height: 1.5
-                              ),
+                                  fontSize: 15,
+                                  color: isDark
+                                      ? Colors.grey[400]
+                                      : Colors.grey[700],
+                                  height: 1.5),
                             ),
                             const SizedBox(height: 30),
                             const Divider(),
                             const SizedBox(height: 20),
-                            const Text(
-                              "Property Owner",
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kPrimaryColor),
+                            Text(
+                              isDark && !texts.isAr
+                                  ? "Property Owner"
+                                  : (texts.isAr
+                                      ? "صاحب العقار"
+                                      : "Property Owner"),
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: kPrimaryColor),
                             ),
                             const SizedBox(height: 15),
-                            _buildOwnerCard(apartment, isDark, theme),
+                            _buildOwnerCard(apartment, isDark, theme, texts),
                             const SizedBox(height: 150),
                           ],
                         ),
@@ -111,41 +128,43 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
                 left: 20,
                 right: 20,
                 child: CustomButton(
-  textButton: "Rent Now",
-  kPrimaryColor: kPrimaryColor,
-  vTextColor: Colors.white,
-  onTap: () async { 
-    print("Button Clicked");
-    // 1. الوصول للـ storage عبر الـ Provider لضمان نفس الإعدادا  
-  // محاولة قراءة التوكن بكل المفاتيح المحتملة
-  final storage = ref.read(storageProvider);
-    String? token = await storage.read(key: 'jwt_token');
-    print("DEBUG: Final Token Check: $token");
-    if (token != null&& token.isNotEmpty ) {
-      // 2. إذا كان التوكن موجوداً، ننتقل لواجهة الحجز
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BookingApp(
-            apartmentId: apartment.id,
-            pricePerNight: apartment.price,
-          ),
-        ),
-      );
-    } else {
-      print("DEBUG: Token is null or empty!");
-      // 3. إذا كان التوكن غير موجود، يجب توجيه المستخدم لتسجيل الدخول
-      ScaffoldMessenger.of(context).showSnackBar(
-       const SnackBar(
-        content: Text("Access Denied: Please login again"),
-        backgroundColor: Colors.red,
-      ),
-      );
-      // يمكنك هنا عمل Navigator لشاشة الـ Login
-    }
-  },
-),
+                  textButton: texts.isAr
+                      ? "احجز الآن"
+                      : "Rent Now", // يمكنك إضافتها للـ AppStrings
+                  kPrimaryColor: kPrimaryColor,
+                  vTextColor: Colors.white,
+                  onTap: () async {
+                    print("Button Clicked");
+                    // 1. الوصول للـ storage عبر الـ Provider لضمان نفس الإعدادا
+                    // محاولة قراءة التوكن بكل المفاتيح المحتملة
+                    final storage = ref.read(storageProvider);
+                    String? token = await storage.read(key: 'jwt_token');
+                    print("DEBUG: Final Token Check: $token");
+                    if (token != null && token.isNotEmpty) {
+                      // 2. إذا كان التوكن موجوداً، ننتقل لواجهة الحجز
+                      if (!mounted) return;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingApp(
+                            apartmentId: apartment.id,
+                            pricePerNight: apartment.price,
+                          ),
+                        ),
+                      );
+                    } else {
+                      print("DEBUG: Token is null or empty!");
+                      // 3. إذا كان التوكن غير موجود، يجب توجيه المستخدم لتسجيل الدخول
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Access Denied: Please login again"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      // يمكنك هنا عمل Navigator لشاشة الـ Login
+                    }
+                  },
+                ),
               ),
             ],
           );
@@ -154,7 +173,7 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  // --- Widgets المقسمة لترتيب الكود ---
+  // --- Widgets المعدلة لتدعم الترجمة ---
 
   Widget _buildImageSlider(ApartmentDetail apartment) {
     return Column(
@@ -168,13 +187,15 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (index) => setState(() => _currentPage = index),
-                itemCount: apartment.imageUrls.length, 
+                itemCount: apartment.imageUrls.length,
                 itemBuilder: (context, index) {
                   return CachedNetworkImage(
                     imageUrl: apartment.imageUrls[index],
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(color: Colors.grey[200]),
-                    errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                    placeholder: (context, url) =>
+                        Container(color: Colors.grey[200]),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.broken_image),
                   );
                 },
               ),
@@ -203,19 +224,24 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   }
 
   Widget _buildPriceHeader(ApartmentDetail apartment) {
+    final texts = ref.watch(stringsProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("${apartment.price} \$", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: kPrimaryColor)),
+          Text("${apartment.price} \$",
+              style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryColor)),
           Row(
             children: [
               const Icon(Icons.location_on, color: Colors.grey, size: 18),
               const SizedBox(width: 4),
               Text(
-                '${apartment.governorate}, ${apartment.city}',
-                style: AppConstants.titleText,
+                '${texts.translate(apartment.governorate)}, ${texts.translate(apartment.city)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -226,7 +252,8 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  Widget _buildStatusCard(ApartmentDetail apartment, bool isDark, ThemeData theme) {
+  Widget _buildStatusCard(
+      ApartmentDetail apartment, bool isDark, ThemeData theme, dynamic texts) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Container(
@@ -234,7 +261,9 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
         decoration: BoxDecoration(
           color: isDark ? theme.cardColor : kPrimaryColor.withOpacity(0.05),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: isDark ? Colors.grey[800]! : kPrimaryColor.withOpacity(0.1)),
+          border: Border.all(
+              color:
+                  isDark ? Colors.grey[800]! : kPrimaryColor.withOpacity(0.1)),
         ),
         child: Row(
           children: [
@@ -244,21 +273,35 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Status", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text("Verified Property", 
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: isDark ? Colors.white : kPrimaryColor)),
+                  Text(texts.isAr ? "الحالة" : "Status",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(texts.isAr ? "عقار مؤكد" : "Verified Property",
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : kPrimaryColor)),
                 ],
               ),
             ),
             Container(
-              height: 30, width: 1, color: Colors.grey.withOpacity(0.3),
+              height: 30,
+              width: 1,
+              color: Colors.grey.withOpacity(0.3),
               margin: const EdgeInsets.symmetric(horizontal: 10),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Title Deed", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text(apartment.titleDeed, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.teal)),
+                Text(texts.titleDeedType,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                // ابحث عن هذا السطر داخل _buildStatusCard
+                Text(
+                    texts.translate(
+                        apartment.titleDeed), // تم استخدام translate هنا
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal)),
               ],
             ),
           ],
@@ -267,28 +310,33 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  Widget _buildFeaturesGrid(ApartmentDetail apartment) {
-  return Wrap(
-    spacing: 20, // المسافة الأفقية بين العناصر
-    runSpacing: 15, // المسافة الرأسية في حال نزل لسطر جديد
-    alignment: WrapAlignment.spaceBetween,
-    children: [
-      _featureIcon(Icons.king_bed, "${apartment.rooms} Rooms"),
-      _featureIcon(Icons.bathtub, "${apartment.bathrooms} Baths"),
-      _featureIcon(Icons.square_foot, "${apartment.space} m²"),
-      _featureIcon(Icons.layers, "Floor ${apartment.floor}"),
-      _featureIcon(Icons.calendar_month, "Built: ${apartment.builtDate.split('-')[0]}"),
-    ],
-  );
-}
+  Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
+    return Wrap(
+      spacing: 20,
+      runSpacing: 15,
+      alignment: WrapAlignment.spaceBetween,
+      children: [
+        _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),
+        _featureIcon(
+            Icons.bathtub, "${apartment.bathrooms} ${texts.bathrooms}"),
+        _featureIcon(Icons.square_foot,
+            "${apartment.space} ${texts.isAr ? 'م²' : 'm²'}"),
+        _featureIcon(Icons.layers, "${texts.floor} ${apartment.floor}"),
+        _featureIcon(Icons.calendar_month,
+            "${texts.builtYear}: ${apartment.builtDate.split('-')[0]}"),
+      ],
+    );
+  }
 
-  Widget _buildOwnerCard(ApartmentDetail apartment, bool isDark, ThemeData theme) {
+  Widget _buildOwnerCard(
+      ApartmentDetail apartment, bool isDark, ThemeData theme, dynamic texts) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isDark ? theme.cardColor : kPrimaryColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[200]!),
+        border:
+            Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[200]!),
       ),
       child: ListTile(
         contentPadding: EdgeInsets.zero,
@@ -297,9 +345,13 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
           backgroundColor: kPrimaryColor.withOpacity(0.1),
           child: const Icon(Icons.person, color: kPrimaryColor, size: 30),
         ),
-        title: Text("${apartment.first_name} ${apartment.last_name}", 
-          style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
-        subtitle: Text("Contact: ${apartment.owner_phone}", style: const TextStyle(color: Colors.grey)),
+        title: Text("${apartment.first_name} ${apartment.last_name}",
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black)),
+        subtitle: Text(
+            "${texts.isAr ? 'تواصل' : 'Contact'}: ${apartment.owner_phone}",
+            style: const TextStyle(color: Colors.grey)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -317,11 +369,13 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(color: kPrimaryColor.withOpacity(0.08), shape: BoxShape.circle),
+          decoration: BoxDecoration(
+              color: kPrimaryColor.withOpacity(0.08), shape: BoxShape.circle),
           child: Icon(icon, color: kPrimaryColor, size: 22),
         ),
         const SizedBox(height: 6),
-        Text(text, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+        Text(text,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -329,7 +383,8 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
   Widget _contactCircle(IconData icon) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey[300]!)),
+      decoration: BoxDecoration(
+          shape: BoxShape.circle, border: Border.all(color: Colors.grey[300]!)),
       child: Icon(icon, color: kPrimaryColor, size: 20),
     );
   }
