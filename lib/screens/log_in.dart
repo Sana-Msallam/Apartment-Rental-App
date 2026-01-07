@@ -47,8 +47,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         // 2. تحديث الـ ProfileProvider يدوياً بالتوكن الجديد
         // هذه الخطوة تضمن أن البروفايل سيُجلب فوراً دون انتظار إعادة تشغيل التطبيق
-        await ref.read(profileProvider.notifier).getProfile(user.token!);
-
+await ref.read(profileProvider.notifier).updateTokenAndFetch(user.token!);
         if (!mounted) return;
         
         // 3. الانتقال للشاشة الرئيسية

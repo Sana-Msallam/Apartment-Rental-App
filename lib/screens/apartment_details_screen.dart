@@ -257,11 +257,9 @@ class _ApartmentDetailsScreenState extends ConsumerState<ApartmentDetailsScreen>
     );
   }
 
-  Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
-  return Wrap(
-    spacing: 20, 
-    runSpacing: 15, 
-    alignment: WrapAlignment.spaceBetween,
+ Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
+  return Row( // استخدمي Row بدلاً من Wrap لضمان بقائهم في صف واحد
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),
       _featureIcon(Icons.bathtub, "${apartment.bathrooms} ${texts.bathrooms}"),

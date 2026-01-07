@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:dio/dio.dart';
 
 class ProfileService {
-  final String _baseUrl = 'http://192.168.1.102:8000/api';
+  final String _baseUrl = 'http://192.168.0.112:8000/api';
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -23,27 +23,27 @@ class ProfileService {
     }
     return null;
   }
+Future<UserModel?> fetchUserProfile(String token) async {
+  try {
+    final response = await _dio.get(
+      '$_baseUrl/profile',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ),
+    );
 
-  Future<UserModel?> fetchUserProfile(String token) async {
-    try {
-      final response = await _dio.get(
-        '$_baseUrl/profile',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-            'Accept': 'application/json',
-          },
-        ),
-      );
-      print("Server Raw Data: ${response.data}");    
-      if (response.statusCode == 200) {
-        final userData =
-            response.data['user'] ?? response.data['data'] ?? response.data;
-        return UserModel.fromJson(userData, token: token);
-      }
-    } on DioException catch (e) {
-      _handleDioError(e);
+    if (response.statusCode == 200) {
+      // التأكد من استخراج البيانات حسب هيكلة Laravel (data أو user)
+      final userData = response.data['data'] ?? response.data['user'] ?? response.data;
+      return UserModel.fromJson(userData, token: token);
     }
     return null;
+  } on DioException catch (e) {
+    // لا ترجعي null هنا، بل ارمي الخطأ لكي يظهر في الـ UI
+    throw e.response?.data['message'] ?? "حدث خطأ في الاتصال بالسيرفر";
   }
+}
 }
