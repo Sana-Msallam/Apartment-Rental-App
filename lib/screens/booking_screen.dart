@@ -35,7 +35,9 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  final DateTime _firstDate = DateTime.now();
+  //final DateTime _firstDate = DateTime.now();
+
+  final DateTime _firstDate = DateTime.now().subtract(const Duration(days: 30));
   final DateTime _lastDate = DateTime.now().add(const Duration(days: 365 * 10));
 
   @override
@@ -48,9 +50,12 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   Future<void> _selectStartDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _startDate ?? _firstDate,
-      firstDate: _firstDate,
-      lastDate: _lastDate,
+      // initialDate: _startDate ?? _firstDate,
+      // firstDate: _firstDate,
+      // lastDate: _lastDate,
+      initialDate: _startDate ?? DateTime.now(), 
+    firstDate: _firstDate, // الآن أصبح يسمح بالشهر الماضي
+    lastDate: _lastDate,
       builder: (context, child) => _buildDatePickerTheme(context, child!),
     );
     if (picked != null) {

@@ -61,7 +61,8 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      // استخدام CustomAppBar الموحد مع نصوص رفيقتك
+
+
       appBar: CustomAppBar(title: texts.profile),
       body: profileAsync.when(
         loading: () => Center(child: CircularProgressIndicator(color: theme.primaryColor)),

@@ -311,10 +311,10 @@ class _ApartmentDetailsScreenState
   }
 
   Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
-    return Wrap(
-      spacing: 20,
-      runSpacing: 15,
-      alignment: WrapAlignment.spaceBetween,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,//  spacing: 15,
+      //  runSpacing: 15,
+      //alignment: WrapAlignment.spaceBetween,
       children: [
         _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),
         _featureIcon(

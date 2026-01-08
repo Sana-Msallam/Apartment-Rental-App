@@ -177,32 +177,30 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   }
 
   // 5. تعديل الدايلوج ليدعم الترجمة أيضاً
-  void _showCancelDialog(int bookingId, AppStrings texts) {
-    final theme = Theme.of(context);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          texts.logout, // أو استخدم نص مترجم للإلغاء إذا وجد
-          style: const TextStyle(color: kPrimaryColor),
-        ),
-        content: Text(texts.areYouSureLogout), // يفضل استبدالها بـ areYouSureCancel في AppStrings
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(texts.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(bookingProvider.notifier).cancelBooking(bookingId);
-            },
-            child: Text(texts.yes, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
+ void _showCancelDialog(int bookingId, AppStrings texts) {
+  final theme = Theme.of(context);
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(
+        texts.cancelBooking, // التعديل هنا
+        style: const TextStyle(color: kPrimaryColor),
       ),
-    );
-  }
+      content: Text(texts.areYouSureCancel), // والتعديل هنا
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(texts.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            ref.read(bookingProvider.notifier).cancelBooking(bookingId);
+          },
+          child: Text(texts.yes, style: const TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+}
 }
