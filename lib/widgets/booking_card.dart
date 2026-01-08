@@ -63,7 +63,7 @@ String statusLabel;
       case 'rejected': // هنا التمييز للمرفوضة
         statusColor = Colors.redAccent;
         // إذا كانت الواجهة إنجليزية يكتب Rejected وإذا عربية يكتب مرفوضة
-        statusLabel = texts.addSuccess == "Success" ? "Rejected" : "مرفوضة"; 
+        statusLabel = texts.addSuccess == "Success" ? "rejected" : "مرفوضة"; 
         break;
       case 'cancelled': // هنا التمييز للملغية
         statusColor = Colors.redAccent;

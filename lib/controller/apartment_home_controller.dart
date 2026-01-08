@@ -77,8 +77,10 @@ class ApartmentNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
     ]);
 
     try {
-      final token = await _storage.read(key: 'jwt_token');
-      await _service.toggleFavorite(id, token ?? "");
+      final success= await _service.toggleFavorite(id);
+      if(!success){
+          loadApartments();
+      }
     } catch (e) {
       // في حال فشل الاتصال، نعيد تحميل القائمة لضمان دقة البيانات
       loadApartments();

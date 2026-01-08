@@ -129,9 +129,7 @@ class Apartmentcard extends StatelessWidget {
                             //  const SizedBox(width: 6),
                             IconButton(
   onPressed: () {
-    // هنا نستدعي الدالة التي تم تمريرها للكارد
-    // إذا كان الكلاس StatefulWidget نستخدم widget.onFavoriteToggle()
-    // إذا كان StatelessWidget نستخدم onFavoriteToggle() مباشرة
+   
     onFavoriteToggle(); 
   },
   icon: Icon(

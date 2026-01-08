@@ -82,7 +82,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         is_favorite: apartment.is_favorite ?? false, 
                         onFavoriteToggle: () {
                           // هنا يتم استدعاء الأكشن من الـ Controller
-                          // ref.read(apartmentProvider.notifier).toggleFavorite(apartment.id);
+                          ref.read(apartmentProvider.notifier).toggleFavorite(apartment.id);
                           print("Favorite toggled for ID: ${apartment.id}");
                         },
                         onTap: () {

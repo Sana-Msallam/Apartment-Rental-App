@@ -103,15 +103,16 @@ class ApartmentHomeService{
   }
 
   // 6. تبديل المفضلة (إضافة/إزالة)
-  Future<bool> toggleFavorite(int apartmentId, String token) async {
+  Future<bool> toggleFavorite(int apartmentId) async {
     try {
       final response = await _apiClient.dio.post(
         'favorite',
         data: {'apartment_id': apartmentId},
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        
       );
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
+      print("Toggle Favorite Error: $e");
       return false;
     }
   }
