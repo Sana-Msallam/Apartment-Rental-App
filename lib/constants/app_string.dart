@@ -210,7 +210,12 @@ String get activeBookings => isAr ? "نشطة" : "Active";
 String get history => isAr ? "السجل" : "History";
 String get archived => isAr ? "المؤرشفة" : "Archived";
 
-
+String get rejected => isAr ? "مرفوضة" : "Rejected";
+String get rateNow => isAr ? "قيم الآن" : "Rate Now";
+String get edit => isAr ? "تعديل" : "Edit";
+String get rated => isAr ? "تم التقييم" : "Rated";
+String get cancelBooking => isAr ? "إلغاء الحجز" : "Cancel Booking";
+String get areYouSureCancel => isAr ? "هل أنت متأكد من إلغاء هذا الحجز؟" : "Are you sure you want to cancel this booking?";
 // --- نصوص صفحة الحجز (Booking Page) ---
   String get selectStayPeriod => isAr ? "تحديد فترة الإقامة" : "Select Stay Period";
   String get editStayPeriod => isAr ? "تعديل فترة الإقامة" : "Edit Stay Period";

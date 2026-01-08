@@ -23,8 +23,8 @@ class AddApartmentService {
       return response.statusCode == 201;
     }on DioException catch (e) {
   print("Server Validation Error: ${e.response?.data}"); 
-  print("🚨🚨🚨 STATUS: ${e.response?.statusCode}");
-  print("🚨🚨🚨 ERROR DATA: ${e.response?.data}");
+  print("STATUS: ${e.response?.statusCode}");
+  print("ERROR DATA: ${e.response?.data}");
   return false;
 }
      catch (e) {

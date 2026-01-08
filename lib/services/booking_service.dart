@@ -76,7 +76,7 @@ Future<bool> confirmBooking({
   Future<dynamic> getMyBookings(String token) async {
     try {
       final response = await _dio.get(
-        'http://192.168.0.105:8000/api/booking',
+        'http://192.168.1.105:8000/api/booking',
         options: Options(
           headers: {
             'Authorization': 'Bearer ${token.trim()}',

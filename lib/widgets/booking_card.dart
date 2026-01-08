@@ -44,31 +44,32 @@ class BookingCard extends ConsumerWidget {
     final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
     final String currentStatus = (status ?? "pending").toLowerCase();
-    final Color secondaryTextColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
-Color statusColor;
-String statusLabel;
-   switch (currentStatus) {
+    final Color secondaryTextColor =
+        theme.textTheme.bodyMedium?.color ?? Colors.grey;
+    Color statusColor;
+    String statusLabel;
+    switch (currentStatus) {
       case 'completed':
         statusColor = Colors.green;
-        statusLabel = texts.history; // "السجل" أو "مكتملة"
+        statusLabel = texts.isAr ? "مكتمل" : "Completed";
         break;
       case 'accepted':
         statusColor = Colors.blue;
-        statusLabel = texts.activeBookings; // "نشطة" أو "مقبولة"
+        statusLabel = texts.isAr ? "مقبول" : "Accepted";
         break;
       case 'pending':
         statusColor = Colors.orange;
-        statusLabel = texts.activeBookings; // "نشطة" أو "قيد الانتظار"
+        statusLabel = texts.isAr ? "قيد الانتظار" : "Pending";
         break;
       case 'rejected': // هنا التمييز للمرفوضة
         statusColor = Colors.redAccent;
         // إذا كانت الواجهة إنجليزية يكتب Rejected وإذا عربية يكتب مرفوضة
-        statusLabel = texts.addSuccess == "Success" ? "rejected" : "مرفوضة"; 
+        statusLabel = texts.isAr ? "مرفوضة" : "Rejected";
         break;
       case 'cancelled': // هنا التمييز للملغية
         statusColor = Colors.redAccent;
         // نستخدم texts.cancel لأنه غالباً يحتوي على كلمة "إلغاء" أو "Cancelled"
-        statusLabel = texts.cancel; 
+        statusLabel = texts.cancel;
         break;
       default:
         statusColor = Colors.grey;
@@ -82,8 +83,8 @@ String statusLabel;
         border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: theme.brightness == Brightness.dark 
-                ? Colors.black.withOpacity(0.3) 
+            color: theme.brightness == Brightness.dark
+                ? Colors.black.withOpacity(0.3)
                 : Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -105,29 +106,36 @@ String statusLabel;
                         // 1. ترجمة كلمة حجز (تستخدم My Bookings من ملفك)
                         "${texts.myBookings} #${booking['id']}",
                         style: TextStyle(
-                          color: theme.brightness == Brightness.dark ? Colors.white : kPrimaryColor,
+                          color: theme.brightness == Brightness.dark
+                              ? Colors.white
+                              : kPrimaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        // 2. ترجمة الرابط بين التواريخ (to أو إلى)
+
                         "${formatDate(booking['start_date'])} ${texts.cancel == "Cancel" ? "to" : "إلى"} ${formatDate(booking['end_date'])}",
-                        style: TextStyle(color: secondaryTextColor, fontSize: 13),
+                        style:
+                            TextStyle(color: secondaryTextColor, fontSize: 13),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     statusLabel, // 3. الحالة مترجمة بالكامل
-                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10),
+                    style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10),
                   ),
                 ),
               ],
@@ -142,28 +150,30 @@ String statusLabel;
                       onPressed: onReview,
                       icon: const Icon(Icons.star_rate, size: 16),
                       // 4. ترجمة زر قيم الآن
-                      label: Text(texts.addSuccess == "Success" ? "Rate Now" : "قيم الآن"),
+                      label: Text(texts.isAr ? "قيم الآن" : "Rate Now"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryColor,
                         foregroundColor: Colors.white,
-                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        textStyle: const TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     )
                   else
                     Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 18),
+                        const Icon(Icons.check_circle,
+                            color: Colors.green, size: 18),
                         const SizedBox(width: 4),
                         Text(
-                          // 5. ترجمة كلمة "تم التقييم"
-                          texts.addSuccess == "Success" ? "Rated" : "تم التقييم",
-                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                          // التعديل هنا: استخدام isAr
+                          texts.isAr ? "تم التقييم" : "Rated",
+                          style: const TextStyle(
+                              color: Colors.green, fontWeight: FontWeight.bold),
                         ),
                       ],
                     )
                 else
                   const SizedBox(),
-                
                 if (currentStatus == 'pending')
                   Row(
                     children: [
@@ -178,11 +188,17 @@ String statusLabel;
                       ElevatedButton(
                         onPressed: onEdit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.brightness == Brightness.dark ? Colors.white : kPrimaryColor,
-                          foregroundColor: theme.brightness == Brightness.dark ? kPrimaryColor : Colors.white,
+                          backgroundColor: theme.brightness == Brightness.dark
+                              ? Colors.white
+                              : kPrimaryColor,
+                          foregroundColor: theme.brightness == Brightness.dark
+                              ? kPrimaryColor
+                              : Colors.white,
                         ),
                         // 7. ترجمة زر التعديل
-                        child: Text(texts.addSuccess == "Success" ? "Edit" : "تعديل"),
+                        child: Text(texts.isAr
+                            ? "تعديل"
+                            : "Edit"), // بدلاً من مقارنة addSuccess
                       ),
                     ],
                   ),
