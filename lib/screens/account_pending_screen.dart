@@ -1,28 +1,31 @@
 import 'package:apartment_rental_app/screens/log_in.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:apartment_rental_app/screens/home_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AccountPendingScreen extends StatefulWidget {
+class AccountPendingScreen extends ConsumerStatefulWidget {
   const AccountPendingScreen({super.key});
 
   @override
-  State<AccountPendingScreen> createState() => _AccountPendingScreenState();
+  ConsumerState<AccountPendingScreen> createState() => _AccountPendingScreenState();
 }
 
-class _AccountPendingScreenState extends State<AccountPendingScreen> {
+class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
 
   @override
   void initState() {
     super.initState();
     
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if ( message.notification?.title == "Account Activated" ||
-      message.notification?.body?.contains("activated")== true) {
+      final texts = ref.read(stringsProvider); // استخدام القراءة هنا داخل الـ listener
+      
+      if (message.notification?.title == "Account Activated" ||
+          message.notification?.body?.contains("activated") == true) {
         if (!mounted) return; 
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Your account has been successfully activated! Welcome.")),
+          SnackBar(content: Text(texts.accountActivatedMsg)),
         );
         
         Navigator.pushReplacement(
@@ -35,25 +38,30 @@ class _AccountPendingScreenState extends State<AccountPendingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF234F68);
-    return WillPopScope(
-      onWillPop: () async => false, // منع زر الرجوع الفعلي
+    // 1. تعريف المتغيرات للغة والثيم
+    final texts = ref.watch(stringsProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.primaryColor;
+
+    return PopScope(
+      canPop: false, // البديل الحديث لـ WillPopScope في التحديثات الجديدة
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // أيقونة الحالة
+              // أيقونة الحالة مع خلفية تتكيف مع المود
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: primaryColor.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.hourglass_top_rounded,
                   size: 80,
                   color: primaryColor,
@@ -61,36 +69,37 @@ class _AccountPendingScreenState extends State<AccountPendingScreen> {
               ),
               const SizedBox(height: 40),
               
-              // العنوان
-              const Text(
-              "The account is under review.",
-              style: TextStyle(
+              // العنوان مترجم وملون حسب الثيم
+              Text(
+                texts.accountUnderReview,
+                textAlign: TextAlign.center,
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: primaryColor,
+                  color: isDark ? Colors.white : primaryColor,
                 ),
               ),
               const SizedBox(height: 15),
               
-              // الوصف
-              const Text(
-            "Thank you for registering with the Sakani application.\n Your information is currently being reviewed by the administrator. You will be able to log in as soon as you receive the activation notification.",
-              textAlign: TextAlign.center,
+              // الوصف مترجم
+              Text(
+                texts.pendingDescription,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey,
+                  color: isDark ? Colors.white70 : Colors.grey,
                   height: 1.5,
                 ),
               ),
               const SizedBox(height: 40),
               
               // مؤشر الانتظار
-              const CircularProgressIndicator(
+              CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               ),
               const SizedBox(height: 60),
 
-              // زر العودة لتسجيل الدخول (الحل الذي اتفقنا عليه)
+              // زر العودة لتسجيل الدخول
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -107,9 +116,9 @@ class _AccountPendingScreenState extends State<AccountPendingScreen> {
                     ),
                     elevation: 2,
                   ),
-                  child: const Text(
-                    "Return to login",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  child: Text(
+                    texts.returnToLogin,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

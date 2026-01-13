@@ -179,6 +179,7 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.bookmark_border_rounded,
             title: texts.myBookings,
             isDark: isDark,
+            isAr: isAr,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyBookingsScreen())),
           ),
           _divider(context),
@@ -187,6 +188,7 @@ class ProfileScreen extends ConsumerWidget {
             icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
             title: isDark ? texts.darkMode : texts.lightMode,
             isDark: isDark,
+            isAr: isAr,
             trailing: Switch.adaptive(
               value: isDark,
               activeColor: kPrimaryColor,
@@ -200,6 +202,7 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.language_rounded,
             title: isAr ? "اللغة العربية" : "English Language",
             isDark: isDark,
+            isAr: isAr,
             trailing: Switch.adaptive(
               value: isAr,
               activeColor: kPrimaryColor,
@@ -213,6 +216,7 @@ class ProfileScreen extends ConsumerWidget {
             icon: Icons.power_settings_new_rounded,
             title: texts.logout,
             isDark: isDark,
+            isAr: isAr,
             isDestructive: true,
             onTap: () => _showLogoutDialog(context, ref, isDark, texts),
           ),
@@ -220,6 +224,7 @@ class ProfileScreen extends ConsumerWidget {
       ),
     );
   }
+  
 
   // دالة الدايلوج المحسنة التي تستخدم Context الصفحة للانتقال
   void _showLogoutDialog(BuildContext pageContext, WidgetRef ref, bool isDark, AppStrings texts) {
@@ -265,6 +270,7 @@ class ProfileScreen extends ConsumerWidget {
     required bool isDark,
     required VoidCallback onTap,
     Widget? trailing,
+    required bool isAr,
     bool isDestructive = false,
   }) {
     return ListTile(
@@ -278,8 +284,10 @@ class ProfileScreen extends ConsumerWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: trailing ?? Icon(Icons.chevron_right_rounded, color: Colors.grey[400]),
-    );
+trailing: trailing ?? Icon(
+          isAr ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, 
+          color: Colors.grey[400]
+      ),    );
   }
 
   Widget _divider(BuildContext context) => Divider(height: 1, indent: 25, endIndent: 25, color: Theme.of(context).dividerColor);

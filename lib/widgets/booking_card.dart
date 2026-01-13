@@ -116,7 +116,7 @@ class BookingCard extends ConsumerWidget {
                       const SizedBox(height: 6),
                       Text(
 
-                        "${formatDate(booking['start_date'])} ${texts.cancel == "Cancel" ? "to" : "إلى"} ${formatDate(booking['end_date'])}",
+                        "${formatDate(booking['start_date'])} ${texts.isAr ? "إلى" : "to"}${formatDate(booking['end_date'])}",
                         style:
                             TextStyle(color: secondaryTextColor, fontSize: 13),
                       ),
