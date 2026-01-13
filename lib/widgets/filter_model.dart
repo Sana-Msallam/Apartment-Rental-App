@@ -1,6 +1,6 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';

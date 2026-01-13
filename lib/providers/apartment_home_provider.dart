@@ -1,4 +1,4 @@
-import 'package:apartment_rental_app/controller/booking_controller.dart';
+import 'package:apartment_rental_app/providers/booking_provider.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:apartment_rental_app/services/api_client.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
@@ -9,8 +9,8 @@ import '../models/apartment_home_model.dart';
 import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:apartment_rental_app/services/apartment_home_service.dart';
 import 'package:apartment_rental_app/services/add_apartment_service.dart';
-import '../controller/my_apartment_controller.dart';
-export 'package:apartment_rental_app/controller/my_apartment_controller.dart';
+import 'my_apartment_provider.dart';
+export 'package:apartment_rental_app/providers/my_apartment_provider.dart';
 
 final apiClientProvider= Provider(( ref)=> ApiClient());
 final bookingServiceProvider = Provider((ref) {

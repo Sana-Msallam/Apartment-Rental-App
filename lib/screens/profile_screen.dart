@@ -1,6 +1,6 @@
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/ThemeNotifier_controller.dart';
-import 'package:apartment_rental_app/controller/profile_controller.dart';
+import 'package:apartment_rental_app/providers/ThemeNotifier_controller.dart';
+import 'package:apartment_rental_app/providers/profile_provider.dart';
 import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/screens/my_bookings_screen.dart';

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
-import 'package:apartment_rental_app/controller/my_apartment_controller.dart';
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
+import 'package:apartment_rental_app/providers/my_apartment_provider.dart';
 import 'package:apartment_rental_app/screens/booking_requests_tap.dart'; // تأكدي من استيراد التبويب الثاني
 import '../widgets/apartmentCard.dart';
 import '../constants/app_constants.dart';

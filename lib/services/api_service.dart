@@ -38,6 +38,10 @@ class ApiService {
         return UserModel.fromJson(userData, token: token);
       }
     } on DioException catch (e) {
+      if(e.response?.statusCode == 403){
+        final message = e.response?.data['message']?? "Your account is pending verification";
+        throw Exception("pending verification");
+      }
       _handleDioError(e);
       return null;
     } catch (e) {

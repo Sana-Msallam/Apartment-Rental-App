@@ -1,7 +1,10 @@
 import 'dart:developer';
+import 'package:apartment_rental_app/providers/notificatios_provider.dart';
 import 'package:apartment_rental_app/services/local_notifications_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart'; 
 
@@ -21,7 +24,7 @@ class PushNotificationsService {
     }
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-    handleForegroundMessage();
+    
 
     messaging.onTokenRefresh.listen((newToken) async {
       log("FCM Token Refreshed: $newToken");
@@ -60,7 +63,7 @@ class PushNotificationsService {
       dio.options.headers["Accept"] = "application/json";
       
       final response = await dio.post(
-        'http://192.168.1.105:8000/api/update-fcm-token', 
+        'http://192.168.0.102:8000/api/update-fcm-token', 
         data: {'fcm_token': fcm_token},
       );
 
@@ -80,9 +83,10 @@ class PushNotificationsService {
   }
 
   // 5. معالجة الإشعارات والتطبيق مفتوح (Foreground)
-  static void handleForegroundMessage() {
+  static void handleForegroundMessage(WidgetRef ref) {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log("Foreground Message: ${message.notification?.title}");
+      ref.read(unreadCountProvider.notifier).state++;
       LocalNotificationService.showBasicNotification(message);
     });
   }

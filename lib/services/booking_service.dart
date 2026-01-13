@@ -26,7 +26,6 @@ Future<dynamic> calculatePrice({
         'start_date': startDate,
         'end_date': endDate,
       },
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     if (response.statusCode == 200) {
@@ -55,7 +54,6 @@ Future<bool> confirmBooking({
         'end_date': endDate,
         'status': 'pending',
       },
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
@@ -76,13 +74,7 @@ Future<bool> confirmBooking({
   Future<dynamic> getMyBookings(String token) async {
     try {
       final response = await _dio.get(
-        'http://192.168.1.105:8000/api/booking',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${token.trim()}',
-            'Accept': 'application/json',
-          },
-        ),
+        'booking',
       );
 
       if (response.statusCode == 200) {
@@ -98,12 +90,6 @@ Future<bool> confirmBooking({
     try {
       final response = await _dio.patch(
         'booking/$bookingId/cancel',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer ${token.trim()}',
-            'Accept': 'application/json',
-          },
-        ),
       );
 
       print("Cancel Status Code: ${response.statusCode}");
@@ -126,8 +112,6 @@ Future<bool> confirmBooking({
       final response = await _dio.patch(
         'booking/$bookingId/update',
         data: {'start_date': start, 'end_date': end},
-
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       print("Server Response Status: ${response.statusCode}");
       return response.statusCode == 200;
@@ -150,11 +134,10 @@ Future<bool> confirmBooking({
           'apartment_id': apartmentId,
           'stars': stars,
         },
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       return response.statusCode == 201 || response.statusCode == 200;
     } on DioException catch (e) {
-      print(" خطأ السيرفر: ${e.response?.data}");
+      print("  Error server ${e.response?.data}");
       return false;
     }
   }

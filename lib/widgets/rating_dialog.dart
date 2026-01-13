@@ -1,10 +1,11 @@
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
-import 'package:apartment_rental_app/constants/app_string.dart'; // استيراد ملف النصوص
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';  
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 void showRatingDialog(BuildContext context, WidgetRef ref, int bookingId, int apartmentId, String apartmentName) {
+
 
   final texts = ref.read(stringsProvider);
 
@@ -15,7 +16,7 @@ void showRatingDialog(BuildContext context, WidgetRef ref, int bookingId, int ap
       int localStars = 0;
       return AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        // تبديل العنوان حسب اللغة
+
         title: Text(
           texts.isAr ? "أهلاً بعودتك 😍" : "Welcome Back 😍", 
           textAlign: TextAlign.center

@@ -141,25 +141,35 @@ final FlutterSecureStorage _storage;
  }
  Future<void> acceptRequest(int bookingId) async {
     try {
+      _updateLocalStatus(bookingId, 'Accepted');
       await _service.acceptBooking(bookingId);
       await fetchOwnerRequests(); 
     } catch (e) {
       print("Accept Error: $e");
+      await fetchOwnerRequests(); 
     }
   }
 
   // تابع رفض الطلب
   Future<void> rejectRequest(int bookingId) async {
     try {
+      _updateLocalStatus(bookingId, 'Rejected');
       await _service.rejectBooking(bookingId);
       await fetchOwnerRequests();
     } catch (e) {
       print("Reject Error: $e");
+      await fetchOwnerRequests();
     }
+  }
+   
+  void _updateLocalStatus(int bookingId, String newStatus){
+    final List<BookingRequestModel> updateList = state.pendingRequests.map((req){
+      return  req.id == bookingId? req.copyWith(status: newStatus) :req;
+    }).toList();
+    state = state.copyWith(pendingRequests: updateList);
   }
 }
 
-// 1. تعريف بروفايدر الـ ApiClient (نسخة واحدة لكل التطبيق)
 final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
 });

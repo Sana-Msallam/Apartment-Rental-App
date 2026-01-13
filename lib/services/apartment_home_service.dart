@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
+import 'package:apartment_rental_app/models/notification_model.dart';
 import 'package:dio/dio.dart';
 import '../models/apartment_home_model.dart';
 import '../services/api_client.dart';
@@ -133,4 +134,5 @@ class ApartmentHomeService{
       throw Exception('Failed to load favorites');
     }
   }
+ 
 }
