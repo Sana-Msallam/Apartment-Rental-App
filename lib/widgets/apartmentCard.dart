@@ -60,13 +60,11 @@ class Apartmentcard extends StatelessWidget {
                 children: [
                   CachedNetworkImage(
                     imageUrl: imagePath,
-                    
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     httpHeaders: const {'Connection': 'keep-alive'},
                     placeholder: (context, url) => Container(
-                      
                       height: 150,
                       color: Colors.grey[200],
                       child: const Center(child: CircularProgressIndicator()),
@@ -99,7 +97,10 @@ class Apartmentcard extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color,
                                   ),
                                 ),
                               ],
@@ -113,7 +114,8 @@ class Apartmentcard extends StatelessWidget {
                             Expanded(
                               child: Row(
                                 children: [
-                                  const Icon(Icons.location_on, color: Colors.grey, size: 12),
+                                  const Icon(Icons.location_on,
+                                      color: Colors.grey, size: 12),
                                   const SizedBox(width: 2),
                                   Expanded(
                                     child: Text(
@@ -128,21 +130,26 @@ class Apartmentcard extends StatelessWidget {
                             ),
                             //  const SizedBox(width: 6),
                             IconButton(
-  onPressed: () {
-   
-    onFavoriteToggle(); 
-  },
-  icon: Icon(
-    is_favorite ? Icons.favorite : Icons.favorite_border,
-    color: is_favorite ? Colors.red : Colors.grey,size: 18
-  ),
-),
+                              onPressed: () {
+                                // هنا نستدعي الدالة التي تم تمريرها للكارد
+                                // إذا كان الكلاس StatefulWidget نستخدم widget.onFavoriteToggle()
+                                // إذا كان StatelessWidget نستخدم onFavoriteToggle() مباشرة
+                                onFavoriteToggle();
+                              },
+                              icon: Icon(
+                                  is_favorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: is_favorite ? Colors.red : Colors.grey,
+                                  size: 18),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.square_foot, color: Colors.grey, size: 14),
+                            const Icon(Icons.square_foot,
+                                color: Colors.grey, size: 14),
                             const SizedBox(width: 4),
                             Text('$space m²', style: AppConstants.thirdText),
                           ],

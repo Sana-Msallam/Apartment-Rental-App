@@ -46,6 +46,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         print("Token saved successfully: ${user.token}");  
         // هذه الخطوة تضمن أن البروفايل سيُجلب فوراً دون انتظار إعادة تشغيل التطبيق
         await ref.read(profileProvider.notifier).getProfile(user.token!);
+await ref.read(profileProvider.notifier).updateTokenAndFetch(user.token!);
         if (!mounted) return;
         
         // 3. الانتقال للشاشة الرئيسية

@@ -310,23 +310,18 @@ class _ApartmentDetailsScreenState
     );
   }
 
-  Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,//  spacing: 15,
-      //  runSpacing: 15,
-      //alignment: WrapAlignment.spaceBetween,
-      children: [
-        _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),
-        _featureIcon(
-            Icons.bathtub, "${apartment.bathrooms} ${texts.bathrooms}"),
-        _featureIcon(Icons.square_foot,
-            "${apartment.space} ${texts.isAr ? 'م²' : 'm²'}"),
-        _featureIcon(Icons.layers, "${texts.floor} ${apartment.floor}"),
-        _featureIcon(Icons.calendar_month,
-            "${texts.builtYear}: ${apartment.builtDate.split('-')[0]}"),
-      ],
-    );
-  }
+ Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
+  return Row( // استخدمي Row بدلاً من Wrap لضمان بقائهم في صف واحد
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),
+      _featureIcon(Icons.bathtub, "${apartment.bathrooms} ${texts.bathrooms}"),
+      _featureIcon(Icons.square_foot, "${apartment.space} ${texts.isAr ? 'م²' : 'm²'}"),
+      _featureIcon(Icons.layers, "${texts.floor} ${apartment.floor}"),
+      _featureIcon(Icons.calendar_month, "${texts.builtYear}: ${apartment.builtDate.split('-')[0]}"),
+    ],
+  );
+}
 
   Widget _buildOwnerCard(
       ApartmentDetail apartment, bool isDark, ThemeData theme, dynamic texts) {

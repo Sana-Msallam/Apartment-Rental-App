@@ -33,10 +33,10 @@ class ProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
 Future<void> updateTokenAndFetch(String token) async {
-  await _storage.write(key: 'jwt_token', value: token); // حفظ التوكن
-  await getProfile(token); // جلب البيانات فوراً
+  state = const AsyncValue.loading(); // أظهري علامة التحميل
+  await _storage.write(key: 'jwt_token', value: token); 
+  await getProfile(token); // اجلبي البيانات فوراً بالتوكن الجديد
 }
-
 
 
   Future<void> getProfile(String token) async {

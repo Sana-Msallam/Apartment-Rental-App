@@ -221,7 +221,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-
+  // دالة الدايلوج المحسنة التي تستخدم Context الصفحة للانتقال
   void _showLogoutDialog(BuildContext pageContext, WidgetRef ref, bool isDark, AppStrings texts) {
     showDialog(
       context: pageContext,
