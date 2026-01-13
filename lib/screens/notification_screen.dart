@@ -86,8 +86,7 @@ class NotificationScreen extends ConsumerWidget {
                       notification.title,
                       style: TextStyle(
                         fontWeight: notification.isRead
-                            ? FontWeight.normal
-                            : FontWeight.bold,
+                            ? FontWeight.normal: FontWeight.bold,
                         fontSize: 15,
                         color:
                             isDark ? Colors.white : AppConstants.primaryColor,
@@ -111,7 +110,6 @@ class NotificationScreen extends ConsumerWidget {
                             .read(notificationsProvider.notifier)
                             .markAsRead(notification.id);
                       }
-                      // هنا يمكنك إضافة توجيه المستخدم لصفحة الحجز إذا كان الإشعار يخص حجز معين
                     },
                   ),
                 );

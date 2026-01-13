@@ -1,4 +1,3 @@
-import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/providers/ThemeNotifier_controller.dart';
 import 'package:apartment_rental_app/screens/home_screen.dart';

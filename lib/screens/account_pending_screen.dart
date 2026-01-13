@@ -18,7 +18,7 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
     super.initState();
     
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final texts = ref.read(stringsProvider); // استخدام القراءة هنا داخل الـ listener
+      final texts = ref.read(stringsProvider); 
       
       if (message.notification?.title == "Account Activated" ||
           message.notification?.body?.contains("activated") == true) {
@@ -38,14 +38,13 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. تعريف المتغيرات للغة والثيم
     final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final primaryColor = theme.primaryColor;
 
     return PopScope(
-      canPop: false, // البديل الحديث لـ WillPopScope في التحديثات الجديدة
+      canPop: false, 
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: Container(
@@ -54,7 +53,6 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // أيقونة الحالة مع خلفية تتكيف مع المود
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -69,7 +67,6 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
               ),
               const SizedBox(height: 40),
               
-              // العنوان مترجم وملون حسب الثيم
               Text(
                 texts.accountUnderReview,
                 textAlign: TextAlign.center,
@@ -81,7 +78,6 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
               ),
               const SizedBox(height: 15),
               
-              // الوصف مترجم
               Text(
                 texts.pendingDescription,
                 textAlign: TextAlign.center,
@@ -93,18 +89,15 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
               ),
               const SizedBox(height: 40),
               
-              // مؤشر الانتظار
               CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               ),
               const SizedBox(height: 60),
 
-              // زر العودة لتسجيل الدخول
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // العودة لصفحة Login وتفريغ الـ Stack
                     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
                   },
                   style: ElevatedButton.styleFrom(
@@ -114,8 +107,7 @@ class _AccountPendingScreenState extends ConsumerState<AccountPendingScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 2,
-                  ),
+                    elevation: 2,),
                   child: Text(
                     texts.returnToLogin,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),

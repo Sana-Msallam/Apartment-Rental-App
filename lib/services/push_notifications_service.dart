@@ -63,7 +63,7 @@ class PushNotificationsService {
       dio.options.headers["Accept"] = "application/json";
       
       final response = await dio.post(
-        'http://192.168.0.112:8000/api/update-fcm-token', 
+        'http://192.168.0.102:8000/api/update-fcm-token', 
         data: {'fcm_token': fcm_token},
       );
 

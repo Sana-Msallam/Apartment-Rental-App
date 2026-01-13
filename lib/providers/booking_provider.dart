@@ -30,7 +30,7 @@ class BookingState {
       currentBookings: currentBookings ?? this.currentBookings,
       cancelledBookings: cancelledBookings ?? this.cancelledBookings,
       historyBookings:
-          historyBookings ?? this.historyBookings, // تم الإصلاح هنا 👈
+          historyBookings ?? this.historyBookings, 
       pendingRequests: pendingRequests ?? this.pendingRequests,
       isLoading: isLoading ?? this.isLoading,
     );
@@ -57,17 +57,15 @@ class BookingController extends StateNotifier<BookingState> {
       if (token != null) {
         final dynamic response = await _service.getMyBookings(token);
 
-        // تأكدي من أن الرد ليس فارغاً وأنه Map
+        
         if (response != null && response is Map) {
-          // الوصول للقائمة داخل حقل 'data'
+          
           final List<dynamic> rawList = response['data'] ?? [];
 
-          // 🛑 الخطوة الأهم: تحويل كل عنصر إلى الموديل بشكل صريح
           final List<BookingRequestModel> allBookings = rawList.map((json) {
             return BookingRequestModel.fromJson(json as Map<String, dynamic>);
           }).toList();
 
-          // الآن نقسم القائمة حسب الحالة (Status)
           state = state.copyWith(
             currentBookings: allBookings.where((b) {
               final s = b.status.toLowerCase().trim();
@@ -114,9 +112,7 @@ class BookingController extends StateNotifier<BookingState> {
       print("Update Error: $e");
       return false;
     }
-  }
-
-  Future<void> fetchOwnerRequests() async {
+  }Future<void> fetchOwnerRequests() async {
     try {
       state = state.copyWith(isLoading: true);
       final requests = await _service.fetchAllBookingRequests();
@@ -138,7 +134,6 @@ class BookingController extends StateNotifier<BookingState> {
     }
   }
 
-  // تابع رفض الطلب
   Future<void> rejectRequest(int bookingId) async {
     try {
       _updateLocalStatus(bookingId, 'Rejected');
@@ -155,10 +150,9 @@ class BookingController extends StateNotifier<BookingState> {
       String? token = await _storage.read(key: 'jwt_token');
       if (token == null) return;
 
-      // نفترض أن السيرفس لديه دالة تسمى cancelBooking
       final success = await _service.cancelBookings(bookingId, token);
       if (success) {
-        await fetchMyBookings(); // تحديث القائمة بعد الإلغاء
+        await fetchMyBookings(); 
       }
     } catch (e) {
       print("Cancel Error: $e");
@@ -178,17 +172,15 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   return ApiClient();
 });
 
-// 2. تعريف بروفايدر السيرفس
 final bookingServiceProvider = Provider<BookingService>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return BookingService(apiClient);
 });
 
-// 3. تعريف بروفايدر الكنترولر
 final bookingProvider =
     StateNotifierProvider<BookingController, BookingState>((ref) {
   final service = ref.watch(bookingServiceProvider);
   final storage =
-      ref.watch(storageProvider); // نأخذ الـ storage المشفر من الـ Provider
+      ref.watch(storageProvider); 
   return BookingController(service, storage);
 });
