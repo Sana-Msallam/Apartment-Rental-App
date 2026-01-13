@@ -1,7 +1,10 @@
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
+import 'package:apartment_rental_app/providers/notificatios_provider.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/my_apartments.dart';
+import 'package:apartment_rental_app/screens/notification_screen.dart';
+import 'package:apartment_rental_app/services/push_notifications_service.dart';
 import 'package:apartment_rental_app/widgets/filter_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,11 +22,22 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
+
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+void initState() {
+  super.initState();
+  Future.microtask(() {
+    ref.read(notificationsProvider.notifier).refreshUnreadCount();
+  });
+  PushNotificationsService.handleForegroundMessage(ref);
+}
+
   @override
   Widget build(BuildContext context) {
     final texts = ref.watch(stringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -78,10 +92,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         space: apartment.space,
                         average_rating: apartment.averageRating,
                         
-                        // الإضافات الضرورية لإصلاح الخطأ:
                         is_favorite: apartment.is_favorite ?? false, 
                         onFavoriteToggle: () {
-                          // هنا يتم استدعاء الأكشن من الـ Controller
                           ref.read(apartmentProvider.notifier).toggleFavorite(apartment.id);
                           print("Favorite toggled for ID: ${apartment.id}");
                         },
@@ -148,16 +160,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const Spacer(),
-            IconButton(
-              icon: Icon(
-                Icons.notifications_none,
-                color: isDark ? Colors.white : Colors.grey[800],
-                size: 28,
+         // --- بداية التعديل: أيقونة الجرس مع النقطة الحمراء ---
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_none,
+                  color: isDark ? Colors.white : Colors.grey[800],
+                  size: 28,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationScreen()),
+                  );
+                },
               ),
-              onPressed: () {
-                // Navigator.push(...)
-              },
-            )
+              Consumer(
+                builder: (context, ref, child) {
+                  final unreadCount = ref.watch(unreadCountProvider);
+                  
+                  if (unreadCount == 0) return const SizedBox.shrink();
+
+                  return Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red, 
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5), 
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        unreadCount > 9 ? '+9' : '$unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
           ],
         ),
       ),

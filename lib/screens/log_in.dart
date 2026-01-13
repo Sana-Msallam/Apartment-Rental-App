@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/profile_controller.dart';
+import 'package:apartment_rental_app/providers/profile_provider.dart';
+import 'package:apartment_rental_app/screens/account_pending_screen.dart';
 import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/screens/sign_up.dart';
@@ -42,8 +43,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (user != null && user.token != null) { 
         // 1. حفظ التوكن أولاً
         await ref.read(storageProvider).write(key: 'jwt_token', value: user.token);
-        print("✅ Token saved successfully: ${user.token}");  
-        // 2. تحديث الـ ProfileProvider يدوياً بالتوكن الجديد
+        print("Token saved successfully: ${user.token}");  
         // هذه الخطوة تضمن أن البروفايل سيُجلب فوراً دون انتظار إعادة تشغيل التطبيق
         await ref.read(profileProvider.notifier).getProfile(user.token!);
         if (!mounted) return;
@@ -58,7 +58,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         _showSnackBar('Login Failed: Invalid credentials');
       }
     } catch (e) {
-      _showSnackBar('Error: $e');
+      final errorMessage = e.toString();
+      if(errorMessage.contains('403')|| errorMessage.contains('pending verification')){
+        if(!mounted) return;
+        Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AccountPendingScreen()),
+      );
+      }
+      else{
+        _showSnackBar('Error: $e');
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

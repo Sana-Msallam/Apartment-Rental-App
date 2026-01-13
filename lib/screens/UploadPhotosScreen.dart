@@ -3,7 +3,7 @@ import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/screens/account_pending_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:ui';
-import 'package:apartment_rental_app/controller/profile_controller.dart';
+import 'package:apartment_rental_app/providers/profile_provider.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
 import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/glass_container.dart';

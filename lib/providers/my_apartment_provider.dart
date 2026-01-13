@@ -1,4 +1,4 @@
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
 import 'package:apartment_rental_app/models/apartment_home_model.dart';
 import 'package:apartment_rental_app/services/apartment_home_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,4 +1,4 @@
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart';
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/widgets/apartmentCard.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +16,6 @@ class FavoritesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Favorite'),
-      // يفضل استبدال Colors.white بـ Theme للـ Dark Mode
       backgroundColor: Colors.white,
       body: favoritesAsync.when(
         skipLoadingOnRefresh: false,

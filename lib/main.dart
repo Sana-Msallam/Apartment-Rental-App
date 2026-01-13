@@ -1,6 +1,6 @@
 import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/ThemeNotifier_controller.dart';
+import 'package:apartment_rental_app/providers/ThemeNotifier_controller.dart';
 import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/screens/booking_screen.dart';
@@ -10,7 +10,7 @@ import 'package:apartment_rental_app/services/local_notifications_service.dart';
 import 'package:apartment_rental_app/services/push_notifications_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // ضروري جداً للترجمة
-import 'package:apartment_rental_app/controller/apartment_home_controller.dart'; // أو المسار الذي وضعتِ فيه كود الـ Providers
+import 'package:apartment_rental_app/providers/apartment_home_provider.dart'; // أو المسار الذي وضعتِ فيه كود الـ Providers
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

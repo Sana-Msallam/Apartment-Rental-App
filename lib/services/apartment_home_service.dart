@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
+import 'package:apartment_rental_app/models/notification_model.dart';
 import 'package:dio/dio.dart';
 import '../models/apartment_home_model.dart';
 import '../services/api_client.dart';
@@ -103,15 +104,16 @@ class ApartmentHomeService{
   }
 
   // 6. تبديل المفضلة (إضافة/إزالة)
-  Future<bool> toggleFavorite(int apartmentId, String token) async {
+  Future<bool> toggleFavorite(int apartmentId) async {
     try {
       final response = await _apiClient.dio.post(
         'favorite',
         data: {'apartment_id': apartmentId},
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        
       );
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
+      print("Toggle Favorite Error: $e");
       return false;
     }
   }
@@ -132,4 +134,5 @@ class ApartmentHomeService{
       throw Exception('Failed to load favorites');
     }
   }
+ 
 }

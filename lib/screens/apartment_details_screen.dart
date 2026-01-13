@@ -10,7 +10,7 @@ import 'package:apartment_rental_app/models/apartment_details_model.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/custom_app_bar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../controller/apartment_home_controller.dart';
+import '../providers/apartment_home_provider.dart';
 import '../constants/app_constants.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);

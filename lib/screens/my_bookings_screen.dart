@@ -1,5 +1,5 @@
 import 'package:apartment_rental_app/constants/app_string.dart';
-import 'package:apartment_rental_app/controller/booking_controller.dart';
+import 'package:apartment_rental_app/providers/booking_provider.dart';
 import 'package:apartment_rental_app/screens/booking_screen.dart'; // افترضت أن هذا ملف تعديل الحجز
 import 'package:apartment_rental_app/widgets/booking_card.dart';
 import 'package:apartment_rental_app/widgets/rating_dialog.dart';
