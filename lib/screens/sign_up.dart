@@ -10,9 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-
-
-
 const Color vBorderColor = Color(0xFFC0C0C0);
 const Color kPrimaryColor = Color(0xFF234F68);
 const double vheight = 15;
@@ -22,7 +19,7 @@ class RegisterPage extends ConsumerStatefulWidget {
   RegisterPage({super.key});
 
   @override
- ConsumerState<RegisterPage> createState() => _RegisterPageState();
+  ConsumerState<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends ConsumerState<RegisterPage> {
@@ -38,7 +35,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     if (_formKey.currentState!.validate()) {
       String formattedDateForServer = "";
       if (_selectedDate != null) {
-        formattedDateForServer = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+        formattedDateForServer =
+            DateFormat('yyyy-MM-dd').format(_selectedDate!);
       }
 
       Navigator.push(
@@ -67,7 +65,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         return Theme(
           data: theme.copyWith(
             colorScheme: theme.colorScheme.copyWith(
-              primary: theme.primaryColor,  
+              primary: theme.primaryColor,
             ),
           ),
           child: child!,
@@ -93,15 +91,15 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   @override
-  Widget build(BuildContext context ) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-final texts = ref.watch(stringsProvider);
+    final texts = ref.watch(stringsProvider);
 
     final titleColor = isDark ? Colors.white : theme.primaryColor;
 
     return Scaffold(
-      resizeToAvoidBottomInset: true, 
+      resizeToAvoidBottomInset: true,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -118,14 +116,15 @@ final texts = ref.watch(stringsProvider);
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.4), 
+              color: Colors.black.withOpacity(0.4),
             ),
           ),
           SafeArea(
             child: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Center(
                   child: GlassContainer(
                     child: Form(
@@ -156,7 +155,8 @@ final texts = ref.watch(stringsProvider);
                           buildLabel(context, texts.lastName),
                           CustomTextFiled(
                             controller: _lastNameController,
-hintText: texts.lastNameHint, // بدلاً من "Enter last name"
+                            hintText: texts
+                                .lastNameHint, // بدلاً من "Enter last name"
                             prefixIcon: Icons.person_outline,
                             validator: (v) => v!.isEmpty ? "Required" : null,
                           ),
@@ -164,25 +164,32 @@ hintText: texts.lastNameHint, // بدلاً من "Enter last name"
                           buildLabel(context, texts.emailAddress),
                           CustomTextFiled(
                             controller: _emailController,
-hintText: "example@mail.com", // أو texts.emailHint                            prefixIcon: Icons.email_outlined,
+                            hintText:
+                                "example@mail.com", // أو texts.emailHint                            prefixIcon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return "Email is required";
-                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(v)) {
-return texts.invalidEmail;                              }
+                              if (v == null || v.isEmpty)
+                                return "Email is required";
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                  .hasMatch(v)) {
+                                return texts.invalidEmail;
+                              }
                               return null;
                             },
                           ),
                           const SizedBox(height: 15),
-buildLabel(context, texts.phoneLabel), // تعديل الـ Label أيضاًد
-               CustomTextFiled(
+                          buildLabel(context,
+                              texts.phoneLabel), // تعديل الـ Label أيضاًد
+                          CustomTextFiled(
                             controller: _phoneController,
                             hintText: "09xx xxx xxx",
                             prefixIcon: Icons.phone_android_outlined,
                             keyboardType: TextInputType.phone,
                             validator: (v) {
-                              if (v == null || v.isEmpty) return "Phone number is required";
-if (v.length < 10) return texts.phoneInvalid;                              return null;
+                              if (v == null || v.isEmpty)
+                                return "Phone number is required";
+                              if (v.length < 10) return texts.phoneInvalid;
+                              return null;
                             },
                           ),
                           const SizedBox(height: 15),
@@ -192,16 +199,20 @@ if (v.length < 10) return texts.phoneInvalid;                              retur
                             child: AbsorbPointer(
                               child: CustomTextFiled(
                                 controller: _dateController,
-hintText: texts.birthDateHint, // بدلاً من "Select your birthday"                                prefixIcon: Icons.calendar_today,
-validator: (v) => v!.isEmpty ? texts.requiredField : null,                              ),
+                                hintText: texts
+                                    .birthDateHint, // بدلاً من "Select your birthday"                                prefixIcon: Icons.calendar_today,
+                                validator: (v) =>
+                                    v!.isEmpty ? texts.requiredField : null,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 40),
                           CustomButton(
                             onTap: _onNextPressed,
                             textButton: texts.next,
-                            kPrimaryColor: isDark ? Colors.white : theme.primaryColor, 
-                            vTextColor: isDark ? Colors.black : Colors.white, 
+                            kPrimaryColor:
+                                isDark ? Colors.white : theme.primaryColor,
+                            vTextColor: isDark ? Colors.black : Colors.white,
                             width: double.infinity,
                           ),
                         ],

@@ -103,7 +103,7 @@ final FlutterSecureStorage _storage;
       final bool success = await _service.cancelBookings(bookingId, token);
 
       if (success) {
-        print("✅ Booking $bookingId cancelled successfully");
+        print(" Booking $bookingId cancelled successfully");
         await fetchMyBookings();
       } else {
         print(" Failed to cancel booking on server");

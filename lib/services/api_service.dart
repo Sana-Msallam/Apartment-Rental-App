@@ -105,7 +105,6 @@ class ApiService {
     return null;
   }
 
-// أضف هذا التابع داخل كلاس ApiService في ملف api_service.dart
 
 Future<bool> logout() async {
   try {

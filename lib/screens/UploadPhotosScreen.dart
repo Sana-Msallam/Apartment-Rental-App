@@ -82,10 +82,11 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
           }
         });
       } else {
-        _showError('Registration failed. Please try again.');
+        
+        _showError(texts.isAr ? "فشل التسجيل، حاول مجدداً" : "Registration failed");
       }
     } catch (e) {
-      _showError('Unexpected error occurred: $e');
+      _showError(texts.isAr ? "حدث خطأ غير متوقع" : "Unexpected error: $e");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
