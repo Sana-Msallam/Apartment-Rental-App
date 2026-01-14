@@ -18,6 +18,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   @override
   void initState() {
     super.initState();
+    // جلب البيانات عند فتح الشاشة
     Future.microtask(() => ref.read(bookingProvider.notifier).fetchMyBookings());
   }
 
@@ -33,7 +34,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text(texts.myBookings, style: theme.appBarTheme.titleTextStyle),
+          title: Text(texts.myBookings),
           centerTitle: true,
           elevation: 0,
           leading: IconButton(
@@ -41,7 +42,11 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           bottom: TabBar(
+            // تخصيص الألوان لتظهر بيضاء واضحة فوق اللون الأزرق
             indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white.withOpacity(0.7),
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
               Tab(text: texts.activeBookings), 
               Tab(text: texts.history), 
@@ -89,8 +94,8 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                     MaterialPageRoute(
                       builder: (context) => BookingApp(
                         apartmentId: booking.apartmentId,
-                        pricePerNight: 0.0, 
-                        bookingId: booking.id,
+                        pricePerNight: 0.0, // سيتم جلب السعر داخل BookingApp أو تمريره من المودل
+                        // تمت إزالة الـ bookingId كما طلبتِ
                         initialStart: DateTime.parse(booking.startDate),
                         initialEnd: DateTime.parse(booking.endDate),
                       ),
@@ -107,13 +112,20 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   Widget _buildEmptyWidget(String type, bool isDark, AppStrings texts) {
     IconData icon = type == "active" ? Icons.calendar_today : (type == "history" ? Icons.history : Icons.cancel);
     String msg = type == "active" ? texts.noActiveBookings : (type == "history" ? texts.noPastBookings : texts.noCancelledBookings);
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 60, color: Colors.grey[300]),
+          Icon(icon, size: 60, color: isDark ? Colors.grey[700] : Colors.grey[300]),
           const SizedBox(height: 15),
-          Text(msg, style: TextStyle(color: Colors.grey[600])),
+          Text(
+            msg, 
+            style: TextStyle(
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
         ],
       ),
     );
@@ -123,10 +135,14 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).cardColor,
         title: Text(texts.cancelBooking, style: const TextStyle(color: Color(0xFF234F68))),
         content: Text(texts.areYouSureCancel),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(texts.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: Text(texts.no), // استخدام texts.no بدلاً من الكلمة الثابتة
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);

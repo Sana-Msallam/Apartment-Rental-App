@@ -28,10 +28,12 @@ class BookingCard extends ConsumerWidget {
     final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    // توحيد حالة الحجز
     final String currentStatus =
         (status ?? booking.status).toLowerCase().trim();
 
-    // تحديد لون الحالة
+    // تحديد لون الحالة بناءً على نوعها
     Color statusColor;
     switch (currentStatus) {
       case 'pending':
@@ -57,6 +59,7 @@ class BookingCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(15),
+        // إضافة حدود خفيفة في الوضع الليلي لزيادة التباين
         border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
         boxShadow: [
           BoxShadow(
@@ -88,7 +91,7 @@ class BookingCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${texts.myBookings} #${booking.id}",
+                        "${texts.myBookings} ",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -100,6 +103,7 @@ class BookingCard extends ConsumerWidget {
                     ],
                   ),
                 ),
+                // السعر
                 Text(
                   "${booking.totalPrice} \$",
                   style: TextStyle(
@@ -110,19 +114,24 @@ class BookingCard extends ConsumerWidget {
                 ),
               ],
             ),
+
             Divider(
                 height: 30, color: isDark ? Colors.white10 : Colors.grey[200]),
 
-            // سطر التواريخ (مثل طلباتي)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _infoColumn(texts.checkInDate, booking.startDate, isDark),
-                _infoColumn(texts.checkOutDate, booking.endDate, isDark),
-              ],
-            ),
+        Row(
+  mainAxisAlignment: MainAxisAlignment.spaceAround,
+  children: [
+    // نستخدم texts.formatDate لتركيز التاريخ
+    _infoColumn(texts.checkInDate, texts.formatDate(booking.startDate), isDark),
+    
+    Icon(Icons.arrow_forward_rounded, size: 16, color: isDark ? Colors.white24 : Colors.grey[300]),
+    
+    // ونفس الشيء لتاريخ الخروج
+    _infoColumn(texts.checkOutDate, texts.formatDate(booking.endDate), isDark),
+  ],
+),
 
-            // الأزرار السفلية (مثل طلباتي)
+            // الأزرار التفاعلية
             if (currentStatus == 'pending') ...[
               const SizedBox(height: 20),
               Row(
@@ -137,7 +146,8 @@ class BookingCard extends ConsumerWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      child: Text(texts.isAr ? "تعديل" : "Edit"),
+                      child:
+                          Text(texts.edit), // تم التغيير لـ texts.edit للترجمة
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -162,10 +172,12 @@ class BookingCard extends ConsumerWidget {
                 child: ElevatedButton.icon(
                   onPressed: onReview,
                   icon: const Icon(Icons.star_rate, size: 18),
-                  label: Text(texts.isAr ? "قيم الآن" : "Rate Now"),
+                  label: Text(
+                      texts.rateNow), // تم التغيير لـ texts.rateNow للترجمة
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber[700],
                     foregroundColor: Colors.white,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                   ),
@@ -178,33 +190,46 @@ class BookingCard extends ConsumerWidget {
     );
   }
 
+  // ودجت صغيرة لعلامة الحالة (Badge)
   Widget _buildStatusBadge(String status, AppStrings texts, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: color.withOpacity(0.5)),
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Text(
-        texts.translate(status),
-        style:
-            TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+        texts.translate(status), // استخدام دالة الترجمة السحرية
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
 
+  // ودجت لعمود المعلومات (التاريخ)
   Widget _infoColumn(String label, String value, bool isDark) {
     return Column(
       children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 12, color: isDark ? Colors.white38 : Colors.grey)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.white38 : Colors.grey[500],
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(value,
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.black87)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+        ),
       ],
     );
   }

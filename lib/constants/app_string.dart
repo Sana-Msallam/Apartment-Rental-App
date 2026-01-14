@@ -1,9 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+
+
 
 class AppStrings {
   final bool isAr;
   AppStrings(this.isAr);
 
+
+
+// داخل كلاس AppStrings
+String formatDate(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return "";
+  try {
+    DateTime dt = DateTime.parse(dateStr);
+    // تنسيق بسيط: السنة-الشهر-اليوم
+    return DateFormat('yyyy-MM-dd').format(dt); 
+  } catch (e) {
+    return dateStr; // إذا فشل التحليل يرجع النص كما هو
+  }
+}
   // --- نصوصك القديمة كما هي ---
   String get fieldRequired => isAr ? "هذا الحقل مطلوب" : "Required";
   String get next => isAr ? "التالي" : "NEXT";

@@ -15,7 +15,7 @@ class BookingState {
     this.currentBookings = const [],
     this.cancelledBookings = const [],
     this.historyBookings = const [],
-    this.pendingRequests= const[],
+    this.pendingRequests = const [],
     this.isLoading = false,
   });
 
@@ -29,23 +29,25 @@ class BookingState {
     return BookingState(
       currentBookings: currentBookings ?? this.currentBookings,
       cancelledBookings: cancelledBookings ?? this.cancelledBookings,
-      historyBookings: historyBookings ?? this.historyBookings, // تم الإصلاح هنا 👈
-      pendingRequests: pendingRequests?? this.pendingRequests,
+      historyBookings:
+          historyBookings ?? this.historyBookings, // تم الإصلاح هنا 👈
+      pendingRequests: pendingRequests ?? this.pendingRequests,
       isLoading: isLoading ?? this.isLoading,
     );
   }
 }
 
 final storageProvider = Provider((ref) => const FlutterSecureStorage(
-  aOptions: AndroidOptions(
-    encryptedSharedPreferences: true,
-  ),
-));
+      aOptions: AndroidOptions(
+        encryptedSharedPreferences: true,
+      ),
+    ));
+
 class BookingController extends StateNotifier<BookingState> {
   BookingController(this._service, this._storage) : super(BookingState());
 
-  final BookingService _service ;
-final FlutterSecureStorage _storage;
+  final BookingService _service;
+  final FlutterSecureStorage _storage;
 
   Future<void> fetchMyBookings() async {
     try {
@@ -55,31 +57,33 @@ final FlutterSecureStorage _storage;
       if (token != null) {
         final dynamic response = await _service.getMyBookings(token);
 
+        // تأكدي من أن الرد ليس فارغاً وأنه Map
         if (response != null && response is Map) {
-          final List<dynamic> bookingsList = response['data'] ?? [];
-          
-          // تحويل القائمة الخام إلى قائمة موديلات (Objects)
-          final List<BookingRequestModel> allBookings = bookingsList
-            .map((json) => BookingRequestModel.fromJson(json))
-            .toList();
+          // الوصول للقائمة داخل حقل 'data'
+          final List<dynamic> rawList = response['data'] ?? [];
 
+          // 🛑 الخطوة الأهم: تحويل كل عنصر إلى الموديل بشكل صريح
+          final List<BookingRequestModel> allBookings = rawList.map((json) {
+            return BookingRequestModel.fromJson(json as Map<String, dynamic>);
+          }).toList();
+
+          // الآن نقسم القائمة حسب الحالة (Status)
           state = state.copyWith(
-            // ✅ نستخدم allBookings الآن بدلاً من bookingsList
             currentBookings: allBookings.where((b) {
               final s = b.status.toLowerCase().trim();
-              return s == 'pending' || s == 'confirmed' || s == 'accepted' || s == 'active';
+              return s == 'pending' ||
+                  s == 'confirmed' ||
+                  s == 'accepted' ||
+                  s == 'active';
             }).toList(),
-
             cancelledBookings: allBookings.where((b) {
               final s = b.status.toLowerCase().trim();
               return s == 'cancelled' || s == 'rejected';
             }).toList(),
-
             historyBookings: allBookings.where((b) {
               final s = b.status.toLowerCase().trim();
               return s == 'completed';
             }).toList(),
-            
             isLoading: false,
           );
         } else {
@@ -89,7 +93,7 @@ final FlutterSecureStorage _storage;
         state = state.copyWith(isLoading: false);
       }
     } catch (e) {
-      print("Fetch Error: $e");
+      print("Fetch My Bookings Error: $e");
       state = state.copyWith(isLoading: false);
     }
   }
@@ -99,7 +103,8 @@ final FlutterSecureStorage _storage;
       String? token = await _storage.read(key: 'jwt_token');
       if (token == null) return false;
 
-      final success = await _service.updateBookingDate(bookingId, start, end, token);
+      final success =
+          await _service.updateBookingDate(bookingId, start, end, token);
       if (success) {
         await fetchMyBookings();
         return true;
@@ -110,24 +115,26 @@ final FlutterSecureStorage _storage;
       return false;
     }
   }
- Future<void> fetchOwnerRequests() async{
-  try{
-    state =state.copyWith(isLoading: true);
-    final requests = await _service.fetchAllBookingRequests();
-    state =state.copyWith(pendingRequests: requests, isLoading: false);
-  }catch (e){
-    print("Error fetching requests: $e");
+
+  Future<void> fetchOwnerRequests() async {
+    try {
+      state = state.copyWith(isLoading: true);
+      final requests = await _service.fetchAllBookingRequests();
+      state = state.copyWith(pendingRequests: requests, isLoading: false);
+    } catch (e) {
+      print("Error fetching requests: $e");
       state = state.copyWith(isLoading: false);
+    }
   }
- }
- Future<void> acceptRequest(int bookingId) async {
+
+  Future<void> acceptRequest(int bookingId) async {
     try {
       _updateLocalStatus(bookingId, 'Accepted');
       await _service.acceptBooking(bookingId);
-      await fetchOwnerRequests(); 
+      await fetchOwnerRequests();
     } catch (e) {
       print("Accept Error: $e");
-      await fetchOwnerRequests(); 
+      await fetchOwnerRequests();
     }
   }
 
@@ -142,6 +149,7 @@ final FlutterSecureStorage _storage;
       await fetchOwnerRequests();
     }
   }
+
   Future<void> cancelBooking(int bookingId) async {
     try {
       String? token = await _storage.read(key: 'jwt_token');
@@ -156,10 +164,11 @@ final FlutterSecureStorage _storage;
       print("Cancel Error: $e");
     }
   }
-   
-  void _updateLocalStatus(int bookingId, String newStatus){
-    final List<BookingRequestModel> updateList = state.pendingRequests.map((req){
-      return  req.id == bookingId? req.copyWith(status: newStatus) :req;
+
+  void _updateLocalStatus(int bookingId, String newStatus) {
+    final List<BookingRequestModel> updateList =
+        state.pendingRequests.map((req) {
+      return req.id == bookingId ? req.copyWith(status: newStatus) : req;
     }).toList();
     state = state.copyWith(pendingRequests: updateList);
   }
@@ -171,13 +180,15 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
 // 2. تعريف بروفايدر السيرفس
 final bookingServiceProvider = Provider<BookingService>((ref) {
-  final apiClient = ref.watch(apiClientProvider); 
+  final apiClient = ref.watch(apiClientProvider);
   return BookingService(apiClient);
 });
 
 // 3. تعريف بروفايدر الكنترولر
-final bookingProvider = StateNotifierProvider<BookingController, BookingState>((ref) {
-  final service = ref.watch(bookingServiceProvider); 
-  final storage = ref.watch(storageProvider); // نأخذ الـ storage المشفر من الـ Provider
+final bookingProvider =
+    StateNotifierProvider<BookingController, BookingState>((ref) {
+  final service = ref.watch(bookingServiceProvider);
+  final storage =
+      ref.watch(storageProvider); // نأخذ الـ storage المشفر من الـ Provider
   return BookingController(service, storage);
 });

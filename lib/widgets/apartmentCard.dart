@@ -9,7 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class Apartmentcard extends ConsumerWidget {
-    final int id;
+  final int id;
   final String imagePath;
   final int price;
   final String governorate;
@@ -37,9 +37,9 @@ class Apartmentcard extends ConsumerWidget {
   });
 
   @override
-Widget build(BuildContext context, WidgetRef ref) {
-  
-      final texts = ref.watch(stringsProvider); // أضيفي هذا السطر (يحتاج تحويل الكلاس لـ ConsumerWidget أو استخدام Consumer)
+  Widget build(BuildContext context, WidgetRef ref) {
+    final texts = ref.watch(
+        stringsProvider); // أضيفي هذا السطر (يحتاج تحويل الكلاس لـ ConsumerWidget أو استخدام Consumer)
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
@@ -87,7 +87,11 @@ Widget build(BuildContext context, WidgetRef ref) {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-Text('$price ${texts.isAr ? "دولار" : "\$"}', style: AppConstants.secondText.copyWith(color: isDark ? Colors.white : kPrimaryColor)),                            Row(
+                            Text('$price ${texts.isAr ? "دولار" : "\$"}',
+                                style: AppConstants.secondText.copyWith(
+                                    color:
+                                        isDark ? Colors.white : kPrimaryColor)),
+                            Row(
                               children: [
                                 const Icon(
                                   Icons.star_rounded,
@@ -154,7 +158,11 @@ Text('$price ${texts.isAr ? "دولار" : "\$"}', style: AppConstants.secondTex
                             const Icon(Icons.square_foot,
                                 color: Colors.grey, size: 14),
                             const SizedBox(width: 4),
-Text('$space ${texts.isAr ? "م²" : "m²"}', style: AppConstants.thirdText.copyWith(color: isDark ? Colors.white70 : Colors.grey)),                          ],
+                            Text('$space ${texts.isAr ? "م²" : "m²"}',
+                                style: AppConstants.thirdText.copyWith(
+                                    color:
+                                        isDark ? Colors.white70 : Colors.grey)),
+                          ],
                         ),
                       ],
                     ),

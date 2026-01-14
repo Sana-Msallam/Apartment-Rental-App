@@ -123,11 +123,22 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
                   Divider(
                       height: 30,
                       color: isDark ? Colors.white10 : Colors.grey[200]),
+                  // داخل ListView.builder في ملف BookingRequestsTap
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _infoColumn(texts.checkInDate, request.startDate, isDark),
-                      _infoColumn(texts.checkOutDate, request.endDate, isDark),
+                      // ركزنا التاريخ هون
+                      _infoColumn(texts.checkInDate,
+                          texts.formatDate(request.startDate), isDark),
+
+                      // سهم صغير للجمالية مثل ما عملنا بالكارد
+                      Icon(Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: isDark ? Colors.white10 : Colors.grey[200]),
+
+                      // وركزنا التاريخ هون كمان
+                      _infoColumn(texts.checkOutDate,
+                          texts.formatDate(request.endDate), isDark),
                     ],
                   ),
                   if (status == 'pending') ...[
