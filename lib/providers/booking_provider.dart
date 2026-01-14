@@ -5,9 +5,9 @@ import 'package:apartment_rental_app/services/booking_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class BookingState {
-  final List<dynamic> currentBookings;
-  final List<dynamic> cancelledBookings;
-  final List<dynamic> historyBookings;
+  final List<BookingRequestModel> currentBookings;
+  final List<BookingRequestModel> cancelledBookings;
+  final List<BookingRequestModel> historyBookings;
   final List<BookingRequestModel> pendingRequests;
   final bool isLoading;
 
@@ -20,9 +20,9 @@ class BookingState {
   });
 
   BookingState copyWith({
-    List<dynamic>? currentBookings,
-    List<dynamic>? cancelledBookings,
-    List<dynamic>? historyBookings,
+    List<BookingRequestModel>? currentBookings,
+    List<BookingRequestModel>? cancelledBookings,
+    List<BookingRequestModel>? historyBookings,
     List<BookingRequestModel>? pendingRequests,
     bool? isLoading,
   }) {
@@ -51,30 +51,32 @@ final FlutterSecureStorage _storage;
     try {
       state = state.copyWith(isLoading: true);
       String? token = await _storage.read(key: 'jwt_token');
-      print("DEBUG: Booking Token: $token");
 
       if (token != null) {
         final dynamic response = await _service.getMyBookings(token);
 
         if (response != null && response is Map) {
           final List<dynamic> bookingsList = response['data'] ?? [];
-          print("RAW BOOKINGS FROM SERVER: $bookingsList"); // هذا السطر سيخبرنا بكل شيء
+          
+          // تحويل القائمة الخام إلى قائمة موديلات (Objects)
+          final List<BookingRequestModel> allBookings = bookingsList
+            .map((json) => BookingRequestModel.fromJson(json))
+            .toList();
+
           state = state.copyWith(
-            // 1. القائمة النشطة: pending, confirmed, accepted, active
-            currentBookings: bookingsList.where((b) {
-              final s = b['status'].toString().toLowerCase().trim();
+            // ✅ نستخدم allBookings الآن بدلاً من bookingsList
+            currentBookings: allBookings.where((b) {
+              final s = b.status.toLowerCase().trim();
               return s == 'pending' || s == 'confirmed' || s == 'accepted' || s == 'active';
             }).toList(),
 
-            // 2. قائمة الأرشيف: تشمل الملغي من المستخدم (cancelled) والمرفوض من المؤجر (rejected) 👈
-            cancelledBookings: bookingsList.where((b) {
-              final s = b['status'].toString().toLowerCase().trim();
+            cancelledBookings: allBookings.where((b) {
+              final s = b.status.toLowerCase().trim();
               return s == 'cancelled' || s == 'rejected';
             }).toList(),
 
-            // 3. السجل: الحجوزات المكتملة فقط 👈
-            historyBookings: bookingsList.where((b) {
-              final s = b['status'].toString().toLowerCase().trim();
+            historyBookings: allBookings.where((b) {
+              final s = b.status.toLowerCase().trim();
               return s == 'completed';
             }).toList(),
             
@@ -84,32 +86,11 @@ final FlutterSecureStorage _storage;
           state = state.copyWith(isLoading: false);
         }
       } else {
-        print("DEBUG: Token is NULL in BookingController");
         state = state.copyWith(isLoading: false);
       }
     } catch (e) {
       print("Fetch Error: $e");
       state = state.copyWith(isLoading: false);
-    }
-  }
-
-  // تابع الإلغاء (Cancel Booking) - تم إعادته وإصلاحه 👈
-  Future<void> cancelBooking(int bookingId) async {
-    try {
-      String? token = await _storage.read(key: 'jwt_token');
-      if (token == null) return;
-
-      // استدعاء السيرفس (تأكدي أن الاسم في السيرفس cancelBookings)
-      final bool success = await _service.cancelBookings(bookingId, token);
-
-      if (success) {
-        print(" Booking $bookingId cancelled successfully");
-        await fetchMyBookings();
-      } else {
-        print(" Failed to cancel booking on server");
-      }
-    } catch (e) {
-      print(" Error in cancelBooking: $e");
     }
   }
 
@@ -159,6 +140,20 @@ final FlutterSecureStorage _storage;
     } catch (e) {
       print("Reject Error: $e");
       await fetchOwnerRequests();
+    }
+  }
+  Future<void> cancelBooking(int bookingId) async {
+    try {
+      String? token = await _storage.read(key: 'jwt_token');
+      if (token == null) return;
+
+      // نفترض أن السيرفس لديه دالة تسمى cancelBooking
+      final success = await _service.cancelBookings(bookingId, token);
+      if (success) {
+        await fetchMyBookings(); // تحديث القائمة بعد الإلغاء
+      }
+    } catch (e) {
+      print("Cancel Error: $e");
     }
   }
    

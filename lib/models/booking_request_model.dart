@@ -48,4 +48,5 @@ class BookingRequestModel {
       totalPrice: (json['total_price'] as num).toDouble(),
     );
   }
+
 }

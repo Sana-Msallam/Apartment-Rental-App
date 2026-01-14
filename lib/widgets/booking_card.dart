@@ -1,11 +1,10 @@
+import 'package:apartment_rental_app/models/booking_request_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
 
-const Color kPrimaryColor = Color(0xFF234F68);
-
 class BookingCard extends ConsumerWidget {
-  final dynamic booking;
+  final BookingRequestModel booking;
   final bool isCancelled;
   final bool isHistory;
   final String? status;
@@ -24,66 +23,44 @@ class BookingCard extends ConsumerWidget {
     this.onReview,
   });
 
-  bool hasBeenRated() {
-    var rated = booking['is_rated'];
-    return rated.toString() == "1" || rated.toString() == "true";
-  }
-
-  String formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return "";
-    try {
-      DateTime dt = DateTime.parse(dateStr);
-      return "${dt.day}/${dt.month}/${dt.year}";
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final texts = ref.watch(stringsProvider);
     final theme = Theme.of(context);
-    final String currentStatus = (status ?? "pending").toLowerCase();
-    final Color secondaryTextColor =
-        theme.textTheme.bodyMedium?.color ?? Colors.grey;
+    final isDark = theme.brightness == Brightness.dark;
+    final String currentStatus =
+        (status ?? booking.status).toLowerCase().trim();
+
+    // تحديد لون الحالة
     Color statusColor;
-    String statusLabel;
     switch (currentStatus) {
-      case 'completed':
-        statusColor = Colors.green;
-        statusLabel = texts.isAr ? "مكتمل" : "Completed";
-        break;
-      case 'accepted':
-        statusColor = Colors.blue;
-        statusLabel = texts.isAr ? "مقبول" : "Accepted";
-        break;
       case 'pending':
         statusColor = Colors.orange;
-        statusLabel = texts.isAr ? "قيد الانتظار" : "Pending";
         break;
-      case 'rejected': // هنا التمييز للمرفوضة
-        statusColor = Colors.redAccent;
-        // إذا كانت الواجهة إنجليزية يكتب Rejected وإذا عربية يكتب مرفوضة
-        statusLabel = texts.isAr ? "مرفوضة" : "Rejected";
+      case 'accepted':
+      case 'confirmed':
+        statusColor = Colors.green;
         break;
-      case 'cancelled': // هنا التمييز للملغية
+      case 'rejected':
+      case 'cancelled':
         statusColor = Colors.redAccent;
-        // نستخدم texts.cancel لأنه غالباً يحتوي على كلمة "إلغاء" أو "Cancelled"
-        statusLabel = texts.cancel;
+        break;
+      case 'completed':
+        statusColor = Colors.blue;
         break;
       default:
         statusColor = Colors.grey;
-        statusLabel = currentStatus.toUpperCase();
     }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.transparent),
         boxShadow: [
           BoxShadow(
-            color: theme.brightness == Brightness.dark
+            color: isDark
                 ? Colors.black.withOpacity(0.3)
                 : Colors.black.withOpacity(0.05),
             blurRadius: 10,
@@ -92,121 +69,143 @@ class BookingCard extends ConsumerWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(15),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // السطر العلوي: الأيقونة، الرقم، والحالة
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: theme.primaryColor.withOpacity(0.1),
+                  child:
+                      Icon(Icons.apartment_rounded, color: theme.primaryColor),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        // 1. ترجمة كلمة حجز (تستخدم My Bookings من ملفك)
-                        "${texts.myBookings} #${booking['id']}",
+                        "${texts.myBookings} #${booking.id}",
                         style: TextStyle(
-                          color: theme.brightness == Brightness.dark
-                              ? Colors.white
-                              : kPrimaryColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black87,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Text(
+                      const SizedBox(height: 4),
+                      _buildStatusBadge(currentStatus, texts, statusColor),
+                    ],
+                  ),
+                ),
+                Text(
+                  "${booking.totalPrice} \$",
+                  style: TextStyle(
+                    color: theme.primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            Divider(
+                height: 30, color: isDark ? Colors.white10 : Colors.grey[200]),
 
-                        "${formatDate(booking['start_date'])} ${texts.isAr ? "إلى" : "to"}${formatDate(booking['end_date'])}",
-                        style:
-                            TextStyle(color: secondaryTextColor, fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    statusLabel, // 3. الحالة مترجمة بالكامل
-                    style: TextStyle(
-                        color: statusColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10),
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 30),
+            // سطر التواريخ (مثل طلباتي)
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                if (currentStatus == 'completed')
-                  if (!hasBeenRated())
-                    ElevatedButton.icon(
-                      onPressed: onReview,
-                      icon: const Icon(Icons.star_rate, size: 16),
-                      // 4. ترجمة زر قيم الآن
-                      label: Text(texts.isAr ? "قيم الآن" : "Rate Now"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
-                        foregroundColor: Colors.white,
-                        textStyle: const TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  else
-                    Row(
-                      children: [
-                        const Icon(Icons.check_circle,
-                            color: Colors.green, size: 18),
-                        const SizedBox(width: 4),
-                        Text(
-                          // التعديل هنا: استخدام isAr
-                          texts.isAr ? "تم التقييم" : "Rated",
-                          style: const TextStyle(
-                              color: Colors.green, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    )
-                else
-                  const SizedBox(),
-                if (currentStatus == 'pending')
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: onCancel,
-                        child: Text(
-                          texts.cancel, // 6. زر الإلغاء مترجم أصلاً في ملفك
-                          style: const TextStyle(color: Colors.redAccent),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: onEdit,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.brightness == Brightness.dark
-                              ? Colors.white
-                              : kPrimaryColor,
-                          foregroundColor: theme.brightness == Brightness.dark
-                              ? kPrimaryColor
-                              : Colors.white,
-                        ),
-                        // 7. ترجمة زر التعديل
-                        child: Text(texts.isAr
-                            ? "تعديل"
-                            : "Edit"), // بدلاً من مقارنة addSuccess
-                      ),
-                    ],
-                  ),
+                _infoColumn(texts.checkInDate, booking.startDate, isDark),
+                _infoColumn(texts.checkOutDate, booking.endDate, isDark),
               ],
             ),
+
+            // الأزرار السفلية (مثل طلباتي)
+            if (currentStatus == 'pending') ...[
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: onEdit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: Text(texts.isAr ? "تعديل" : "Edit"),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onCancel,
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.redAccent),
+                        foregroundColor: Colors.redAccent,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: Text(texts.cancel),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (currentStatus == 'completed') ...[
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: onReview,
+                  icon: const Icon(Icons.star_rate, size: 18),
+                  label: Text(texts.isAr ? "قيم الآن" : "Rate Now"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber[700],
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status, AppStrings texts, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Text(
+        texts.translate(status),
+        style:
+            TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _infoColumn(String label, String value, bool isDark) {
+    return Column(
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 12, color: isDark ? Colors.white38 : Colors.grey)),
+        const SizedBox(height: 4),
+        Text(value,
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black87)),
+      ],
     );
   }
 }
