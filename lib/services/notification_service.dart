@@ -8,7 +8,7 @@ class NotificationService {
 
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      final response = await _apiClient.dio.get('notifications'); // الرابط من الباك إند
+      final response = await _apiClient.dio.get('notifications'); 
       
       if (response.statusCode == 200) {
         final List notificationsData = response.data['data'];

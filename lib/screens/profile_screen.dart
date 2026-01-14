@@ -12,20 +12,16 @@ import '../widgets/custom_app_bar.dart';
 
 const Color kPrimaryColor = Color(0xFF234F68);
 
-// دالة تسجيل الخروج الموحدة والمحسنة
 Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
   try {
     final storage = ref.read(storageProvider);
     final apiService = ref.read(apiServiceProvider);
 
-    // 1. جلب التوكن قبل الحذف لإخبار السيرفر
     String? token = await storage.read(key: 'jwt_token');
 
-    // 2. تصفير الحالة محلياً فوراً لسرعة الاستجابة
     await storage.delete(key: 'jwt_token');
     ref.invalidate(profileProvider);
 
-    // 3. الانتقال لصفحة تسجيل الدخول (استخدام pushAndRemoveUntil لمنع الرجوع)
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -33,8 +29,6 @@ Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
         (route) => false,
       );
     }
-
-    // 4. إخبار السيرفر في الخلفية (اختياري لا يعطل الانتقال)
     if (token != null) {
       try {
         await apiService.logout();
@@ -127,7 +121,6 @@ class ProfileScreen extends ConsumerWidget {
           style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, fontSize: 24),
         ),
         const SizedBox(height: 25),
-        // حاوية رقم الهاتف الأنيقة
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(

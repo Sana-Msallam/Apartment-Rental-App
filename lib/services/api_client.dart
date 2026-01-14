@@ -4,14 +4,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ApiClient {
   late Dio dio;
   static const _storage= FlutterSecureStorage(aOptions: AndroidOptions(
-    encryptedSharedPreferences: true, // تفعيل التشفير المتوافق مع أندرويد الحديث
+    encryptedSharedPreferences: true, 
   ),
 );
 
   ApiClient(){
     dio= Dio(
       BaseOptions(
-        baseUrl: 'http://192.168.0.102:8000/api/',
+        baseUrl: 'http://10.43.150.84:8000/api/',
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {

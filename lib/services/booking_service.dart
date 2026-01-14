@@ -9,9 +9,7 @@ class BookingService {
   BookingService(this._apiClient);
   Dio get _dio => _apiClient.dio;
 
- 
 
- // 1. تعديل دالة حساب السعر لتعيد إما السعر أو رسالة الخطأ
 Future<dynamic> calculatePrice({
   required int apartmentId,
   required String startDate,
@@ -29,7 +27,7 @@ Future<dynamic> calculatePrice({
     );
 
     if (response.statusCode == 200) {
-      return response.data['data']; // يعيد السعر (double)
+      return response.data['data']; 
     } else {
       return response.data['message'] ?? "Error calculation"; 
     }
@@ -37,8 +35,6 @@ Future<dynamic> calculatePrice({
     return "Connection Error";
   }
 }
-
-// 2. تعديل دالة التأكيد
 Future<bool> confirmBooking({
   required int apartmentId,
   required String startDate,
@@ -59,11 +55,9 @@ Future<bool> confirmBooking({
     if (response.statusCode == 200 || response.statusCode == 201) {
       return true;
     } else {
-      // نرمي استثناء يحتوي على رسالة Laravel
       throw response.data['message'] ?? "Booking failed";
     }
   } on DioException catch (e) {
-     // إذا كان الخطأ من السيرفر (مثل 403)
      if (e.response != null) {
        throw e.response?.data['message'] ?? "Server Error";
      }

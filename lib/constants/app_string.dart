@@ -113,7 +113,7 @@ class AppStrings {
         }
       : {
           'Damascus': ['Midan', 'Mazzeh', 'Afif'],
-          'Aleppo': ['As-Safira', 'Al-Bab', 'Manbij'],
+          'Aleppo': ['As-Safira', 'Al-bab', 'Manbij'],
           'Homs': ['Talkalakh', 'Al-Qusayr', 'Al-Rastan'],
           'Hama': ['Salamiyah', 'Masyaf', 'Al-Hamraa'],
           'Daraa': ['Bosra', 'Al-Hirak', 'Nawa'],

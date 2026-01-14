@@ -447,7 +447,7 @@ title: texts.checkInDate, // "تاريخ الدخول" مترجمة
                       CustomButton(
                         onTap: _submitBooking,
                         textButton: widget.bookingId == null
-                          ? texts.confirmBooking // "تأكيد الحجز" مترجمة
+                          ? texts.confirmBooking 
                 : texts.updateBooking,
                         kPrimaryColor: isDark
                             ? Colors.white

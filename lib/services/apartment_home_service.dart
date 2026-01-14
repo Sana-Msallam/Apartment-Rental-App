@@ -23,7 +23,6 @@ class ApartmentHomeService{
     }
   }
 
-  // 2. جلب تفاصيل شقة
   Future<ApartmentDetail> fetchApartmentDetails(int id) async {
     try {
       final response = await _apiClient.dio.get('apartment/$id');
@@ -37,7 +36,7 @@ class ApartmentHomeService{
     }
   }
 
-  // 3. الفلترة
+
   Future<List<Apartment>> fetchFilteredApartments({
     String? governorate,
     String? city,
@@ -73,7 +72,6 @@ class ApartmentHomeService{
     }
   }
 
-  // 4. حذف شقة (للمالك)
   Future<bool> deleteApartment(int id, String token) async {
     try {
       final response = await _apiClient.dio.delete(
@@ -86,7 +84,7 @@ class ApartmentHomeService{
     }
   }
 
-  // 5. شقق المالك
+ 
   Future<List<Apartment>> getOwnerApartments(String token) async {
     try {
       final response = await _apiClient.dio.get(
@@ -103,7 +101,6 @@ class ApartmentHomeService{
     }
   }
 
-  // 6. تبديل المفضلة (إضافة/إزالة)
   Future<bool> toggleFavorite(int apartmentId) async {
     try {
       final response = await _apiClient.dio.post(
@@ -118,7 +115,6 @@ class ApartmentHomeService{
     }
   }
 
-  // 7. جلب قائمة المفضلة
   Future<List<Apartment>> fetchFavorites(String token) async {
     try {
       final response = await _apiClient.dio.get(

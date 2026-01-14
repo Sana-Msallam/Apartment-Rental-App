@@ -14,7 +14,6 @@ class MyBookingsScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<MyBookingsScreen> createState() => _MyBookingsScreenState();
 }
-// ... (الواردات المذكورة في كودك تبقى كما هي)
 
 class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   @override
@@ -27,7 +26,6 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. تعريف المتغيرات التي سيتم تمريرها للدوال
     final texts = ref.watch(stringsProvider); 
     final bookingState = ref.watch(bookingProvider);
     final theme = Theme.of(context);
@@ -39,7 +37,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
-            texts.myBookings, // استخدام الترجمة للعنوان
+            texts.myBookings, 
             style: theme.appBarTheme.titleTextStyle,
           ),
           centerTitle: true,
@@ -75,7 +73,6 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             : TabBarView(
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  // 3. تمرير 'texts' هنا لحل مشكلة الإيرور
                   _buildList(bookingState.currentBookings, "active", isDark, texts),
                   _buildList(bookingState.historyBookings, "history", isDark, texts),
                   _buildList(bookingState.cancelledBookings, "cancelled", isDark, texts),
@@ -85,7 +82,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     );
   }
 
-  // 4. تأكد أن تعريف الدالة يستقبل texts في النهاية
+  
   Widget _buildList(List<dynamic> bookings, String type, bool isDark, AppStrings texts) {
     final theme = Theme.of(context);
 
@@ -140,7 +137,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             isCancelled: type == "cancelled",
             isHistory: type == "history",
             status: status,
-            onCancel: () => _showCancelDialog(booking['id'], texts), // تمرير المترجم للدايلوج
+            onCancel: () => _showCancelDialog(booking['id'], texts), 
             onReview: (status.toLowerCase() == 'completed')
                 ? () {
                     final bId = booking['id'];
@@ -175,18 +172,16 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       },
     );
   }
-
-  // 5. تعديل الدايلوج ليدعم الترجمة أيضاً
  void _showCancelDialog(int bookingId, AppStrings texts) {
   final theme = Theme.of(context);
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: Text(
-        texts.cancelBooking, // التعديل هنا
+        texts.cancelBooking, 
         style: const TextStyle(color: kPrimaryColor),
       ),
-      content: Text(texts.areYouSureCancel), // والتعديل هنا
+      content: Text(texts.areYouSureCancel), 
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),

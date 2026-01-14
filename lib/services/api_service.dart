@@ -5,7 +5,7 @@ import 'package:apartment_rental_app/services/push_notifications_service.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
-  final ApiClient _apiClient; // استخدام الكلاينت الموحد
+  final ApiClient _apiClient; 
   ApiService(this._apiClient);
 
   Dio get _dio => _apiClient.dio;
@@ -13,7 +13,7 @@ class ApiService {
   Future<UserModel?> login(String phone, String password) async {
     try {
       String? fcm_token =await PushNotificationsService.getDeviceToken();
-      print(' try to login /login');
+      print(' try to login');
 
       final response = await _dio.post(
         'login',

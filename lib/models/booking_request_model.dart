@@ -6,6 +6,7 @@ class BookingRequestModel {
   final int apartmentId;
   final int userId;
   final double totalPrice;
+  final BookingUser? user; 
 
   BookingRequestModel({
     required this.id,
@@ -15,6 +16,7 @@ class BookingRequestModel {
     required this.apartmentId,
     required this.userId,
     required this.totalPrice,
+    this.user,
   });
 
   BookingRequestModel copyWith({
@@ -25,6 +27,7 @@ class BookingRequestModel {
     int? apartmentId,
     int? userId,
     double ?totalPrice,
+    BookingUser? user,
   }){
     return BookingRequestModel(
       id: id?? this.id,
@@ -33,7 +36,8 @@ class BookingRequestModel {
       endDate: endDate?? this.endDate,
       apartmentId: apartmentId?? this.apartmentId,
       userId: userId?? this.userId,
-      totalPrice: totalPrice?? this.totalPrice
+      totalPrice: totalPrice?? this.totalPrice,
+      user: user ?? this.user,
       );
   }
 
@@ -46,6 +50,27 @@ class BookingRequestModel {
       apartmentId: json['apartment_id'],
       userId: json['user_id'],
       totalPrice: (json['total_price'] as num).toDouble(),
+      user: json['user'] != null ? BookingUser.fromJson(json['user']) : null,
     );
   }
+}
+class BookingUser {
+  final int id;
+  final String firstName;
+  final String lastName;
+
+  BookingUser({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+  });
+
+  factory BookingUser.fromJson(Map<String, dynamic> json) {
+    return BookingUser(
+      id: json['id'],
+      firstName: json['first_name'],
+      lastName: json['last_name'],
+    );
+  }
+  String get fullName => '$firstName $lastName';
 }

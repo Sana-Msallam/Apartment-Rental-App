@@ -14,21 +14,20 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
+  
   WidgetsFlutterBinding.ensureInitialized();
   
-  // تهيئة الوقت واللغة
   try {
     await initializeDateFormatting('en', null);
   } catch (e) {
     debugPrint('Initialization failed: $e');
   }
 
-  // تهيئة فايربيز
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ التعديل الجوهري: القراءة من SecureStorage ليتوافق مع شاشة التفاصيل والـ ApiService لديكِ
   const storage = FlutterSecureStorage();
   final String? savedToken = await storage.read(key: 'jwt_token');
 
@@ -54,7 +53,6 @@ class Sakani extends ConsumerWidget {
     final currentThemeMode = ref.watch(themeProvider);
     final isAr = ref.watch(isArabicProvider);
 
-    // الستايلات الموحدة
     const textStyleDisplay = TextStyle(
       fontWeight: FontWeight.w900,
       fontSize: 24,
@@ -122,7 +120,6 @@ class Sakani extends ConsumerWidget {
         ),
       ),
 
-      // ✅ الآن هذا السطر سيعمل بشكل صحيح لأن الـ token قادم من نفس مفتاح شاشة التفاصيل
       home: (token != null && token!.isNotEmpty) 
           ? const HomeScreen() 
           :  StartPage(),

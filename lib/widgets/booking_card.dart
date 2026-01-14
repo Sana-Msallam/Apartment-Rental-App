@@ -1,8 +1,8 @@
+import 'package:apartment_rental_app/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
 
-const Color kPrimaryColor = Color(0xFF234F68);
 
 class BookingCard extends ConsumerWidget {
   final dynamic booking;
@@ -61,14 +61,12 @@ class BookingCard extends ConsumerWidget {
         statusColor = Colors.orange;
         statusLabel = texts.isAr ? "قيد الانتظار" : "Pending";
         break;
-      case 'rejected': // هنا التمييز للمرفوضة
+      case 'rejected': 
         statusColor = Colors.redAccent;
-        // إذا كانت الواجهة إنجليزية يكتب Rejected وإذا عربية يكتب مرفوضة
         statusLabel = texts.isAr ? "مرفوضة" : "Rejected";
         break;
-      case 'cancelled': // هنا التمييز للملغية
+      case 'cancelled': 
         statusColor = Colors.redAccent;
-        // نستخدم texts.cancel لأنه غالباً يحتوي على كلمة "إلغاء" أو "Cancelled"
         statusLabel = texts.cancel;
         break;
       default:
@@ -103,12 +101,11 @@ class BookingCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        // 1. ترجمة كلمة حجز (تستخدم My Bookings من ملفك)
-                        "${texts.myBookings} #${booking['id']}",
+                       "${texts.myBookings} #${booking['id']}",
                         style: TextStyle(
                           color: theme.brightness == Brightness.dark
                               ? Colors.white
-                              : kPrimaryColor,
+                              : AppConstants.primaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -131,7 +128,7 @@ class BookingCard extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    statusLabel, // 3. الحالة مترجمة بالكامل
+                    statusLabel, 
                     style: TextStyle(
                         color: statusColor,
                         fontWeight: FontWeight.bold,
@@ -149,10 +146,9 @@ class BookingCard extends ConsumerWidget {
                     ElevatedButton.icon(
                       onPressed: onReview,
                       icon: const Icon(Icons.star_rate, size: 16),
-                      // 4. ترجمة زر قيم الآن
                       label: Text(texts.isAr ? "قيم الآن" : "Rate Now"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryColor,
+                        backgroundColor: AppConstants.primaryColor,
                         foregroundColor: Colors.white,
                         textStyle: const TextStyle(
                             fontSize: 12, fontWeight: FontWeight.bold),
@@ -165,7 +161,6 @@ class BookingCard extends ConsumerWidget {
                             color: Colors.green, size: 18),
                         const SizedBox(width: 4),
                         Text(
-                          // التعديل هنا: استخدام isAr
                           texts.isAr ? "تم التقييم" : "Rated",
                           style: const TextStyle(
                               color: Colors.green, fontWeight: FontWeight.bold),
@@ -180,7 +175,7 @@ class BookingCard extends ConsumerWidget {
                       TextButton(
                         onPressed: onCancel,
                         child: Text(
-                          texts.cancel, // 6. زر الإلغاء مترجم أصلاً في ملفك
+                          texts.cancel, 
                           style: const TextStyle(color: Colors.redAccent),
                         ),
                       ),
@@ -190,15 +185,15 @@ class BookingCard extends ConsumerWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.brightness == Brightness.dark
                               ? Colors.white
-                              : kPrimaryColor,
+                              : AppConstants.primaryColor,
                           foregroundColor: theme.brightness == Brightness.dark
-                              ? kPrimaryColor
+                              ? AppConstants.primaryColor
                               : Colors.white,
                         ),
-                        // 7. ترجمة زر التعديل
+                        
                         child: Text(texts.isAr
                             ? "تعديل"
-                            : "Edit"), // بدلاً من مقارنة addSuccess
+                            : "Edit"), 
                       ),
                     ],
                   ),

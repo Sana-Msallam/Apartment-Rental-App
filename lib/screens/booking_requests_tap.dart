@@ -22,7 +22,6 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
 
   @override
   Widget build(BuildContext context) {
-    // جلب النصوص والثيم
     final texts = ref.watch(stringsProvider);
     final state = ref.watch(bookingProvider);
     final theme = Theme.of(context);
@@ -42,7 +41,7 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
                 size: 80, color: isDark ? Colors.white10 : Colors.grey[400]),
             const SizedBox(height: 10),
             Text(
-              texts.noData, // النص الحرفي "لا يوجد بيانات"
+              texts.noData, 
               style: TextStyle(color: isDark ? Colors.white60 : Colors.grey),
             ),
           ],
@@ -95,14 +94,13 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "${texts.userIdLabel}: ${request.userId}",
+                              " ${request.user?.fullName} ",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                   color:
                                       isDark ? Colors.white : Colors.black87),
                             ),
-                            // استدعاء الميثود مع تمرير الـ texts للترجمة
                             _buildStatusBadge(request.status, texts),
                           ],
                         ),
@@ -146,7 +144,7 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10)),
                             ),
-                            child: Text(texts.accept), // "قبول" حرفياً
+                            child: Text(texts.accept), 
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -161,7 +159,7 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10)),
                             ),
-                            child: Text(texts.rejected), // "مرفوضة" حرفياً
+                            child: Text(texts.rejected), 
                           ),
                         ),
                       ],
@@ -170,7 +168,7 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
                     const SizedBox(height: 15),
                     Center(
                       child: Text(
-                        texts.viewDetailsMsg, // "اضغط لعرض تفاصيل الشقة"
+                        texts.viewDetailsMsg, 
                         style: TextStyle(
                             color: isDark ? Colors.white38 : Colors.grey,
                             fontSize: 12,
@@ -187,10 +185,9 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
     );
   }
 
-  // ميثود عرض الحالة مع الترجمة الحرفية
+  
   Widget _buildStatusBadge(String status, AppStrings texts) {
     Color color;
-    // نستخدم ميثود translate الموجود بملفك لترجمة الحالة القادمة من السيرفر
     String translatedStatus = texts.translate(status.trim());
 
     switch (status.toLowerCase().trim()) {
@@ -229,7 +226,6 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
     );
   }
 
-  // عمود المعلومات مع دعم المود
   Widget _infoColumn(String label, String value, bool isDark) {
     return Column(
       children: [
