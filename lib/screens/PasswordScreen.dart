@@ -65,7 +65,7 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
     final dynamicColor = isDark ? Colors.white : theme.primaryColor;
 
     return Scaffold(
-      extendBodyBehindAppBar: true, // مهم لجعل الخلفية تحت الـ AppBar
+      extendBodyBehindAppBar: true, 
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -74,7 +74,6 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
       ),
       body: Stack(
         children: [
-          // الطبقة 1: الخلفية
           Positioned.fill(
             child: Image.asset(
               'assets/images/start.png',
@@ -84,8 +83,6 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.4)),
           ),
-
-          // الطبقة 2: المحتوى
           LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
@@ -95,14 +92,13 @@ class _PasswordScreenState extends ConsumerState<PasswordScreen> {
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                       minHeight: constraints
-                          .maxHeight, // يضمن أن المحتوى يملأ الطول لتوسيط الـ GlassContainer
+                          .maxHeight, 
                     ),
                     child: SafeArea(
                       child: Padding(
                             padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 20),
                         child: Center(
-                          // هنا يتم التوسيط الحقيقي
                           child: GlassContainer(
                             child: Form(
                               key: _formKey,

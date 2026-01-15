@@ -10,8 +10,6 @@ import 'package:apartment_rental_app/widgets/glass_container.dart';
 import 'package:apartment_rental_app/widgets/custom_text_filed.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:apartment_rental_app/widgets/buildLabel.dart';
-// تأكد من استيراد ملف الـ Provider الخاص باللغة
-// import 'package:apartment_rental_app/provider/strings_provider.dart';
 
 Color kPrimaryColor = const Color(0xFF234F68);
 
@@ -25,7 +23,6 @@ class AddApartmentPage extends ConsumerStatefulWidget {
 class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // المتغيرات التي تخزن الحالة
   List<String> _currentCities = [];
   String? _selectedCity;
   String? _selectedgovernorates;
@@ -55,17 +52,13 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-// في الوضع الداكن نستخدم الأبيض للأيقونات والنصوص ليبرز فوق الخلفية السوداء
     final accentColor = isDark ? Colors.white : const Color(0xFF234F68);
-    // استدعاء نصوص اللغة المختارة (عربي أو إنجليزي)
     final texts = ref.watch(stringsProvider);
 
     final dynamicColor = isDark ? Colors.white : theme.primaryColor;
-    // استخراج المحافظات من الـ Map الموجود في ملف اللغة
     final List<String> governoratesList =
         texts.citiesByGovernorate.keys.toList();
 
-    // قائمة أنواع الطابو المترجمة
     final List<String> titleDeedTypes = [
       texts.greenTabo,
       texts.courtDecision,
@@ -94,7 +87,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
           ),
           Container(
             color: isDark
-                ? Colors.black.withOpacity(0.7) // تعتيم أقوى في الوضع الليلي
+                ? Colors.black.withOpacity(0.7) 
                 : Colors.white.withOpacity(0.1),
           ),
           SafeArea(
@@ -109,7 +102,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                     children: [
                       Center(
                         child: Text(
-                          texts.apartmentDetails, // مترجم
+                          texts.apartmentDetails, 
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -119,14 +112,14 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                       ),
                       const SizedBox(height: 25),
 
-                      buildLabel(context, texts.apartmentPhotos), // مترجم
+                      buildLabel(context, texts.apartmentPhotos),
                       const SizedBox(height: 8),
                       _buildPhotoUploadWidget(texts),
                       if (_selectedImages.isNotEmpty) _buildImagePreview(),
 
                       const SizedBox(height: 20),
 
-                      buildLabel(context, texts.priceLabel), // مترجم
+                      buildLabel(context, texts.priceLabel), 
                       CustomTextFiled(
                         controller: _priceController,
                         hintText: " 1200",
@@ -150,7 +143,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                buildLabel(context, texts.rooms), // مترجم
+                                buildLabel(context, texts.rooms), 
                                 CustomTextFiled(
                                   controller: _roomsController,
                                   hintText: "3",
@@ -168,7 +161,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                buildLabel(context, texts.bathrooms), // مترجم
+                                buildLabel(context, texts.bathrooms), 
                                 CustomTextFiled(
                                   controller: _bathroomsController,
                                   hintText: "2",
@@ -192,7 +185,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                buildLabel(context, texts.spaceLabel), // مترجم
+                                buildLabel(context, texts.spaceLabel), 
                                 CustomTextFiled(
                                   controller: _spaceController,
                                   hintText: "120",
@@ -210,7 +203,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                buildLabel(context, texts.floor), // مترجم
+                                buildLabel(context, texts.floor), 
                                 CustomTextFiled(
                                   controller: _floorController,
                                   hintText: "2",
@@ -227,9 +220,9 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                       ),
 
                       const SizedBox(height: 15),
-                      buildLabel(context, texts.governorate), // مترجم
+                      buildLabel(context, texts.governorate), 
                       CustomDropdown(
-                        hint: texts.selectGovernorate, // مترجم
+                        hint: texts.selectGovernorate, 
                         value: _selectedgovernorates,
                         items: governoratesList,
                         icon: Icons.location_city,
@@ -237,7 +230,6 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                           setState(() {
                             _selectedgovernorates = newValue;
                             _selectedCity = null;
-                            // جلب المدن من ملف اللغة بناءً على المحافظة المختارة
                             _currentCities =
                                 texts.citiesByGovernorate[newValue] ?? [];
                           });
@@ -246,7 +238,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
 
                       const SizedBox(height: 15),
 
-                      buildLabel(context, texts.city), // مترجم
+                      buildLabel(context, texts.city), 
                       CustomDropdown(
                         hint: _selectedgovernorates == null
                             ? texts.selectGovFirst
@@ -263,7 +255,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
 
                       const SizedBox(height: 15),
 
-                      buildLabel(context, texts.builtYear), // مترجم
+                      buildLabel(context, texts.builtYear), 
                       CustomTextFiled(
                         controller: _builtController,
                         hintText: "2000",
@@ -275,7 +267,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
 
                       const SizedBox(height: 15),
 
-                      buildLabel(context, texts.titleDeedType), // مترجم
+                      buildLabel(context, texts.titleDeedType), 
                       CustomDropdown(
                         hint: texts.selectTitleDeed,
                         value: _selectedTitleDeed,
@@ -287,7 +279,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
 
                       const SizedBox(height: 15),
 
-                      buildLabel(context, texts.description), // مترجم
+                      buildLabel(context, texts.description),
                       CustomTextFiled(
                         controller: _descriptionController,
                         hintText: texts.descriptionHint,
@@ -307,8 +299,8 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
                       Center(
                         child: CustomButton(
                           onTap: () =>
-                              _submitData(texts), // نمرر نصوص اللغة للميثود
-                          textButton: texts.addApartmentButton, // مترجم
+                              _submitData(texts), 
+                          textButton: texts.addApartmentButton, 
                           kPrimaryColor:
                               isDark ? Colors.white : theme.primaryColor,
                           vTextColor: isDark ? Colors.black : Colors.white,
@@ -410,7 +402,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
     );
   }
 
-  Future<void> _submitData(var texts) async {
+ Future<void> _submitData(var texts) async {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedImages.isEmpty) {
@@ -419,7 +411,8 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       );
       return;
     }
-    if (_selectedgovernorates == null || _selectedCity == null) {
+    
+    if (_selectedgovernorates == null || _selectedCity == null  ||_selectedTitleDeed == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(texts.locationError)),
       );
@@ -438,10 +431,10 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       "space": int.tryParse(_spaceController.text) ?? 0,
       "floor": int.tryParse(_floorController.text) ?? 0,
       "bathrooms": int.tryParse(_bathroomsController.text) ?? 0,
-      "governorate": _selectedgovernorates,
-      "city": _selectedCity,
+      "governorate": texts.getEnglishValue(_selectedgovernorates!),
+      "city": texts.getEnglishValue(_selectedCity!),
+      "title_deed": texts.getEnglishValue(_selectedTitleDeed!),
       "built_date": "${_builtController.text}-1-1",
-      "title_deed": _selectedTitleDeed,
       "description": _descriptionController.text,
     };
 
@@ -451,14 +444,15 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       images: _selectedImages,
     );
 
-    Navigator.pop(context); // إغلاق الـ Loading
+    if (!mounted) return;
+    Navigator.pop(context); 
 
     if (success) {
       ref.invalidate(apartmentProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(texts.addSuccess)),
       );
-      Navigator.pop(context); // العودة للشاشة السابقة
+      Navigator.pop(context); 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(texts.addError)),

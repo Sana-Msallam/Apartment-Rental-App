@@ -9,7 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class Apartmentcard extends ConsumerWidget {
-    final int id;
+  final int id;
   final String imagePath;
   final int price;
   final String governorate;
@@ -36,10 +36,9 @@ class Apartmentcard extends ConsumerWidget {
     this.is_favorite = false,
   });
 
-  @override
-Widget build(BuildContext context, WidgetRef ref) {
-  
-      final texts = ref.watch(stringsProvider); // أضيفي هذا السطر (يحتاج تحويل الكلاس لـ ConsumerWidget أو استخدام Consumer)
+ @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final texts = ref.watch(stringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Card(
@@ -60,11 +59,12 @@ Widget build(BuildContext context, WidgetRef ref) {
           child: Stack(
             children: [
               Column(
+                mainAxisSize: MainAxisSize.min, 
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CachedNetworkImage(
+                  CachedNetworkImage( 
                     imageUrl: imagePath,
-                    height: 150,
+                    height: 140, 
                     width: double.infinity,
                     fit: BoxFit.cover,
                     httpHeaders: const {'Connection': 'keep-alive'},
@@ -80,50 +80,46 @@ Widget build(BuildContext context, WidgetRef ref) {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), 
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-Text('$price ${texts.isAr ? "دولار" : "\$"}', style: AppConstants.secondText.copyWith(color: isDark ? Colors.white : kPrimaryColor)),                            Row(
+                            Text('$price ${texts.isAr ? "دولار" : "\$"}',
+                                style: AppConstants.secondText.copyWith(
+                                    fontSize: 14, 
+                                    color: isDark ? Colors.white : kPrimaryColor)),
+                            Row(
                               children: [
-                                const Icon(
-                                  Icons.star_rounded,
-                                  color: Colors.amber,
-                                  size: 18,
-                                ),
+                                const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                                 const SizedBox(width: 2),
                                 Text(
                                   average_rating?.toString() ?? "0",
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge
-                                        ?.color,
+                                    fontSize: 13,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 2),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
                               child: Row(
                                 children: [
-                                  const Icon(Icons.location_on,
-                                      color: Colors.grey, size: 12),
+                                  const Icon(Icons.location_on, color: Colors.grey, size: 12),
                                   const SizedBox(width: 2),
                                   Expanded(
                                     child: Text(
                                       '$governorate, $city',
-                                      style: AppConstants.thirdText,
+                                      style: AppConstants.thirdText.copyWith(fontSize: 11),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -131,30 +127,31 @@ Text('$price ${texts.isAr ? "دولار" : "\$"}', style: AppConstants.secondTex
                                 ],
                               ),
                             ),
-                            //  const SizedBox(width: 6),
-                            IconButton(
-                              onPressed: () {
-                                // هنا نستدعي الدالة التي تم تمريرها للكارد
-                                // إذا كان الكلاس StatefulWidget نستخدم widget.onFavoriteToggle()
-                                // إذا كان StatelessWidget نستخدم onFavoriteToggle() مباشرة
-                                onFavoriteToggle();
-                              },
-                              icon: Icon(
-                                  is_favorite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: is_favorite ? Colors.red : Colors.grey,
-                                  size: 18),
+                            SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                onPressed: onFavoriteToggle,
+                                icon: Icon(
+                                    is_favorite ? Icons.favorite : Icons.favorite_border,
+                                    color: is_favorite ? Colors.red : Colors.grey,
+                                    size: 18),
+                              ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 2),
                         Row(
                           children: [
-                            const Icon(Icons.square_foot,
-                                color: Colors.grey, size: 14),
+                            const Icon(Icons.square_foot, color: Colors.grey, size: 14),
                             const SizedBox(width: 4),
-Text('$space ${texts.isAr ? "م²" : "m²"}', style: AppConstants.thirdText.copyWith(color: isDark ? Colors.white70 : Colors.grey)),                          ],
+                            Text('$space ${texts.isAr ? "م²" : "m²"}',
+                                style: AppConstants.thirdText.copyWith(
+                                    fontSize: 11,
+                                    color: isDark ? Colors.white70 : Colors.grey)),
+                          ],
                         ),
                       ],
                     ),

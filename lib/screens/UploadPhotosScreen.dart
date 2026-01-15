@@ -29,7 +29,6 @@ class UploadPhotosScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  // تأكدي أن هذه هي ConsumerState وليس State فقط
   ConsumerState<UploadPhotosScreen> createState() => _UploadPhotosScreenState();
 }
 
@@ -77,7 +76,7 @@ class _UploadPhotosScreenState extends ConsumerState<UploadPhotosScreen> {
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) =>/* AccountPendingScreen()*/   LoginPage()),
+              MaterialPageRoute(builder: (context) =>   LoginPage()),
             );
           }
         });

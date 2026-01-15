@@ -1,7 +1,7 @@
 
 class ApartmentDetail{
   final int id;
-final double price; // تغيير لـ double ليتطابق مع الـ Migration
+final double price; 
   final int rooms;                    
   final int bathrooms;                
   final int space;              

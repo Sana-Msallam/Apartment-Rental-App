@@ -1,5 +1,6 @@
 import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
-import 'package:apartment_rental_app/constants/app_string.dart';  
+import 'package:apartment_rental_app/constants/app_string.dart';
+import 'package:apartment_rental_app/providers/booking_provider.dart';  
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -18,13 +19,12 @@ void showRatingDialog(BuildContext context, WidgetRef ref, int bookingId, int ap
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
 
         title: Text(
-          texts.isAr ? "أهلاً بعودتك 😍" : "Welcome Back 😍", 
+          texts.isAr ? "أهلاً بعودتك " : "Welcome Back ", 
           textAlign: TextAlign.center
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // تبديل السؤال مع الحفاظ على اسم الشقة
             Text(
               texts.isAr 
                   ? "كيف كانت تجربتك في $apartmentName؟" 
@@ -45,7 +45,6 @@ void showRatingDialog(BuildContext context, WidgetRef ref, int bookingId, int ap
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            // تبديل كلمة "لاحقاً"
             child: Text(
               texts.isAr ? "لاحقاً" : "Later", 
               style: const TextStyle(color: Colors.grey)
@@ -54,12 +53,13 @@ void showRatingDialog(BuildContext context, WidgetRef ref, int bookingId, int ap
           ElevatedButton(
             onPressed: () {
               if (localStars > 0) {
-                // الحفاظ على استدعاء الـ controller تماماً كما كان
                 ref.read(apartmentProvider.notifier).addReview(bookingId, localStars, apartmentId);
+                ref.read(bookingProvider.notifier).fetchMyBookings();
+                ref.read(apartmentProvider.notifier).loadApartments();
                 Navigator.pop(context);
               }
             },
-            // تبديل نص الزر
+        
             child: Text(texts.isAr ? "قيم الآن" : "Rate Now"),
           ),
         ],

@@ -156,7 +156,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           CustomTextFiled(
                             controller: _lastNameController,
                             hintText: texts
-                                .lastNameHint, // بدلاً من "Enter last name"
+                                .lastNameHint, 
                             prefixIcon: Icons.person_outline,
                             validator: (v) => v!.isEmpty ? "Required" : null,
                           ),
@@ -165,7 +165,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           CustomTextFiled(
                             controller: _emailController,
                             hintText:
-                                "example@mail.com", // أو texts.emailHint                            prefixIcon: Icons.email_outlined,
+                                "example@mail.com",
                             keyboardType: TextInputType.emailAddress,
                             validator: (v) {
                               if (v == null || v.isEmpty)
@@ -179,7 +179,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                           const SizedBox(height: 15),
                           buildLabel(context,
-                              texts.phoneLabel), // تعديل الـ Label أيضاًد
+                              texts.phoneLabel), 
                           CustomTextFiled(
                             controller: _phoneController,
                             hintText: "09xx xxx xxx",
@@ -200,7 +200,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               child: CustomTextFiled(
                                 controller: _dateController,
                                 hintText: texts
-                                    .birthDateHint, // بدلاً من "Select your birthday"                                prefixIcon: Icons.calendar_today,
+                                    .birthDateHint, 
                                 validator: (v) =>
                                     v!.isEmpty ? texts.requiredField : null,
                               ),

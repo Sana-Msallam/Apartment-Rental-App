@@ -4,6 +4,7 @@ import 'package:apartment_rental_app/providers/booking_provider.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../constants/app_constants.dart';
 
 class BookingRequestsTap extends ConsumerStatefulWidget {
   const BookingRequestsTap({super.key});
@@ -19,6 +20,9 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
     Future.microtask(
         () => ref.read(bookingProvider.notifier).fetchOwnerRequests());
   }
+  Future<void> _onRefresh() async {
+    await ref.read(bookingProvider.notifier).fetchOwnerRequests();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,182 +36,196 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
           child: CircularProgressIndicator(color: theme.primaryColor));
     }
 
-    if (state.pendingRequests.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.event_busy,
-                size: 80, color: isDark ? Colors.white10 : Colors.grey[400]),
-            const SizedBox(height: 10),
-            Text(
-              texts.noData, 
-              style: TextStyle(color: isDark ? Colors.white60 : Colors.grey),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: state.pendingRequests.length,
-      itemBuilder: (context, index) {
-        final request = state.pendingRequests[index];
-        final status = request.status.toLowerCase().trim();
-
-        return Card(
-          elevation: isDark ? 0 : 4,
-          margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-          color: theme.cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-            side:
-                BorderSide(color: isDark ? Colors.white10 : Colors.transparent),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(15),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ApartmentDetailsScreen(apartmentId: request.apartmentId),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: AppConstants.primaryColor,
+      backgroundColor: isDark ? const Color(0xFF22282A) : Colors.white,
+      child: state.pendingRequests.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundColor: theme.primaryColor.withOpacity(0.1),
-                        child: Icon(Icons.person, color: theme.primaryColor),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              " ${request.user?.fullName} ",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color:
-                                      isDark ? Colors.white : Colors.black87),
-                            ),
-                            _buildStatusBadge(request.status, texts),
-                          ],
-                        ),
-                      ),
+                      Icon(Icons.event_busy,
+                          size: 80,
+                          color: isDark ? Colors.white10 : Colors.grey[400]),
+                      const SizedBox(height: 10),
                       Text(
-                        "${request.totalPrice} \$",
+                        texts.noData,
                         style: TextStyle(
-                            color: theme.primaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
+                            color: isDark ? Colors.white60 : Colors.grey),
                       ),
-                      const SizedBox(width: 5),
-                      Icon(Icons.arrow_forward_ios,
-                          size: 12,
-                          color: isDark ? Colors.white38 : Colors.grey),
                     ],
                   ),
-                  Divider(
-                      height: 30,
-                      color: isDark ? Colors.white10 : Colors.grey[200]),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _infoColumn(texts.checkInDate, request.startDate, isDark),
-                      _infoColumn(texts.checkOutDate, request.endDate, isDark),
-                    ],
+                ),
+              ],
+            )
+          : ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(12),
+              itemCount: state.pendingRequests.length,
+              itemBuilder: (context, index) {
+                final request = state.pendingRequests[index];
+                final status = request.status.toLowerCase().trim();
+
+                return Card(
+                  elevation: isDark ? 0 : 4,
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  color: theme.cardColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    side: BorderSide(
+                        color: isDark ? Colors.white10 : Colors.transparent),
                   ),
-                  if (status == 'pending') ...[
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => ref
-                                .read(bookingProvider.notifier)
-                                .acceptRequest(request.id),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: Text(texts.accept), 
-                          ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(15),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ApartmentDetailsScreen(
+                              apartmentId: request.apartmentId),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => ref
-                                .read(bookingProvider.notifier)
-                                .rejectRequest(request.id),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.red),
-                              foregroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                            child: Text(texts.rejected), 
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 25,
+                                backgroundColor:
+                                    theme.primaryColor.withOpacity(0.1),
+                                child: Icon(Icons.person,
+                                    color: theme.primaryColor),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${request.user?.fullName ?? texts.translate('Unknown User')}",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black87),
+                                    ),
+                                    _buildStatusBadge(request.status, texts),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                "${request.totalPrice} \$",
+                                style: TextStyle(
+                                    color: theme.primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16),
+                              ),
+                              const SizedBox(width: 5),
+                              Icon(Icons.arrow_forward_ios,
+                                  size: 12,
+                                  color: isDark ? Colors.white38 : Colors.grey),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 15),
-                    Center(
-                      child: Text(
-                        texts.viewDetailsMsg, 
-                        style: TextStyle(
-                            color: isDark ? Colors.white38 : Colors.grey,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic),
+                          Divider(
+                              height: 30,
+                              color: isDark ? Colors.white10 : Colors.grey[200]),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _infoColumn(
+                                  texts.checkInDate,
+                                  texts.formatDate(request.startDate),
+                                  isDark),
+                              Icon(Icons.arrow_forward_rounded,
+                                  size: 16,
+                                  color: isDark
+                                      ? Colors.white10
+                                      : Colors.grey[200]),
+                              _infoColumn(
+                                  texts.checkOutDate,
+                                  texts.formatDate(request.endDate),
+                                  isDark),
+                            ],
+                          ),
+                          if (status == 'pending') ...[
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () => ref
+                                        .read(bookingProvider.notifier)
+                                        .acceptRequest(request.id),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                    child: Text(texts.accept),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => ref
+                                        .read(bookingProvider.notifier)
+                                        .rejectRequest(request.id),
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(color: Colors.red),
+                                      foregroundColor: Colors.red,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                    child: Text(texts.rejected),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 15),
+                            Center(
+                              child: Text(
+                                texts.viewDetailsMsg,
+                                style: TextStyle(
+                                    color: isDark ? Colors.white38 : Colors.grey,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                  ],
-                ],
-              ),
+                  ),
+                );
+              },
             ),
-          ),
-        );
-      },
     );
   }
 
-  
   Widget _buildStatusBadge(String status, AppStrings texts) {
     Color color;
     String translatedStatus = texts.translate(status.trim());
 
     switch (status.toLowerCase().trim()) {
-      case 'pending':
-        color = Colors.orange;
-        break;
-      case 'accepted':
-        color = Colors.green;
-        break;
-      case 'rejected':
-        color = Colors.red;
-        break;
-      case 'completed':
-        color = Colors.blue;
-        break;
-      case 'cancelled':
-        color = Colors.grey;
-        break;
-      default:
-        color = Colors.black;
+      case 'pending': color = Colors.orange; break;
+      case 'accepted': color = Colors.green; break;
+      case 'rejected': color = Colors.red; break;
+      case 'completed': color = Colors.blue; break;
+      case 'cancelled': color = Colors.grey; break;
+      default: color = Colors.black;
     }
 
     return Container(
@@ -220,8 +238,7 @@ class _BookingRequestsTapState extends ConsumerState<BookingRequestsTap> {
       ),
       child: Text(
         translatedStatus,
-        style:
-            TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
       ),
     );
   }

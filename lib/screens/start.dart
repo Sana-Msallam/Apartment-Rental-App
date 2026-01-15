@@ -4,10 +4,7 @@ import 'package:apartment_rental_app/screens/log_in.dart';
 import 'package:apartment_rental_app/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-// يجب استيراد شاشتك الرئيسية (واجهة الشقق)
-// import 'package:apartment_rental_app/screens/home_screen.dart';
-// ولأغراض التجربة نستخدم شاشة تفاصيل الشقة
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';// import 'package:apartment_rental_app/screens/home_screen.dart';
 import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 
@@ -22,7 +19,7 @@ class StartPage extends ConsumerWidget {
 
   final storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
-    encryptedSharedPreferences: true, // تفعيل التشفير المتوافق مع أندرويد الحديث
+    encryptedSharedPreferences: true, 
   ),
 
   );

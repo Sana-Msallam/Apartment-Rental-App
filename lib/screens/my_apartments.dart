@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:apartment_rental_app/constants/app_string.dart';
 import 'package:apartment_rental_app/providers/apartment_home_provider.dart';
 import 'package:apartment_rental_app/providers/my_apartment_provider.dart';
-import 'package:apartment_rental_app/screens/booking_requests_tap.dart'; // تأكدي من استيراد التبويب الثاني
+import 'package:apartment_rental_app/screens/booking_requests_tap.dart'; 
 import '../widgets/apartmentCard.dart';
 import '../constants/app_constants.dart';
 import '../screens/apartment_details_screen.dart';
@@ -19,9 +19,7 @@ class MyApartmentsScreen extends ConsumerStatefulWidget {
 }
 
 class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
-  
-  // دالة التأكيد على الحذف (من كود رفيقتك - مفيدة جداً)
-  void _confirmDelete(BuildContext context, WidgetRef ref, int apartmentId, AppStrings texts) {
+    void _confirmDelete(BuildContext context, WidgetRef ref, int apartmentId, AppStrings texts) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -46,6 +44,9 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
       ),
     );
   }
+  Future<void> _handleRefresh() async {
+    await ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +55,12 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return DefaultTabController(
-      length: 2, // عدد التبويبات التي أضفتيها أنتِ
+      length: 2, 
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
-            texts.myApartments, // استخدام النصوص المعربة من كود رفيقتك
+            texts.myApartments, 
             style: theme.appBarTheme.titleTextStyle ?? GoogleFonts.lato(fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
@@ -76,19 +77,20 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
             unselectedLabelColor: Colors.white70,
             labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
-              Tab(text: texts.all ?? "All"), // استخدام نصوص رفيقتك إن وجدت
+              Tab(text: texts.isAr ? "شققي" : "My Apartments"), 
               Tab(text: texts.requests ?? "Requests"),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            // التبويب الأول: شققي (مع إضافة ميزة السحب لتحديث الصفحة)
             RefreshIndicator(
-              onRefresh: () => ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments(),
+              onRefresh: _handleRefresh,
+              color: AppConstants.primaryColor,
+              backgroundColor: isDark ? const Color(0xFF22282A) : Colors.white,
               child: _buildMyApartmentsGrid(texts),
             ),
-            // التبويب الثاني: طلبات الحجز (من شغلك أنتِ)
+            
             const BookingRequestsTap(),
           ],
         ),
@@ -98,7 +100,6 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
             context, 
             MaterialPageRoute(builder: (context) => const AddApartmentPage())
           ).then((_) {
-            // تحديث البيانات بعد العودة من صفحة الإضافة
             if (mounted) {
               ref.read(ownerApartmentsProvider.notifier).loadOwnerApartments();
             }
@@ -108,23 +109,27 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
       ),
     );
   }
-
-  // دالة بناء الشبكة (Grid) مدمج فيها منطق الحذف والبيانات
   Widget _buildMyApartmentsGrid(AppStrings texts) {
     final apartmentsAsyncValue = ref.watch(ownerApartmentsProvider);
 
     return apartmentsAsyncValue.when(
       data: (List<Apartment> apartments) {
         if (apartments.isEmpty) {
-          return ListView( // ListView ضروري هنا ليشتغل الـ RefreshIndicator حتى لو القائمة فارغة
+          return ListView( 
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-              Center(child: Text(texts.noApartments)),
+              Center(
+                child: Text(
+                  texts.noApartments,
+                  style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54),
+                ),
+              ),
             ],
           );
         }
         return GridView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(10),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -139,11 +144,11 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
               id: apartment.id,
               imagePath: apartment.imagePath,
               price: apartment.price,
-              governorate: apartment.governorate,
-              city: apartment.city,
+              governorate: texts.translate(apartment.governorate),
+              city: texts.translate(apartment.city),
               space: apartment.space,
               average_rating: apartment.averageRating,
-              is_favorite: apartment.is_favorite,
+              is_favorite: apartment.is_favorite ?? false,
               onTap: () {
                 Navigator.push(
                   context,
@@ -161,7 +166,13 @@ class _MyApartmentsScreenState extends ConsumerState<MyApartmentsScreen> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(child: Text('Error: $error')),
+      error: (error, stack) => ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+          Center(child: Text('Error: $error', textAlign: TextAlign.center)),
+        ],
+      ),
     );
   }
 }

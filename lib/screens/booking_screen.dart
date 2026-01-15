@@ -35,9 +35,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  //final DateTime _firstDate = DateTime.now();
-
-  final DateTime _firstDate = DateTime.now().subtract(const Duration(days: 30));
+  final DateTime _firstDate = DateTime.now();
   final DateTime _lastDate = DateTime.now().add(const Duration(days: 365 * 10));
 
   @override
@@ -50,11 +48,9 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   Future<void> _selectStartDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      // initialDate: _startDate ?? _firstDate,
-      // firstDate: _firstDate,
-      // lastDate: _lastDate,
+      
       initialDate: _startDate ?? DateTime.now(), 
-    firstDate: _firstDate, // الآن أصبح يسمح بالشهر الماضي
+    firstDate: _firstDate, 
     lastDate: _lastDate,
       builder: (context, child) => _buildDatePickerTheme(context, child!),
     );
@@ -69,9 +65,9 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   }
 
   Future<void> _selectEndDate() async {
-   final texts = ref.read(stringsProvider); // جلب النصوص
+   final texts = ref.read(stringsProvider); 
     if (_startDate == null) {
-      _showErrorSnackBar(texts.selectStartFirstError); // استخدام المترجم
+      _showErrorSnackBar(texts.selectStartFirstError); 
       return;
     }
     final DateTime minRequiredEndDate = DateTime(
@@ -108,9 +104,9 @@ class _BookingAppState extends ConsumerState<BookingApp> {
   }
 
   void _submitBooking() async {
-   final texts = ref.read(stringsProvider); // جلب النصوص
+   final texts = ref.read(stringsProvider); 
     if (_startDate == null || _endDate == null) {
-      _showErrorSnackBar(texts.datesRequiredError); // مترجم
+      _showErrorSnackBar(texts.datesRequiredError); 
       return;
     }
 
@@ -118,7 +114,7 @@ class _BookingAppState extends ConsumerState<BookingApp> {
     String? token = await storage.read(key: 'jwt_token');
 
     if (token == null) {
-_showErrorSnackBar(texts.loginRequiredError); // مترجم
+_showErrorSnackBar(texts.loginRequiredError); 
       Navigator.pushNamed(context, '/login');
       return;
     }
@@ -149,13 +145,13 @@ _showErrorSnackBar(texts.loginRequiredError); // مترجم
    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(texts.bookingSuccess), // مترجم
+          content: Text(texts.bookingSuccess), 
           backgroundColor: Colors.green,
         ),
       );
       Navigator.pop(context, true);
     } else {
-_showErrorSnackBar(texts.addError); // مترجم
+_showErrorSnackBar(texts.addError); 
     }
   }
 
@@ -165,7 +161,6 @@ final texts = ref.read(stringsProvider);
   _showLoadingDialog();
   try {
     final bookingService = ref.read(bookingServiceProvider);
-    // استدعاء الخدمة (التي قمنا بتعديلها لتعيد رقم أو نص)
     final result = await bookingService.calculatePrice(
       apartmentId: widget.apartmentId,
       startDate: start,
@@ -174,20 +169,17 @@ final texts = ref.read(stringsProvider);
     );
 
     if (!mounted) return;
-    Navigator.pop(context); // إغلاق اللودينج
-
+    Navigator.pop(context); 
     if (result is num) {
-      // إذا كان رقم، يعني نجح حساب السعر
       _showConfirmationDialog(result.toDouble(), start, end, token);
     } else if (result is String) {
-      // إذا كان نص، فهذه هي رسالة الـ Exception من Laravel
       _showErrorSnackBar(result); 
     } else {
-_showErrorSnackBar(texts.addError); // مترجم
+_showErrorSnackBar(texts.addError); 
     }
   } catch (e) {
     if (mounted) Navigator.pop(context);
-_showErrorSnackBar(texts.serverError); // مترجم
+_showErrorSnackBar(texts.serverError); 
   }
 }
   void _showLoadingDialog() {
@@ -213,7 +205,7 @@ _showErrorSnackBar(texts.serverError); // مترجم
     String token,
   ) {
     final theme = Theme.of(context);
-final texts = ref.read(stringsProvider); // جلب النصوص
+final texts = ref.read(stringsProvider); 
     showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -246,7 +238,7 @@ final texts = ref.read(stringsProvider); // جلب النصوص
               child: Column(
                 children: [
                   Text(
-texts.confirmBooking, // مترجم: تأكيد الحجز
+texts.confirmBooking,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: theme.primaryColor,
@@ -254,12 +246,10 @@ texts.confirmBooking, // مترجم: تأكيد الحجز
                   ),
                   const SizedBox(height: 20),
 
-                  // عرض الفترة الزمنية بتنسيق نظيف
-                 _buildInfoRow(Icons.calendar_month, texts.bookingPeriod, "$start ➔ $end", theme), // مترجم
+                 _buildInfoRow(Icons.calendar_month, texts.bookingPeriod, "$start ➔ $end", theme), 
                   const Divider(height: 30, thickness: 0.5),
 
-                  // عرض السعر بشكل بارز
-                _buildInfoRow(Icons.payments_outlined, texts.totalAmount, "\$${price.toStringAsFixed(2)}", theme, isPrice: true), // مترجم
+                _buildInfoRow(Icons.payments_outlined, texts.totalAmount, "\$${price.toStringAsFixed(2)}", theme, isPrice: true), 
                 ],
               ),
             ),
@@ -269,7 +259,7 @@ texts.confirmBooking, // مترجم: تأكيد الحجز
               padding: const EdgeInsets.only(bottom: 24, left: 20, right: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment
-                    .end, // جعل الأزرار في جهة اليمين لتبدو أرقى
+                    .end, 
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(dialogContext),
@@ -283,7 +273,7 @@ texts.confirmBooking, // مترجم: تأكيد الحجز
                     ),
                   ),
 
-                  const SizedBox(width: 15), // مسافة كافية بين النص والزر
+                  const SizedBox(width: 15), 
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kPrimaryColor,
@@ -299,8 +289,8 @@ texts.confirmBooking, // مترجم: تأكيد الحجز
                       minimumSize: const Size(90, 35),
                     ),
 onPressed: () async {
-  Navigator.pop(dialogContext); // إغلاق دايالوج التأك
-  _showLoadingDialog(); // إظهار لودينج
+  Navigator.pop(dialogContext); 
+  _showLoadingDialog(); 
 
   try {
     bool success = await ref.read(bookingServiceProvider).confirmBooking(
@@ -311,8 +301,7 @@ onPressed: () async {
     );
 
     if (!mounted) return;
-    Navigator.pop(context); // إغلاق اللودينج
-
+    Navigator.pop(context); 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -422,7 +411,7 @@ onPressed: () async {
                       const SizedBox(height: 15),
                       Text(
                        widget.bookingId == null
-                ? texts.selectStayPeriod  // مفتاح العنوان من ملف اللغة
+                ? texts.selectStayPeriod  
                 : texts.editStayPeriod,
                         style: TextStyle(
                           fontSize: 24,
@@ -433,7 +422,7 @@ onPressed: () async {
                       
                       const SizedBox(height: 30),
                       DateSelector(
-title: texts.checkInDate, // "تاريخ الدخول" مترجمة                     
+title: texts.checkInDate,                     
    date: _startDate,
                         onTap: _selectStartDate,
                       ),

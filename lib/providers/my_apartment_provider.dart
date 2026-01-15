@@ -3,9 +3,7 @@ import 'package:apartment_rental_app/models/apartment_home_model.dart';
 import 'package:apartment_rental_app/services/apartment_home_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-// my_apartment_controller.dart
 
-// ... Imports ...
 
 class OwnerApartmentsNotifier extends StateNotifier<AsyncValue<List<Apartment>>> {
   final ApartmentHomeService _service;
@@ -21,7 +19,10 @@ class OwnerApartmentsNotifier extends StateNotifier<AsyncValue<List<Apartment>>>
       final token = await _storage.read(key: 'jwt_token');
       if (token == null) throw Exception("User not authenticated");
       final apartments = await _service.getOwnerApartments(token);
-      state = AsyncValue.data(apartments);
+      if (mounted) {
+    state = AsyncValue.data(apartments);
+    }
+      
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -37,8 +38,6 @@ class OwnerApartmentsNotifier extends StateNotifier<AsyncValue<List<Apartment>>>
     }
   }
 }
-
-// هذا هو البروفايدر الوحيد الذي يجب أن يحمل هذا الاسم
 final ownerApartmentsProvider = StateNotifierProvider.autoDispose<OwnerApartmentsNotifier, AsyncValue<List<Apartment>>>((ref) {
   final service = ref.watch(apartmentHomeServiceProvider);
   final storage = ref.watch(storageProvider);

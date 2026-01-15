@@ -43,7 +43,6 @@ class _ApartmentDetailsScreenState
 
   @override
   Widget build(BuildContext context) {
-    // استدعاء نصوص اللغة
     final texts = ref.watch(stringsProvider);
     final apartmentAsync =
         ref.watch(apartmentDetailProvider(widget.apartmentId));
@@ -52,7 +51,6 @@ class _ApartmentDetailsScreenState
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      // ترجمة عنوان الأب بار
       appBar: CustomAppBar(title: texts.apartmentDetails),
       body: apartmentAsync.when(
         loading: () => const Center(
@@ -73,17 +71,17 @@ class _ApartmentDetailsScreenState
                       _buildPriceHeader(apartment),
                       const SizedBox(height: 20),
                       _buildStatusCard(
-                          apartment, isDark, theme, texts), // نمرر texts
+                          apartment, isDark, theme, texts), 
                       const SizedBox(height: 25),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildFeaturesGrid(apartment, texts), // نمرر texts
+                            _buildFeaturesGrid(apartment, texts), 
                             const SizedBox(height: 30),
                             Text(
-                              texts.description, // مترجم
+                              texts.description, 
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: isDark ? Colors.white : Colors.black87,
@@ -130,18 +128,15 @@ class _ApartmentDetailsScreenState
                 child: CustomButton(
                   textButton: texts.isAr
                       ? "احجز الآن"
-                      : "Rent Now", // يمكنك إضافتها للـ AppStrings
+                      : "Rent Now", 
                   kPrimaryColor: kPrimaryColor,
                   vTextColor: Colors.white,
                   onTap: () async {
                     print("Button Clicked");
-                    // 1. الوصول للـ storage عبر الـ Provider لضمان نفس الإعدادا
-                    // محاولة قراءة التوكن بكل المفاتيح المحتملة
                     final storage = ref.read(storageProvider);
                     String? token = await storage.read(key: 'jwt_token');
                     print("DEBUG: Final Token Check: $token");
                     if (token != null && token.isNotEmpty) {
-                      // 2. إذا كان التوكن موجوداً، ننتقل لواجهة الحجز
                       if (!mounted) return;
                       Navigator.push(
                         context,
@@ -154,14 +149,12 @@ class _ApartmentDetailsScreenState
                       );
                     } else {
                       print("DEBUG: Token is null or empty!");
-                      // 3. إذا كان التوكن غير موجود، يجب توجيه المستخدم لتسجيل الدخول
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Access Denied: Please login again"),
                           backgroundColor: Colors.red,
                         ),
                       );
-                      // يمكنك هنا عمل Navigator لشاشة الـ Login
                     }
                   },
                 ),
@@ -172,9 +165,6 @@ class _ApartmentDetailsScreenState
       ),
     );
   }
-
-  // --- Widgets المعدلة لتدعم الترجمة ---
-
   Widget _buildImageSlider(ApartmentDetail apartment) {
     return Column(
       children: [
@@ -294,10 +284,9 @@ class _ApartmentDetailsScreenState
               children: [
                 Text(texts.titleDeedType,
                     style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                // ابحث عن هذا السطر داخل _buildStatusCard
                 Text(
                     texts.translate(
-                        apartment.titleDeed), // تم استخدام translate هنا
+                        apartment.titleDeed),
                     style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -311,7 +300,7 @@ class _ApartmentDetailsScreenState
   }
 
  Widget _buildFeaturesGrid(ApartmentDetail apartment, dynamic texts) {
-  return Row( // استخدمي Row بدلاً من Wrap لضمان بقائهم في صف واحد
+  return Row( 
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       _featureIcon(Icons.king_bed, "${apartment.rooms} ${texts.rooms}"),

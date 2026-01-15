@@ -219,7 +219,6 @@ class ProfileScreen extends ConsumerWidget {
   }
   
 
-  // دالة الدايلوج المحسنة التي تستخدم Context الصفحة للانتقال
   void _showLogoutDialog(BuildContext pageContext, WidgetRef ref, bool isDark, AppStrings texts) {
     showDialog(
       context: pageContext,
@@ -233,8 +232,8 @@ class ProfileScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(dialogContext); // إغلاق الدايلوج أولاً
-              handleLogout(pageContext, ref); // الانتقال باستخدام Context الصفحة
+              Navigator.pop(dialogContext); 
+              handleLogout(pageContext, ref); 
             },
             child: Text(texts.yes, style: const TextStyle(color: Colors.red)),
           ),

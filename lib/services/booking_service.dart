@@ -90,7 +90,7 @@ Future<bool> confirmBooking({
       return response.statusCode == 200 || response.statusCode == 201;
     } on DioException catch (e) {
       print(
-        " خطأ عند الإلغاء: ${e.response?.statusCode} - ${e.response?.data}",
+        " Error ${e.response?.statusCode} - ${e.response?.data}",
       );
       return false;
     }

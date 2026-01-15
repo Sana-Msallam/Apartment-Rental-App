@@ -111,7 +111,6 @@ class NotificationScreen extends ConsumerWidget {
                             .read(notificationsProvider.notifier)
                             .markAsRead(notification.id);
                       }
-                      // هنا يمكنك إضافة توجيه المستخدم لصفحة الحجز إذا كان الإشعار يخص حجز معين
                     },
                   ),
                 );

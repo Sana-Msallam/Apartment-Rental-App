@@ -29,7 +29,7 @@ class _FilterModelState extends ConsumerState<FilterModel> {
     final texts = ref.watch(stringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // تجهيز القوائم المترجمة
+
     List<String> govList = [texts.all, ...texts.citiesByGovernorate.keys];
 
     List<String> cityList = [texts.all];
@@ -37,7 +37,6 @@ class _FilterModelState extends ConsumerState<FilterModel> {
       cityList.addAll(texts.citiesByGovernorate[_selectedGovernorate] ?? []);
     }
 
-    // التأكد من أن القيم المختارة موجودة في القوائم الجديدة لتجنب الأخطاء
     if (!govList.contains(_selectedGovernorate)) _selectedGovernorate = texts.all;
     if (!cityList.contains(_selectedCity)) _selectedCity = texts.all;
 
@@ -124,7 +123,6 @@ class _FilterModelState extends ConsumerState<FilterModel> {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // التحويل العكسي للسيرفر
                       final String? finalGov = _selectedGovernorate == texts.all ? null : texts.getEnglishValue(_selectedGovernorate);
                       final String? finalCity = _selectedCity == texts.all ? null : texts.getEnglishValue(_selectedCity);
                       
@@ -170,8 +168,6 @@ class _FilterModelState extends ConsumerState<FilterModel> {
       ),
     );
   }
-
-  // دالة التنسيق الموحدة للحقول
   InputDecoration _inputDecoration(bool isDark) {
     return InputDecoration(
       border: OutlineInputBorder(

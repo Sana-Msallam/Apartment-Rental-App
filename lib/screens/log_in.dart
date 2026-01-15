@@ -41,15 +41,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       final user = await ref.read(apiServiceProvider).login(phone, password);
 
       if (user != null && user.token != null) { 
-        // 1. حفظ التوكن أولاً
         await ref.read(storageProvider).write(key: 'jwt_token', value: user.token);
         print("Token saved successfully: ${user.token}");  
-        // هذه الخطوة تضمن أن البروفايل سيُجلب فوراً دون انتظار إعادة تشغيل التطبيق
         await ref.read(profileProvider.notifier).getProfile(user.token!);
 await ref.read(profileProvider.notifier).updateTokenAndFetch(user.token!);
         if (!mounted) return;
         
-        // 3. الانتقال للشاشة الرئيسية
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -92,7 +89,7 @@ await ref.read(profileProvider.notifier).updateTokenAndFetch(user.token!);
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-final texts = ref.watch(stringsProvider); // السطر المطلوب
+final texts = ref.watch(stringsProvider); 
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.black,
@@ -198,7 +195,7 @@ final texts = ref.watch(stringsProvider); // السطر المطلوب
 
   Widget _buildRegisterLink(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    final texts = ref.watch(stringsProvider); // إضافة السطر هنا
+    final texts = ref.watch(stringsProvider); 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

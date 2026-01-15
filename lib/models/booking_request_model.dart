@@ -7,6 +7,8 @@ class BookingRequestModel {
   final int userId;
   final double totalPrice;
   final BookingUser? user; 
+  final int? isRated;
+
 
   BookingRequestModel({
     required this.id,
@@ -17,6 +19,7 @@ class BookingRequestModel {
     required this.userId,
     required this.totalPrice,
     this.user,
+    this.isRated,
   });
 
   BookingRequestModel copyWith({
@@ -28,6 +31,7 @@ class BookingRequestModel {
     int? userId,
     double ?totalPrice,
     BookingUser? user,
+    int? isRated,
   }){
     return BookingRequestModel(
       id: id?? this.id,
@@ -38,6 +42,7 @@ class BookingRequestModel {
       userId: userId?? this.userId,
       totalPrice: totalPrice?? this.totalPrice,
       user: user ?? this.user,
+      isRated: isRated?? this.isRated,
       );
   }
 
@@ -51,6 +56,7 @@ class BookingRequestModel {
       userId: json['user_id'],
       totalPrice: (json['total_price'] as num).toDouble(),
       user: json['user'] != null ? BookingUser.fromJson(json['user']) : null,
+      isRated: json['is_rated'] ?? 0,
     );
   }
 }

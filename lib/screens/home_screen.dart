@@ -9,7 +9,7 @@ import 'package:apartment_rental_app/widgets/filter_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/apartmentCard.dart'; // تأكدي من صحة اسم الملف (يفضل ApartmentCard.dart)
+import '../widgets/apartmentCard.dart'; 
 import '../constants/app_constants.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/profile_screen.dart';
@@ -22,105 +22,122 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
-void initState() {
-  super.initState();
-  Future.microtask(() {
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      _onRefresh();
+    });
+    PushNotificationsService.handleForegroundMessage(ref);
+  }
+  Future<void> _onRefresh() async {
     ref.read(notificationsProvider.notifier).refreshUnreadCount();
-  });
-  PushNotificationsService.handleForegroundMessage(ref);
-}
+    await ref.read(apartmentProvider.notifier).loadApartments();
+  }
 
   @override
   Widget build(BuildContext context) {
     final texts = ref.watch(stringsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildCustomAppBar(context, isDark),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 5),
-            Text(
-              texts.recommendation,
-              style: GoogleFonts.lato(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black87,
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        color: AppConstants.primaryColor,
+        backgroundColor: isDark ? const Color(0xFF22282A) : Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 5),
+              Text(
+                texts.recommendation,
+                style: GoogleFonts.lato(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Expanded(
-              // تم حذف Consumer الزائد هنا لأننا نستخدم ref الخاص بـ ConsumerState
-              child: ref.watch(apartmentProvider).when(
-                data: (apartments) {
-                  if (apartments.isEmpty) {
-                    return Center(
-                      child: Text(
-                        texts.noApartments,
-                        style: TextStyle(
-                            color: isDark ? Colors.white70 : Colors.black54),
-                      ),
-                    );
-                  }
-
-                  return GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 6,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.68,
-                    ),
-                    itemCount: apartments.length,
-                    itemBuilder: (context, index) {
-                      final apartment = apartments[index];
-                      
-                      // قمت بحذف GestureDetector الخارجي لأن الكارد يحتوي داخله على onTap
-                      return Apartmentcard(
-                        id: apartment.id,
-                        imagePath: apartment.imagePath,
-                        price: apartment.price,
-                        governorate: texts.translate(apartment.governorate),
-                        city: texts.translate(apartment.city),
-                        space: apartment.space,
-                        average_rating: apartment.averageRating,
-                        
-                        is_favorite: apartment.is_favorite ?? false, 
-                        onFavoriteToggle: () {
-                          ref.read(apartmentProvider.notifier).toggleFavorite(apartment.id);
-                          print("Favorite toggled for ID: ${apartment.id}");
-                        },
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ApartmentDetailsScreen(
-                                apartmentId: apartment.id,
-                              ),
+              const SizedBox(height: 5),
+              Expanded(
+                child: ref.watch(apartmentProvider).when(
+                  data: (apartments) {
+                    if (apartments.isEmpty) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                          Center(
+                            child: Text(
+                              texts.noApartments,
+                              style: TextStyle(
+                                  color: isDark ? Colors.white70 : Colors.black54),
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       );
-                    },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(
-                  child: Text(
-                    'Something went wrong: ${error.toString()}',
-                    style: TextStyle(color: isDark ? Colors.red[200] : Colors.red),
+                    }
+
+                    return GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 6,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.68,
+                      ),
+                      itemCount: apartments.length,
+                      itemBuilder: (context, index) {
+                        final apartment = apartments[index];
+                        
+                        return Apartmentcard(
+                          id: apartment.id,
+                          imagePath: apartment.imagePath,
+                          price: apartment.price,
+                          governorate: texts.translate(apartment.governorate),
+                          city: texts.translate(apartment.city),
+                          space: apartment.space,
+                          average_rating: apartment.averageRating,
+                          is_favorite: apartment.is_favorite ?? false, 
+                          onFavoriteToggle: () {
+                            ref.read(apartmentProvider.notifier).toggleFavorite(apartment.id);
+                          },
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ApartmentDetailsScreen(
+                                  apartmentId: apartment.id,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                      Center(
+                        child: Text(
+                          'Something went wrong: ${error.toString()}',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: isDark ? Colors.red[200] : Colors.red),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -160,7 +177,6 @@ void initState() {
               ),
             ),
             const Spacer(),
-         // --- بداية التعديل: أيقونة الجرس مع النقطة الحمراء ---
           Stack(
             alignment: Alignment.center,
             children: [
@@ -267,7 +283,7 @@ void initState() {
         else if (icon == Icons.all_inbox) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) =>  const MyApartmentsScreen()),
+            MaterialPageRoute(builder: (context) =>   const MyApartmentsScreen()),
           );
          }
          else if (icon == Icons.person) { 

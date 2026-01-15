@@ -10,8 +10,6 @@ import 'package:dio/dio.dart';
 
 class PushNotificationsService {
   static FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  // 1. تهيئة الإشعارات (Permissions & Listeners)
   static Future<void> init() async {
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
@@ -32,7 +30,6 @@ class PushNotificationsService {
     });
   }
 
-  // 2. جلب التوكن الخاص بالجهاز
   static Future<String?> getDeviceToken() async {
     try {
       String? token = await messaging.getToken();
@@ -44,7 +41,6 @@ class PushNotificationsService {
     }
   }
 
-  // 3. إرسال التوكن للباك إند
   static Future<void> sendTokenToServer(String fcm_token, {String? authToken}) async {
     try {
       String? finalToken = authToken;
@@ -58,12 +54,11 @@ class PushNotificationsService {
       return;
     }
       final dio = Dio();
-      // إعدادات الـ Header لضمان قبول الطلب من السيرفر
       dio.options.headers["Authorization"] = "Bearer $finalToken";
       dio.options.headers["Accept"] = "application/json";
       
       final response = await dio.post(
-        'http://10.43.150.84:8000/api/update-fcm-token', 
+        'http://192.168.1.7:8000/api/update-fcm-token', 
         data: {'fcm_token': fcm_token},
       );
 
@@ -75,14 +70,12 @@ class PushNotificationsService {
     }
   }
 
-  // 4. معالجة الإشعارات في الخلفية
-  @pragma('vm:entry-point') // ضرورية لضمان عملها في الخلفية
+  @pragma('vm:entry-point')
   static Future<void> handleBackgroundMessage(RemoteMessage message) async {
     await Firebase.initializeApp();
     log("Background Message: ${message.notification?.title}");
   }
 
-  // 5. معالجة الإشعارات والتطبيق مفتوح (Foreground)
   static void handleForegroundMessage(WidgetRef ref) {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       log("Foreground Message: ${message.notification?.title}");

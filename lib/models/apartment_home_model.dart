@@ -68,7 +68,7 @@ class Apartment {
           : 0,
       space: json['space'] ?? 0,
       imagePath: correctedPath,
-      is_favorite: json['is_favorite'] ?? false, // مهم جداً لعمل القلب
+      is_favorite: json['is_favorite'] ?? false, 
     );
   }
 }

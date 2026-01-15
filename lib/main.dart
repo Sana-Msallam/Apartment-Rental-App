@@ -9,39 +9,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // تعديل: استخدام SecureStorage
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'; 
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   
   WidgetsFlutterBinding.ensureInitialized();
-  
-  try {
-    await initializeDateFormatting('en', null);
-  } catch (e) {
-    debugPrint('Initialization failed: $e');
-  }
+
 
   
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  const storage = FlutterSecureStorage();
+  const storage = FlutterSecureStorage(
+  aOptions: AndroidOptions(
+    encryptedSharedPreferences: true, 
+  ),
+);
   final String? savedToken = await storage.read(key: 'jwt_token');
-
-  // تهيئة الإشعارات
-  await Future.wait([
-    PushNotificationsService.init(),
-    LocalNotificationService.init(),
-  ]);
-
   runApp(
     ProviderScope(
       child: Sakani(token: savedToken),
     ),
   );
+  _initServices();
+}
+
+  void _initServices() {
+  Future.delayed(const Duration(seconds: 1), () {
+    PushNotificationsService.init().catchError((e) => debugPrint("Push Error: $e"));
+    LocalNotificationService.init().catchError((e) => debugPrint("Local Error: $e"));
+    initializeDateFormatting('en', null);
+  });
 }
 
 class Sakani extends ConsumerWidget {

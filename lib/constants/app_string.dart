@@ -1,10 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+
+
 
 class AppStrings {
   final bool isAr;
   AppStrings(this.isAr);
 
-  // --- نصوصك القديمة كما هي ---
+String formatDate(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return "";
+  try {
+    DateTime dt = DateTime.parse(dateStr);
+    return DateFormat('dd-MM-yyy').format(dt); 
+  } catch (e) {
+    return dateStr; 
+  }
+}
+
   String get fieldRequired => isAr ? "هذا الحقل مطلوب" : "Required";
   String get next => isAr ? "التالي" : "NEXT";
   String get cancel => isAr ? "إلغاء" : "Cancel";
@@ -66,7 +79,6 @@ class AppStrings {
   String get noApartments =>
       isAr ? "لا يوجد شقق حالياً." : "No apartments found.";
 
-  // --- نصوص إضافة الشقة ---
   String get apartmentDetails => isAr ? "تفاصيل الشقة" : "Apartment Details";
   String get apartmentPhotos => isAr ? "صور الشقة" : "Apartment Photos";
   String get priceLabel => isAr ? "السعر (\$)" : "Price (\$)";
@@ -94,9 +106,7 @@ class AppStrings {
       isAr ? "ارفع صور الشقة" : "Upload apartment photos";
   String get requests => isAr ? "الطلبات" : "requests";
 
-  // --- خرائط الترجمة (للبيانات القادمة من السيرفر) ---
 
-  // 1. خريطة المحافظات والمدن (للعرض في القوائم المنسدلة)
   Map<String, List<String>> get citiesByGovernorate => isAr
       ? {
           'دمشق': ['الميدان', 'المزة', 'عفيف'],
@@ -126,13 +136,12 @@ class AppStrings {
         };
 
   Map<String, String> get dbToAr => {
-        // المحافظات
         'Damascus': 'دمشق',
         'Aleppo': 'حلب',
         'Homs': 'حمص',
         'Hama': 'حماة',
-        'Daraa': 'درعا', // تأكدي من سبينغ السيرفر (Daraa أو Draa)
-        'Draa': 'درعا', // للاحتياط حسب كود الفلتر السابق
+        'Daraa': 'درعا', 
+        'Draa': 'درعا', 
         'Latakia': 'اللاذقية',
         'Tartous': 'طرطوس',
         'Suwayda': 'السويداء',
@@ -140,7 +149,6 @@ class AppStrings {
         'Idlib': 'إدلب',
         'Raqqa': 'الرقة',
 
-        // المناطق (التي لم تكن موجودة في القائمة السابقة)
         'Midan': 'الميدان',
         'Mazzeh': 'المزة',
         'Afif': 'عفيف',
@@ -175,13 +183,11 @@ class AppStrings {
         'Al-Karamah': 'الكرامة',
         'Al-Mansoura': 'المنصورة',
 
-        // أنواع الطابو
         'green': 'طابو أخضر',
         'Court Decision': 'قرار محكمة',
         'Power of Attorney': 'وكالة',
       };
 
-  // --- نصوص شاشة الملف الشخصي (Profile) ---
   String get accountSettings => isAr ? "إعدادات الحساب" : "Account Settings";
   String get language => isAr ? "اللغة" : "Language";
   String get darkMode => isAr ? "الوضع الليلي" : "Dark Mode";
@@ -199,18 +205,19 @@ class AppStrings {
   String get logout => isAr ? "تسجيل الخروج" : "Logout";
 
 String get userIdLabel => isAr ? "رقم المستخدم" : "User ID";
-  String get accept => isAr ? "قبول" : "Accept"; // أضيفي هذا السطر
+  String get accept => isAr ? "قبول" : "Accept"; 
   String get viewDetailsMsg => isAr
       ? "اضغط لعرض تفاصيل الشقة"
-      : "Click to view apartment details"; // أضيفي هذا السطر
-  // 3. دالة سحرية تستخدمها في أي مكان لعرض النص مترجم
+      : "Click to view apartment details"; 
   String translate(String? value) {
     if (value == null) return '';
     if (!isAr) return value;
     return dbToAr[value] ?? value;
   }
-
-  // رسائل التنبيه والخطأ (كما هي)
+  String get favorites => isAr ? "المفضلة" : "Favorites";
+  String get noFavorites => isAr ? "لا يوجد عناصر في المفضلة بعد!" : "No favorites yet!";
+  String get somethingWentWrong => isAr ? "حدث خطأ ما!" : "Something went wrong";
+  String get tryAgain => isAr ? "إعادة المحاولة" : "Try Again";
   String get priceRequired => isAr ? "السعر مطلوب" : "Price is required";
   String get invalidNumber => isAr ? "رقم غير صالح" : "Invalid number";
   String get imageError => isAr
@@ -246,7 +253,6 @@ String get userIdLabel => isAr ? "رقم المستخدم" : "User ID";
   String get areYouSureCancel => isAr
       ? "هل أنت متأكد من إلغاء هذا الحجز؟"
       : "Are you sure you want to cancel this booking?";
-// --- نصوص صفحة الحجز (Booking Page) ---
   String get selectStayPeriod =>
       isAr ? "تحديد فترة الإقامة" : "Select Stay Period";
   String get editStayPeriod => isAr ? "تعديل فترة الإقامة" : "Edit Stay Period";
@@ -255,13 +261,10 @@ String get userIdLabel => isAr ? "رقم المستخدم" : "User ID";
   String get confirmBooking => isAr ? "تأكيد الحجز" : "Confirm Booking";
   String get updateBooking => isAr ? "تحديث الحجز" : "Update Booking";
 
-  // --- نصوص نافذة التأكيد (Confirmation Dialog) ---
   String get bookingPeriod => isAr ? "فترة الحجز" : "Booking Period";
   String get totalAmount => isAr ? "المبلغ الإجمالي" : "Total Amount";
   String get confirm => isAr ? "تأكيد" : "Confirm";
-  // ملاحظة: "cancel" موجودة مسبقاً في كودك فلا داعي لتكرارها
 
-  // --- رسائل التنبيه والخطأ للحجز (SnackBars) ---
   String get selectStartFirstError =>
       isAr ? "يرجى اختيار تاريخ البدء أولاً" : "Please select start date first";
   String get datesRequiredError =>
@@ -276,14 +279,12 @@ String get userIdLabel => isAr ? "رقم المستخدم" : "User ID";
   String get updateSuccess =>
       isAr ? "تم تحديث الموعد بنجاح!" : "Update Successful!";
 
-// --- نصوص صفحة الإشعارات (Notification Screen) ---
   String get notifications => isAr ? "الإشعارات" : "Notifications";
   String get noNotifications =>
       isAr ? "لا يوجد إشعارات حالياً" : "No notifications yet";
   String get error => isAr ? "خطأ" : "Error";
   String get markAsRead => isAr ? "تحديد كمقروء" : "Mark as read";
 
-// --- نصوص شاشة انتظار التفعيل (Account Pending) ---
   String get accountUnderReview =>
       isAr ? "الحساب قيد المراجعة" : "The account is under review.";
   String get pendingDescription => isAr
@@ -294,33 +295,29 @@ String get userIdLabel => isAr ? "رقم المستخدم" : "User ID";
       ? "تم تفعيل حسابك بنجاح! أهلاً بك."
       : "Your account has been successfully activated! Welcome.";
 
-  // 1. إضافة نص "الكل" ليستخدم في الفلتر
   String get all => isAr ? "الكل" : "All";
 
-  // 2. إضافة عناوين الفلتر ليكون الشغل راكز
   String get filterTitle => isAr ? "فلترة" : "Filter";
   String get reset => isAr ? "إعادة تعيين" : "Reset";
   String get apply => isAr ? "تطبيق" : "Apply";
   String get priceRange => isAr ? "نطاق السعر" : "Price Range";
   String get spaceRange => isAr ? "نطاق المساحة" : "Space Range";
 
-  // 3. الدالة السحرية للتحويل العكسي (من العربي للانكليزي قبل الإرسال للسيرفر)
   String getEnglishValue(String localValue) {
-    if (!isAr) return localValue; // إذا التطبيق إنكليزي، القيمة أصلاً إنكليزي
+    if (!isAr) return localValue; 
     if (localValue == "الكل") return "All";
 
-    // البحث في القاموس عن المفتاح (Key) الذي يقابل هذه القيمة العربية
     try {
       return dbToAr.entries
           .firstWhere((entry) => entry.value == localValue)
           .key;
     } catch (e) {
-      return localValue; // إذا لم يجدها، يرسلها كما هي
+      return localValue; 
     }
   }
 }
 
-// الـ Providers
+
 final isArabicProvider = StateProvider<bool>((ref) => false);
 
 final stringsProvider = Provider<AppStrings>((ref) {

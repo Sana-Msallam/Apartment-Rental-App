@@ -1,12 +1,11 @@
 import 'package:apartment_rental_app/constants/app_string.dart';
+import 'package:apartment_rental_app/models/booking_request_model.dart';
 import 'package:apartment_rental_app/providers/booking_provider.dart';
-import 'package:apartment_rental_app/screens/booking_screen.dart'; // افترضت أن هذا ملف تعديل الحجز
+import 'package:apartment_rental_app/screens/booking_screen.dart'; 
 import 'package:apartment_rental_app/widgets/booking_card.dart';
 import 'package:apartment_rental_app/widgets/rating_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-const Color kPrimaryColor = Color(0xFF234F68);
 
 class MyBookingsScreen extends ConsumerStatefulWidget {
   const MyBookingsScreen({super.key});
@@ -19,9 +18,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(bookingProvider.notifier).fetchMyBookings(),
-    );
+    Future.microtask(() => ref.read(bookingProvider.notifier).fetchMyBookings());
   }
 
   @override
@@ -36,40 +33,28 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Text(
-            texts.myBookings, 
-            style: theme.appBarTheme.titleTextStyle,
-          ),
+          title: Text(texts.myBookings),
           centerTitle: true,
-          backgroundColor: theme.appBarTheme.backgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
           bottom: TabBar(
             indicatorColor: Colors.white,
             indicatorWeight: 3,
             labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
+            unselectedLabelColor: Colors.white.withOpacity(0.7),
             labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
-          Tab(text: texts.activeBookings), 
-  
-  Tab(text: texts.history), 
-  
-  Tab(text: texts.archived),
+              Tab(text: texts.activeBookings), 
+              Tab(text: texts.history), 
+              Tab(text: texts.archived),
             ],
           ),
         ),
         body: bookingState.isLoading
-            ? Center(
-                child: CircularProgressIndicator(color: theme.primaryColor),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : TabBarView(
                 physics: const BouncingScrollPhysics(),
                 children: [
@@ -82,120 +67,105 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
     );
   }
 
-  
-  Widget _buildList(List<dynamic> bookings, String type, bool isDark, AppStrings texts) {
-    final theme = Theme.of(context);
-
+  Widget _buildList(List<BookingRequestModel> bookings, String type, bool isDark, AppStrings texts) {
     if (bookings.isEmpty) {
-      String emptyMessage;
-      IconData emptyIcon;
-
-      if (type == "active") {
-        emptyMessage = texts.noActiveBookings;
-        emptyIcon = Icons.calendar_today_rounded;
-      } else if (type == "history") {
-        emptyMessage = texts.noPastBookings;
-        emptyIcon = Icons.history_rounded;
-      } else {
-        emptyMessage = texts.noCancelledBookings;
-        emptyIcon = Icons.cancel_presentation_rounded;
-      }
-
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              emptyIcon,
-              size: 60,
-              color: isDark ? Colors.white10 : Colors.grey[300],
-            ),
-            const SizedBox(height: 15),
-            Text(
-              emptyMessage,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: isDark ? Colors.white60 : Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      );
+      return _buildEmptyWidget(type, isDark, texts);
     }
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-      physics: const BouncingScrollPhysics(),
-      itemCount: bookings.length,
-      itemBuilder: (context, index) {
-        final booking = bookings[index];
-        final String status = booking['status'] ?? "";
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: BookingCard(
+    
+    return RefreshIndicator(
+      onRefresh: () => ref.read(bookingProvider.notifier).fetchMyBookings(),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+        itemCount: bookings.length,
+        itemBuilder: (context, index) {
+          final booking = bookings[index];
+          return BookingCard(
             booking: booking,
             isCancelled: type == "cancelled",
             isHistory: type == "history",
-            status: status,
-            onCancel: () => _showCancelDialog(booking['id'], texts), 
-            onReview: (status.toLowerCase() == 'completed')
-                ? () {
-                    final bId = booking['id'];
-                    final aId = booking['apartment_id'] ?? booking['apartment']?['id'];
-                    if (aId != null) {
-                      showRatingDialog(context, ref, bId, aId, booking['apartment']?['title'] ?? "Apartment");
-                    }
-                  }
+            status: booking.status,
+            onCancel: () => _showCancelDialog(booking.id, texts),
+            onReview: (booking.status.toLowerCase() == 'completed' && booking.isRated == 0)
+                ? () => showRatingDialog(context, ref, booking.id, booking.apartmentId, "Apartment")
                 : null,
-            onEdit: status.toLowerCase() == "pending"
+            onEdit: (booking.status.toLowerCase() == "pending")
                 ? () async {
-                    final apartmentData = booking['apartment'] ?? {};
                     final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => BookingApp(
-                          apartmentId: booking['apartment_id'],
-                          pricePerNight: (apartmentData['price'] as num? ?? 0.0).toDouble(),
-                          bookingId: booking['id'],
-                          initialStart: DateTime.parse(booking['start_date']),
-                          initialEnd: DateTime.parse(booking['end_date']),
+                          apartmentId: booking.apartmentId,
+                          bookingId: booking.id,
+                          pricePerNight: 0.0, 
+                          initialStart: DateTime.parse(booking.startDate),
+                          initialEnd: DateTime.parse(booking.endDate),
                         ),
                       ),
                     );
+                    
                     if (result == true) {
                       ref.read(bookingProvider.notifier).fetchMyBookings();
                     }
                   }
                 : null,
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
- void _showCancelDialog(int bookingId, AppStrings texts) {
-  final theme = Theme.of(context);
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(
-        texts.cancelBooking, 
-        style: const TextStyle(color: kPrimaryColor),
+
+  Widget _buildEmptyWidget(String type, bool isDark, AppStrings texts) {
+    IconData icon = type == "active" 
+        ? Icons.calendar_today 
+        : (type == "history" ? Icons.history : Icons.cancel);
+    
+    String msg = type == "active" 
+        ? texts.noActiveBookings 
+        : (type == "history" ? texts.noPastBookings : texts.noCancelledBookings);
+    
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 60, color: isDark ? Colors.grey[700] : Colors.grey[300]),
+          const SizedBox(height: 15),
+          Text(
+            msg, 
+            style: TextStyle(
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
-      content: Text(texts.areYouSureCancel), 
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(texts.cancel),
+    );
+  }
+
+  void _showCancelDialog(int bookingId, AppStrings texts) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        backgroundColor: Theme.of(context).cardColor,
+        title: Text(
+          texts.cancelBooking, 
+          style: const TextStyle(color: Color(0xFF234F68), fontWeight: FontWeight.bold)
         ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            ref.read(bookingProvider.notifier).cancelBooking(bookingId);
-          },
-          child: Text(texts.yes, style: const TextStyle(color: Colors.red)),
-        ),
-      ],
-    ),
-  );
-}
+        content: Text(texts.areYouSureCancel),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), 
+            child: Text(texts.no),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(bookingProvider.notifier).cancelBooking(bookingId);
+            },
+            child: Text(texts.yes, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -1,4 +1,3 @@
-// 1. تأكدي أن الـ Provider ينشئ ProfileService
 import 'package:apartment_rental_app/models/user_model.dart';
 import 'package:apartment_rental_app/services/api_client.dart';
 import 'package:apartment_rental_app/services/api_service.dart';
@@ -33,9 +32,9 @@ class ProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   }
 
 Future<void> updateTokenAndFetch(String token) async {
-  state = const AsyncValue.loading(); // أظهري علامة التحميل
+  state = const AsyncValue.loading(); 
   await _storage.write(key: 'jwt_token', value: token); 
-  await getProfile(token); // اجلبي البيانات فوراً بالتوكن الجديد
+  await getProfile(token); 
 }
 
 
@@ -55,9 +54,6 @@ final profileServiceProvider = Provider((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return ProfileService(apiClient); 
 });
-      
-      
-    // هذا البروفايدر هو الذي سيحل المشكلة
 final apiServiceProvider = Provider<ApiService>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return ApiService(apiClient);
