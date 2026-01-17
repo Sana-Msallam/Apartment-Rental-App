@@ -1,4 +1,3 @@
-
 class ReviewRequest {
   final int apartmentId;
   final int stars;
@@ -11,8 +10,8 @@ class ReviewRequest {
   });
 
   Map<String, dynamic> toJson() => {
-    'apartment_id': apartmentId,
-    'stars': stars,
-    'comment': comment,
-  };
+        'apartment_id': apartmentId,
+        'stars': stars,
+        'comment': comment,
+      };
 }

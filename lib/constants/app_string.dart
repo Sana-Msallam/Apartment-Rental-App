@@ -21,6 +21,11 @@ String formatDate(String? dateStr) {
     return dateStr; // إذا فشل التحليل يرجع النص كما هو
   }
 }
+
+String get favorites => isAr ? "المفضلة" : "Favorites";
+  String get noFavorites => isAr ? "لا يوجد عناصر في المفضلة بعد!" : "No favorites yet!";
+  String get somethingWentWrong => isAr ? "حدث خطأ ما!" : "Something went wrong";
+  String get tryAgain => isAr ? "إعادة المحاولة" : "Try Again";
   // --- نصوصك القديمة كما هي ---
   String get fieldRequired => isAr ? "هذا الحقل مطلوب" : "Required";
   String get next => isAr ? "التالي" : "NEXT";

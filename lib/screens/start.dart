@@ -12,7 +12,6 @@ import 'package:apartment_rental_app/screens/apartment_details_screen.dart';
 import 'package:apartment_rental_app/models/apartment_details_model.dart';
 
 import '../main.dart';
-
 const Color kGradientColorStart = Color(0x00234F68);
 const Color kGradientColorMid = Color(0x66234F68);
 const Color kGradientColorEnd = Color(0xCC234F68);

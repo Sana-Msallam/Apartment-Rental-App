@@ -18,7 +18,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
   @override
   void initState() {
     super.initState();
-    // جلب البيانات عند فتح الشاشة
+
     Future.microtask(() => ref.read(bookingProvider.notifier).fetchMyBookings());
   }
 
@@ -42,7 +42,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           bottom: TabBar(
-            // تخصيص الألوان لتظهر بيضاء واضحة فوق اللون الأزرق
+
             indicatorColor: Colors.white,
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white.withOpacity(0.7),
@@ -87,23 +87,26 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
           onReview: (booking.status.toLowerCase() == 'completed')
               ? () => showRatingDialog(context, ref, booking.id, booking.apartmentId, "Apartment")
               : null,
-          onEdit: (booking.status.toLowerCase() == "pending")
-              ? () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BookingApp(
-                        apartmentId: booking.apartmentId,
-                        pricePerNight: 0.0, // سيتم جلب السعر داخل BookingApp أو تمريره من المودل
-                        // تمت إزالة الـ bookingId كما طلبتِ
-                        initialStart: DateTime.parse(booking.startDate),
-                        initialEnd: DateTime.parse(booking.endDate),
-                      ),
-                    ),
-                  );
-                  if (result == true) ref.read(bookingProvider.notifier).fetchMyBookings();
-                }
-              : null,
+      onEdit: (booking.status.toLowerCase() == "pending")
+    ? () async {
+        // ننتظر العودة من صفحة التعديل
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookingApp(
+              apartmentId: booking.apartmentId,
+              pricePerNight: 0.0, 
+              initialStart: DateTime.parse(booking.startDate),
+              initialEnd: DateTime.parse(booking.endDate),
+            ),
+          ),
+        );
+        
+        // بعد العودة مباشرة، نقوم بتحديث البيانات لضمان ظهور التعديل
+        // حتى لو لم ترسل الشاشة true، يفضل التحديث للتأكد
+        ref.read(bookingProvider.notifier).fetchMyBookings();
+      }
+    : null,
         );
       },
     );

@@ -5,29 +5,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/app_constants.dart';
 import '../widgets/custom_app_bar.dart';
+import 'package:apartment_rental_app/constants/app_string.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final texts = ref.watch(stringsProvider);
     final favoritesAsync = ref.watch(favoriteApartmentsProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Favorite'),
-      backgroundColor: Colors.white,
+      appBar: CustomAppBar(title: texts.favorites),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: favoritesAsync.when(
         skipLoadingOnRefresh: false,
         loading: () => const Center(child: CircularProgressIndicator()),
         data: (apartments) {
-          // --- التعديل 1: إضافة RefreshIndicator للكل حتى لو القائمة فارغة ---
           return RefreshIndicator(
             onRefresh: () async {
-  ref.invalidate(favoriteApartmentsProvider);
-  // ننتظر حتى ينتهي الجلب الجديد للتأكد من اختفاء الدائرة
-  await ref.read(favoriteApartmentsProvider.notifier).loadFavoriteApartments(); 
-},
+              ref.invalidate(favoriteApartmentsProvider);
+              await ref.read(favoriteApartmentsProvider.notifier).loadFavoriteApartments();
+            },
             child: apartments.isEmpty
                 ? SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -35,7 +35,7 @@ class FavoritesScreen extends ConsumerWidget {
                       height: MediaQuery.of(context).size.height * 0.7,
                       child: Center(
                         child: Text(
-                          'No favorites yet!',
+                          texts.noFavorites,
                           style: AppConstants.textNoData,
                         ),
                       ),
@@ -46,7 +46,7 @@ class FavoritesScreen extends ConsumerWidget {
                     physics: const AlwaysScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      childAspectRatio: 0.68, // نفس نسبة الهوم
+                      childAspectRatio: 0.68,
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                     ),
@@ -62,9 +62,7 @@ class FavoritesScreen extends ConsumerWidget {
                         space: apt.space,
                         average_rating: apt.averageRating,
                         is_favorite: apt.is_favorite,
-                        // --- التعديل 2: إضافة التفاعل مع زر القلب ---
                         onFavoriteToggle: () {
-                          // عند الضغط سيقوم الـ Notifier بحذفها وعمل invalidate للقائمة
                           ref.read(apartmentProvider.notifier).toggleFavorite(apt.id);
                         },
                         onTap: () {
@@ -82,17 +80,16 @@ class FavoritesScreen extends ConsumerWidget {
                   ),
           );
         },
-        // loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, size: 50, color: Colors.red),
               const SizedBox(height: 10),
-              Text("Something went wrong", style: AppConstants.thirdText),
+              Text(texts.somethingWentWrong, style: AppConstants.thirdText),
               TextButton(
                 onPressed: () => ref.refresh(favoriteApartmentsProvider),
-                child: const Text("Try Again"),
+                child: Text(texts.tryAgain),
               )
             ],
           ),

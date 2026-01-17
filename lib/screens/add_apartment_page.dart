@@ -410,7 +410,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
     );
   }
 
-  Future<void> _submitData(var texts) async {
+ Future<void> _submitData(var texts) async {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedImages.isEmpty) {
@@ -419,7 +419,8 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       );
       return;
     }
-    if (_selectedgovernorates == null || _selectedCity == null) {
+    
+    if (_selectedgovernorates == null || _selectedCity == null || _selectedTitleDeed == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(texts.locationError)),
       );
@@ -432,16 +433,18 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
+    // --- التحويل للغة الإنجليزية قبل الإرسال ---
     final Map<String, dynamic> apartmentData = {
       "price": int.tryParse(_priceController.text) ?? 0,
       "rooms": int.tryParse(_roomsController.text) ?? 0,
       "space": int.tryParse(_spaceController.text) ?? 0,
       "floor": int.tryParse(_floorController.text) ?? 0,
       "bathrooms": int.tryParse(_bathroomsController.text) ?? 0,
-      "governorate": _selectedgovernorates,
-      "city": _selectedCity,
+      // هنا استخدمنا الدوال السحرية للتحويل
+      "governorate": texts.getEnglishValue(_selectedgovernorates!),
+      "city": texts.getEnglishValue(_selectedCity!),
+      "title_deed": texts.getEnglishValue(_selectedTitleDeed!),
       "built_date": "${_builtController.text}-1-1",
-      "title_deed": _selectedTitleDeed,
       "description": _descriptionController.text,
     };
 
@@ -451,6 +454,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       images: _selectedImages,
     );
 
+    if (!mounted) return;
     Navigator.pop(context); // إغلاق الـ Loading
 
     if (success) {
@@ -458,7 +462,7 @@ class _AddApartmentPageState extends ConsumerState<AddApartmentPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(texts.addSuccess)),
       );
-      Navigator.pop(context); // العودة للشاشة السابقة
+      Navigator.pop(context); 
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(texts.addError)),
